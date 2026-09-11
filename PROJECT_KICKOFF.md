@@ -356,14 +356,210 @@ Tarife, Preise, GitHub-Synchronisation und externer Agentenzugriff müssen vor e
 
 ### VST3
 
-- JUCE- und Toolchain-Version festlegen
-- unterstützte Windows-Versionen definieren
-- Plugin-ID, Herstellerkennung und Produktkennung festlegen
-- Preset-Suchpfade und Installationsort festlegen
-- Verhalten bei ungültigen und inkompatiblen Presets spezifizieren
-- synthetische MVP-Klicksounds oder lizenzierte Samples auswählen
-- Strategie für Host-Taktartwechsel innerhalb eines Projekts definieren
-- Testmatrix für Buffer-Größen, Sample Rates und Tempoänderungen erstellen
+#### VST-001 – Entwicklungsumgebung
+
+Status: festgelegt
+
+- Editor und zentrale Arbeitsoberfläche: Visual Studio Code
+- Entwicklungs- und Testsystem: Windows 10 x64
+- Projektverwaltung: CMake
+- Compiler: MSVC aus den Visual Studio 2022 Build Tools
+- Windows SDK: Windows 10 SDK
+- Build-Ausführung: CMake Presets
+- Sprachstandard: C++17
+
+JUCE verlangt aktuell CMake 3.22 oder neuer. Die konkrete JUCE-Version wird vor Projektanlage als stabiler Release fest gepinnt.
+
+#### VST-002 – Lokaler Entwicklungsablauf
+
+Status: festgelegt
+
+- Quellcodebearbeitung, Build und Tests laufen unter Windows 10.
+- VS Code bleibt die einzige IDE.
+- Die Erweiterung CMake Tools steuert Konfiguration und Build.
+- CMake erzeugt native Windows-x64-Builds mit MSVC.
+- Plugin-Validierung und Cubase-Tests laufen auf demselben Windows-System.
+- Debug- und Release-Ausgaben liegen in getrennten Build-Verzeichnissen.
+
+Begründung:
+
+- Cubase Elements 15 ist der verbindliche Referenz-Host.
+- Das MVP benötigt ein Windows-x64-VST3-Bundle.
+- JUCE nennt für Windows eine MSVC-/Visual-Studio-Toolchain.
+- Native Entwicklung und Test auf der Zielplattform vermeiden Cross-Build- und ABI-Risiken.
+
+Zielbild:
+
+```text
+VS Code auf Windows 10 x64
+│
+├── CMake Presets
+├── MSVC und Windows 10 SDK
+├── Preset-Core und Unit Tests
+├── JUCE VST3 Build
+├── VST3 Validator
+└── Cubase Elements 15
+```
+
+#### VST-003 – Zielplattform und Pluginformat
+
+Status: festgelegt
+
+- MVP-Plattform: Windows x64
+- unterstütztes Betriebssystem: Windows 10
+- Pluginformat: ausschließlich VST3
+- Referenz-Host: Cubase Elements 15
+- Linux-Binary: nicht Teil des MVP
+- Standalone-Anwendung: nicht Teil des MVP
+- weitere Pluginformate: nicht Teil des MVP
+
+Windows 11 erhält im MVP keine verbindliche Supportzusage. Eine spätere Freigabe setzt eigene Tests voraus.
+
+#### VST-004 – Buildsystem und Abhängigkeiten
+
+Status: Empfehlung zur Freigabe
+
+- CMake 3.22 oder neuer
+- Visual Studio 2022 CMake-Generator mit MSVC
+- Windows 10 SDK
+- JUCE als fest gepinnte Projektabhängigkeit
+- keine global installierte JUCE-Version als Voraussetzung
+- reproduzierbare Debug- und Release-Presets
+- getrennte Build-Verzeichnisse für Debug und Release
+
+Empfehlung für JUCE: Ein stabiler Release wird über CMake `FetchContent` mit unveränderlichem Git-Tag eingebunden. Ein beweglicher Branch wie `master` oder `develop` ist ausgeschlossen.
+
+Lizenzmodell: festgelegt
+
+- TempoFlow wird quelloffen unter `AGPL-3.0-only` entwickelt und veröffentlicht.
+- Für JUCE wird die freie AGPLv3-Option genutzt.
+- Der vollständige Lizenztext liegt in [[LICENSE]].
+- Eine kostenpflichtige JUCE-Starter-, Indie- oder Pro-Lizenz ist für dieses Lizenzmodell nicht erforderlich.
+- Veröffentlichte Binärdateien werden zusammen mit dem korrespondierenden Quellcode oder einem AGPL-konformen Bezugsangebot bereitgestellt.
+- JUCE-Änderungen, TempoFlow-Quellcode, Build-Konfiguration und erforderliche Lizenzhinweise werden vollständig mitgeliefert.
+- Empfänger dürfen den veröffentlichten Code entsprechend der AGPLv3 verwenden, verändern und weitergeben.
+- Das Repository darf während der privaten Entwicklungsphase nicht öffentlich sein. Spätestens mit der öffentlichen Weitergabe des Plugins müssen die AGPL-Pflichten erfüllt sein.
+
+#### VST-005 – Plugin-Identität
+
+Status: Benutzerdaten erforderlich
+
+Festzulegen sind:
+
+- Plugin-Name: `TempoFlow`
+- Herstellername
+- vierstelliger JUCE Manufacturer Code
+- vierstelliger JUCE Plugin Code
+- VST3 Class ID
+- Bundle Identifier
+- initiale Plugin-Version
+
+Empfehlung:
+
+- Plugin-Version beginnt bei `0.1.0`.
+- Produkt- und Herstellerkennungen werden nach der ersten Festlegung nicht mehr geändert.
+- Keine zufälligen Platzhalter in öffentlich verteilten Builds.
+
+#### VST-006 – Preset-Speicherorte
+
+Status: Empfehlung zur Freigabe
+
+- Mitgelieferte Factory-Presets liegen schreibgeschützt im Plugin-Bundle beziehungsweise Installer-Paket.
+- Benutzer-Presets liegen in einem benutzerspezifischen TempoFlow-Verzeichnis.
+- Das Plugin enthält keine fest codierten absoluten Pfade.
+- JUCE ermittelt den plattformgerechten Basisordner.
+
+Empfohlener Windows-Pfad:
+
+```text
+%APPDATA%\TempoFlow\Presets
+```
+
+Empfohlener Entwicklungsordner im Repository:
+
+```text
+presets/factory
+```
+
+Der VST3-Entwicklungsbuild wird benutzerspezifisch installiert. Der von Steinberg vorgesehene Windows-Pfad vermeidet Administratorrechte:
+
+```text
+%LOCALAPPDATA%\Programs\Common\VST3
+```
+
+#### VST-007 – Verhalten bei Presetfehlern
+
+Status: Empfehlung zur Freigabe
+
+- Ein fehlerhaftes Preset verändert den aktiven Pluginzustand nicht.
+- JSON-Syntax, Schema und semantische Regeln werden vor Übernahme vollständig geprüft.
+- Fehlermeldungen nennen Datei, Regel und betroffenen Wert.
+- Unbekannte optionale Felder werden ignoriert.
+- Unbekannte Major-Versionen werden abgelehnt.
+- Unterstützte `1.x`-Versionen werden geladen, sofern alle bekannten Pflichtwerte gültig sind.
+- Fehler im Audio-Thread lösen keine Dateizugriffe, Dialoge oder Exceptions aus.
+
+Preset-Dateien werden außerhalb des Audio-Threads gelesen und validiert. Der fertige Zustand wird anschließend threadsicher an die Audioverarbeitung übergeben.
+
+#### VST-008 – Klangquelle des MVP
+
+Status: Empfehlung zur Freigabe
+
+- Das MVP verwendet synthetisch erzeugte Klicksounds.
+- Alle sechs ClickTypes erhalten klar unterscheidbare Klangrollen.
+- `mute` erzeugt kein Audio.
+- Externe Samples werden erst nach Lizenzprüfung ergänzt.
+
+Damit blockiert keine ungeklärte Sample-Lizenz den Prototyp.
+
+#### VST-009 – Host-Timing und Taktartwechsel
+
+Status: Empfehlung zur Freigabe
+
+- Der Audio-Thread liest bei jedem Block die aktuelle Host-Position.
+- PPQ-Position, BPM, Taktart, Sample Rate und Blockgröße bilden die Zeitbasis.
+- Click-Ereignisse werden als Sample-Offsets innerhalb des aktuellen Blocks berechnet.
+- Start, Stop und Sprünge setzen den internen Scheduler kontrolliert neu auf.
+- Tempo- und Taktartänderungen werden spätestens am ersten Block mit neuen Hostdaten übernommen.
+- Preset-BPM und Preset-Taktart bleiben im Host Mode reine Referenzwerte.
+- Bei fehlenden oder ungültigen Hostdaten erzeugt das Plugin keinen frei laufenden Ersatz-Transport.
+
+Die Detailstrategie für mehrere Hoständerungen innerhalb eines einzelnen Audio-Blocks muss beim Prototyp gegen die von Cubase gelieferten Positionsdaten getestet werden.
+
+#### VST-010 – Testmatrix
+
+Status: Entscheidung vorbereitet
+
+Mindestens zu prüfen sind:
+
+- Debug- und Release-Build
+- 44,1 kHz, 48 kHz und 96 kHz
+- Buffer-Größen 32, 64, 128, 256, 512 und 1024 Samples
+- konstantes und automatisiertes Tempo
+- gerade, zusammengesetzte und ungerade Taktarten
+- Start ab Taktanfang und innerhalb eines Taktes
+- Stop, Neustart, Loop und Positionssprung
+- Taktartwechsel im Projekt
+- Laden aller sieben Referenz-Presets
+- ungültiges JSON, ungültiges Schema und semantisch ungültige Presets
+- Speichern und erneutes Öffnen eines Cubase-Projekts
+
+Alle Unit Tests, Plugin-Builds, Validator-Läufe und Cubase-Integrationstests werden unter Windows 10 ausgeführt.
+
+#### VST-011 – Noch offene Freigaben
+
+Vor dem Projektgerüst müssen entschieden werden:
+
+1. genaue JUCE-Version,
+2. Herstellername und technische Plugin-Kennungen,
+3. endgültige Preset-Benutzerpfade.
+
+#### Technische Grundlagen
+
+- [JUCE – Repository und Systemanforderungen](https://github.com/juce-framework/JUCE/blob/master/README.md)
+- [JUCE – CMake API](https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md)
+- [Steinberg – VST3-Entwicklungsumgebung](https://steinbergmedia.github.io/vst3_dev_portal/pages/Getting%2BStarted/How%2Bto%2Bsetup%2Bmy%2Bsystem.html)
+- [Steinberg – VST3-Speicherorte](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html)
 
 ### Base44
 
