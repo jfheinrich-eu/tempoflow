@@ -1,0 +1,55 @@
+{
+    "schema": "tempoflow-preset",
+    "schemaVersion": "1.0.0",
+    "metadata": {
+        "name": "Beats 2 + 4",
+        "description": "A 4/4 practice preset that sounds wood clicks on beats 2 and 4 and mutes beats 1 and 3.",
+        "author": "Jörg Heinrich",
+        "createdAt": "2026-09-06T22:33:00+02:00",
+        "updatedAt": "2026-09-06T22:33:00+02:00"
+    },
+    "tempo": {
+        "bpm": 120
+    },
+    "meter": {
+        "numerator": 4,
+        "denominator": 4,
+        "grouping": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "subdivision": {
+        "mode": "none",
+        "partsPerBeat": 1
+    },
+    "pattern": {
+        "beats": [
+            {
+                "beat": 1,
+                "click": "mute"
+            },
+            {
+                "beat": 2,
+                "click": "wood"
+            },
+            {
+                "beat": 3,
+                "click": "mute"
+            },
+            {
+                "beat": 4,
+                "click": "wood"
+            }
+        ]
+    },
+    "sound": {
+        "soundSet": "default",
+        "volume": 0.8
+    },
+    "playback": {
+        "mode": "host"
+    }
+}

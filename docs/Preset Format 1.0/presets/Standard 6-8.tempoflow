@@ -1,0 +1,61 @@
+{
+    "schema": "tempoflow-preset",
+    "schemaVersion": "1.0.0",
+    "metadata": {
+        "name": "Standard 6-8",
+        "description": "A standard 6/8 time signature preset grouped as 3+3.",
+        "author": "Jörg Heinrich",
+        "createdAt": "2026-09-06T22:33:00+02:00",
+        "updatedAt": "2026-09-06T22:33:00+02:00"
+    },
+    "tempo": {
+        "bpm": 120
+    },
+    "meter": {
+        "numerator": 6,
+        "denominator": 8,
+        "grouping": [
+            3,
+            3
+        ]
+    },
+    "subdivision": {
+        "mode": "none",
+        "partsPerBeat": 1
+    },
+    "pattern": {
+        "beats": [
+            {
+                "beat": 1,
+                "click": "accent"
+            },
+            {
+                "beat": 2,
+                "click": "normal"
+            },
+            {
+                "beat": 3,
+                "click": "normal"
+            },
+            {
+                "beat": 4,
+                "click": "normal"
+            },
+            {
+                "beat": 5,
+                "click": "normal"
+            },
+            {
+                "beat": 6,
+                "click": "normal"
+            }
+        ]
+    },
+    "sound": {
+        "soundSet": "default",
+        "volume": 0.8
+    },
+    "playback": {
+        "mode": "host"
+    }
+}

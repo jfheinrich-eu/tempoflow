@@ -1,0 +1,340 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tempoflow:schema:preset:1.0",
+  "title": "TempoFlow Preset Format 1.0",
+  "description": "JSON Schema for TempoFlow .tempoflow preset files, based on the approved TempoFlow Preset Format 1.0 specification.",
+  "$comment": "Audit note: Section 5 of the approved Markdown document still shows an older meter example without 'grouping'. The final approved rules in sections 9, 27, 39.7 and 40 explicitly make meter.grouping mandatory; those final rules supersede the stale example. This schema therefore requires grouping.",
+  "type": "object",
+  "required": [
+    "schema",
+    "schemaVersion",
+    "metadata",
+    "tempo",
+    "meter",
+    "subdivision",
+    "pattern",
+    "sound",
+    "playback"
+  ],
+  "properties": {
+    "schema": {
+      "const": "tempoflow-preset",
+      "description": "Fixed schema discriminator."
+    },
+    "schemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+      "description": "Semantic Versioning version of the preset schema. This 1.0 validator accepts compatible major version 1.x schema versions."
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "tempo": {
+      "$ref": "#/$defs/tempo"
+    },
+    "meter": {
+      "$ref": "#/$defs/meter"
+    },
+    "subdivision": {
+      "$ref": "#/$defs/subdivision"
+    },
+    "pattern": {
+      "$ref": "#/$defs/pattern"
+    },
+    "sound": {
+      "$ref": "#/$defs/sound"
+    },
+    "playback": {
+      "$ref": "#/$defs/playback"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable preset name."
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "description": "Preset category. Recommended values include general, practice, blues, rock, jazz, funk, metal and custom; the vocabulary is intentionally extensible."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "author": {
+          "type": "string"
+        },
+        "createdAt": {
+          "description": "ISO-8601 timestamp when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "updatedAt": {
+          "description": "ISO-8601 timestamp when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "const": ""
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "tempo": {
+      "type": "object",
+      "required": [
+        "bpm"
+      ],
+      "properties": {
+        "bpm": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 300,
+          "description": "Tempo in beats per minute; fractional values are allowed."
+        }
+      },
+      "additionalProperties": true
+    },
+    "meter": {
+      "type": "object",
+      "required": [
+        "numerator",
+        "denominator",
+        "grouping"
+      ],
+      "properties": {
+        "numerator": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "denominator": {
+          "type": "integer",
+          "enum": [
+            2,
+            4,
+            8,
+            16
+          ]
+        },
+        "grouping": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": "Musical grouping inside the bar, e.g. [2,2,3] for 7/8."
+        }
+      },
+      "additionalProperties": true,
+      "$comment": "Semantic rule required by TempoFlow Preset Format 1.0: sum(meter.grouping) MUST equal meter.numerator. Draft 2020-12 JSON Schema has no portable arithmetic comparison to a sibling property, so applications MUST enforce this as an additional semantic validation step."
+    },
+    "subdivision": {
+      "description": "V1 supports only no subdivision and triplets. Future modes are intentionally not accepted by this V1 schema until a compatible schema revision defines them.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "mode",
+            "partsPerBeat"
+          ],
+          "properties": {
+            "mode": {
+              "const": "none"
+            },
+            "partsPerBeat": {
+              "const": 1
+            }
+          },
+          "additionalProperties": true
+        },
+        {
+          "type": "object",
+          "required": [
+            "mode",
+            "partsPerBeat"
+          ],
+          "properties": {
+            "mode": {
+              "const": "triplet"
+            },
+            "partsPerBeat": {
+              "const": 3
+            }
+          },
+          "additionalProperties": true
+        }
+      ]
+    },
+    "clickType": {
+      "type": "string",
+      "enum": [
+        "accent",
+        "normal",
+        "high",
+        "low",
+        "wood",
+        "mute"
+      ]
+    },
+    "beat": {
+      "type": "object",
+      "required": [
+        "beat",
+        "click"
+      ],
+      "properties": {
+        "beat": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "click": {
+          "$ref": "#/$defs/clickType"
+        }
+      },
+      "additionalProperties": true
+    },
+    "pattern": {
+      "type": "object",
+      "required": [
+        "beats"
+      ],
+      "properties": {
+        "beats": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/beat"
+          }
+        }
+      },
+      "additionalProperties": true,
+      "$comment": "Semantic rules required by TempoFlow Preset Format 1.0: pattern.beats length MUST equal meter.numerator; beat positions MUST correspond to the bar positions 1..meter.numerator without omissions or duplicates. Draft 2020-12 cannot portably compare these values with sibling meter.numerator, so applications MUST enforce them as an additional semantic validation step."
+    },
+    "sound": {
+      "type": "object",
+      "required": [
+        "soundSet",
+        "volume"
+      ],
+      "properties": {
+        "soundSet": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the active sound set. Concrete sample/synthesis mapping is intentionally outside the preset."
+        },
+        "volume": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Master/preset volume. V1 has no per-click-type volume."
+        }
+      },
+      "additionalProperties": true
+    },
+    "playback": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "internal",
+            "host"
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "schema": "tempoflow-preset",
+      "schemaVersion": "1.0.0",
+      "metadata": {
+        "name": "Slow Blues Shuffle",
+        "description": "Langsames Blues-Shuffle-Übungspreset",
+        "category": "blues",
+        "tags": [
+          "blues",
+          "shuffle",
+          "practice"
+        ],
+        "author": "Jörg",
+        "createdAt": "2026-09-06T21:30:00+02:00",
+        "updatedAt": "2026-09-06T21:30:00+02:00"
+      },
+      "tempo": {
+        "bpm": 72
+      },
+      "meter": {
+        "numerator": 4,
+        "denominator": 4,
+        "grouping": [
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "subdivision": {
+        "mode": "triplet",
+        "partsPerBeat": 3
+      },
+      "pattern": {
+        "beats": [
+          {
+            "beat": 1,
+            "click": "accent"
+          },
+          {
+            "beat": 2,
+            "click": "normal"
+          },
+          {
+            "beat": 3,
+            "click": "normal"
+          },
+          {
+            "beat": 4,
+            "click": "normal"
+          }
+        ]
+      },
+      "sound": {
+        "soundSet": "default",
+        "volume": 0.8
+      },
+      "playback": {
+        "mode": "internal"
+      }
+    }
+  ]
+}

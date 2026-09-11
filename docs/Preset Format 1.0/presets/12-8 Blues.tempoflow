@@ -1,0 +1,87 @@
+{
+    "schema": "tempoflow-preset",
+    "schemaVersion": "1.0.0",
+    "metadata": {
+        "name": "12-8 Blues",
+        "description": "A 12/8 blues preset grouped as four groups of three eighth notes.",
+        "author": "Jörg Heinrich",
+        "createdAt": "2026-09-06T22:33:00+02:00",
+        "updatedAt": "2026-09-06T22:33:00+02:00"
+    },
+    "tempo": {
+        "bpm": 72
+    },
+    "meter": {
+        "numerator": 12,
+        "denominator": 8,
+        "grouping": [
+            3,
+            3,
+            3,
+            3
+        ]
+    },
+    "subdivision": {
+        "mode": "none",
+        "partsPerBeat": 1
+    },
+    "pattern": {
+        "beats": [
+            {
+                "beat": 1,
+                "click": "accent"
+            },
+            {
+                "beat": 2,
+                "click": "normal"
+            },
+            {
+                "beat": 3,
+                "click": "normal"
+            },
+            {
+                "beat": 4,
+                "click": "normal"
+            },
+            {
+                "beat": 5,
+                "click": "normal"
+            },
+            {
+                "beat": 6,
+                "click": "normal"
+            },
+            {
+                "beat": 7,
+                "click": "normal"
+            },
+            {
+                "beat": 8,
+                "click": "normal"
+            },
+            {
+                "beat": 9,
+                "click": "normal"
+            },
+            {
+                "beat": 10,
+                "click": "normal"
+            },
+            {
+                "beat": 11,
+                "click": "normal"
+            },
+            {
+                "beat": 12,
+                "click": "normal"
+            }
+        ]
+    },
+    "sound": {
+        "soundSet": "default",
+        "volume": 0.8
+    },
+    "playback": {
+        "mode": "host"
+    }
+}

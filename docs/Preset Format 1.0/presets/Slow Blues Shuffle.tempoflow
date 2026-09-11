@@ -1,0 +1,55 @@
+{
+    "schema": "tempoflow-preset",
+    "schemaVersion": "1.0.0",
+    "metadata": {
+        "name": "Slow Blues Shuffle",
+        "description": "A slow 4/4 blues shuffle preset at 72 BPM using triplet subdivision.",
+        "author": "Jörg Heinrich",
+        "createdAt": "2026-09-06T22:33:00+02:00",
+        "updatedAt": "2026-09-06T22:33:00+02:00"
+    },
+    "tempo": {
+        "bpm": 72
+    },
+    "meter": {
+        "numerator": 4,
+        "denominator": 4,
+        "grouping": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "subdivision": {
+        "mode": "triplet",
+        "partsPerBeat": 3
+    },
+    "pattern": {
+        "beats": [
+            {
+                "beat": 1,
+                "click": "accent"
+            },
+            {
+                "beat": 2,
+                "click": "normal"
+            },
+            {
+                "beat": 3,
+                "click": "normal"
+            },
+            {
+                "beat": 4,
+                "click": "normal"
+            }
+        ]
+    },
+    "sound": {
+        "soundSet": "default",
+        "volume": 0.8
+    },
+    "playback": {
+        "mode": "host"
+    }
+}
