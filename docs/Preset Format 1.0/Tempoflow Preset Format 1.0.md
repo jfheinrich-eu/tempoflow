@@ -16,6 +16,9 @@ updated:
   - by: Joerg Heinrich
     at: 2026-09-07T00:28:00+02:00
     comment: complete task 3B and 3C
+  - by: Codex
+    at: 2026-09-11T00:00:00+02:00
+    comment: Synchronized document version, complete example and implementation phase status
 version: 1.1.2
 status: approved
 tags:
@@ -151,7 +154,8 @@ Eine Datei muss gültiges JSON enthalten.
 
   "meter": {
     "numerator": 4,
-    "denominator": 4
+    "denominator": 4,
+    "grouping": [1, 1, 1, 1]
   },
 
   "subdivision": {
@@ -1235,7 +1239,7 @@ Preset Schema definieren.
 Status:
 
 ```text
-✅ Entwurf vorhanden
+✅ Abgeschlossen
 ```
 
 ### Phase 3B
@@ -1247,7 +1251,7 @@ Damit können Presets automatisch validiert werden.
 Status:
 
 ```text
-✅ Schema erstellt
+✅ Abgeschlossen
 ```
 
 ### Phase 3C
@@ -1264,7 +1268,7 @@ Referenz-Presets erstellt:
 Status:
 
 ```text
-✅ Presets erstellt
+✅ Abgeschlossen
 ```
 
 ### Phase 4
@@ -1500,7 +1504,7 @@ approved
 Dokumentversion:
 
 ```text
-1.1.0
+1.1.2
 ```
 
 Die folgenden Architekturentscheidungen sind abgeschlossen:
@@ -1513,22 +1517,20 @@ Die folgenden Architekturentscheidungen sind abgeschlossen:
 6. optionale zukünftige Mehrfachausgänge
 7. paralleler Betrieb mit Cubase-Metronom
 
-Als nächster technischer Schritt folgt:
+Die folgenden Implementierungsphasen sind abgeschlossen:
 
 ```text
+Phase 3A
+→ Preset-Schema definiert
+
 Phase 3B
-→ formales JSON Schema
-→ tempoflow-preset.schema.json
-```
+→ formales JSON Schema erstellt
 
-Danach:
-
-```text
 Phase 3C
-→ Referenz-Presets
+→ sieben Referenz-Presets erstellt
 ```
 
-und anschließend:
+Als nächster technischer Schritt folgt:
 
 ```text
 Phase 4

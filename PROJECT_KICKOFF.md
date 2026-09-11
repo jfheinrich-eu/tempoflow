@@ -380,16 +380,16 @@ Tarife, Preise, GitHub-Synchronisation und externer Agentenzugriff müssen vor e
 - semantische Validierung als gemeinsame Testsuite formulieren
 - Verhalten bei unbekannten Major-Versionen festlegen
 
-## Dokumentationsbefunde
+## Dokumentationsstatus
 
-Die Spezifikation ist fachlich weit fortgeschritten, enthält aber redaktionelle Widersprüche:
+Die Spezifikation wurde auf Dokumentversion `1.1.2` konsolidiert:
 
-- Die Frontmatter nennt Dokumentversion `1.1.2`, Abschnitt 41 nennt `1.1.0`.
-- Das vollständige Beispiel in Abschnitt 5 enthält noch kein verpflichtendes `meter.grouping`.
-- Abschnitt 41 bezeichnet Phase 3B und 3C als nächste Schritte, obwohl Schema und Referenz-Presets bereits vorhanden sind.
-- Titel „Preset Format 1.0“, Dokumentversion und `schemaVersion` müssen sprachlich sauber getrennt werden.
+- Das vollständige Beispiel enthält das verbindliche `meter.grouping`.
+- Die Phasen 3A, 3B und 3C sind als abgeschlossen dokumentiert.
+- Das JSON Schema und die sieben Referenz-Presets bilden den freigegebenen Stand ab.
+- Phase 4, das TempoFlow VST3 MVP, ist der nächste technische Schritt.
 
-Das JSON Schema berücksichtigt die verbindliche Grouping-Regel bereits. Diese redaktionellen Punkte blockieren den VST-Prototyp nicht, sollten aber vor Implementierungsbeginn bereinigt werden.
+„Preset Format 1.0“ bezeichnet die fachliche Formatgeneration. `1.1.2` bezeichnet die Version des Spezifikationsdokuments. Die Referenz-Presets verwenden Schema-Version `1.0.0`.
 
 ## Risiken
 
@@ -409,31 +409,25 @@ Die Base44-App ist noch nicht vollständig inventarisiert. Datenschutz- und Sich
 
 Unklare Sample-Lizenzen können eine Veröffentlichung verhindern. Synthetische Sounds sind der sichere MVP-Fallback.
 
-### P2 – Dokumentationsdrift
-
-Widersprüche zwischen Spezifikation, Statusabschnitt und Schema können zu unterschiedlichen Implementierungen führen.
-
 ### P3 – Base44-Branding
 
 Der sichtbare „Edit with Base44“-Button wirkt unprofessionell, ist aber kein akutes Sicherheitsproblem.
 
-## Umsetzungsphasen
+## Umsetzungsabschnitte
 
-### Phase 0 – Spezifikation konsolidieren
+### Abschnitt A – Restarbeiten an der Spezifikation
 
-- Dokumentversionen und Status korrigieren
-- vollständiges Beispiel um `meter.grouping` ergänzen
 - Schema und semantische Regeln als verbindliche Testfälle festhalten
 - MVP-Soundquelle entscheiden
 
-### Phase 1 – VST3-Grundgerüst
+### Abschnitt B – VST3-Grundgerüst
 
 - JUCE-Projekt anlegen
 - VST3-Metadaten definieren
 - Mono-Bus konfigurieren
 - Plugin in Cubase Elements 15 laden
 
-### Phase 2 – Host-Synchronisation
+### Abschnitt C – Host-Synchronisation
 
 - Transport lesen
 - Tempo lesen
@@ -441,27 +435,27 @@ Der sichtbare „Edit with Base44“-Button wirkt unprofessionell, ist aber kein
 - Sample- und Buffer-Position verarbeiten
 - Beat- und Taktgrenzen samplegenau bestimmen
 
-### Phase 3 – Audio und Pattern
+### Abschnitt D – Audio und Pattern
 
 - Click-Engine implementieren
 - sechs ClickTypes abbilden
 - Master-Lautstärke anwenden
 - Meter-Grouping und Triplet-Subdivision verarbeiten
 
-### Phase 4 – Presets
+### Abschnitt E – Presets
 
 - `.tempoflow` laden
 - strukturell und semantisch validieren
 - Fehler robust melden
 - sieben Referenz-Presets als Integrationstests verwenden
 
-### Phase 5 – PWA-Abgleich
+### Abschnitt F – PWA-Abgleich
 
 - Preset-Import und -Export prüfen
 - gleiche Semantik mit denselben Referenzdateien testen
 - Base44-Datenflüsse und Veröffentlichungsanforderungen prüfen
 
-### Phase 6 – Release-Vorbereitung
+### Abschnitt G – Release-Vorbereitung
 
 - Installations- und Presetpfade dokumentieren
 - Lizenznachweise für Samples und Abhängigkeiten erstellen

@@ -3,7 +3,7 @@
   "$id": "urn:tempoflow:schema:preset:1.0",
   "title": "TempoFlow Preset Format 1.0",
   "description": "JSON Schema for TempoFlow .tempoflow preset files, based on the approved TempoFlow Preset Format 1.0 specification.",
-  "$comment": "Audit note: Section 5 of the approved Markdown document still shows an older meter example without 'grouping'. The final approved rules in sections 9, 27, 39.7 and 40 explicitly make meter.grouping mandatory; those final rules supersede the stale example. This schema therefore requires grouping.",
+  "$comment": "The approved specification requires meter.grouping. Applications must also enforce the semantic grouping and beat rules documented in the schema definitions below.",
   "type": "object",
   "required": [
     "schema",
