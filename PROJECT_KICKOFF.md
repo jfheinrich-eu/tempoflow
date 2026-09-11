@@ -442,24 +442,21 @@ Lizenzmodell: festgelegt
 
 #### VST-005 – Plugin-Identität
 
-Status: teilweise festgelegt
+Status: festgelegt
 
 Festgelegt:
 
 - Plugin-Name: `TempoFlow`
 - Herstellername: `jfheinrich`
+- vierstelliger JUCE Manufacturer Code: `Jfhe`
+- vierstelliger JUCE Plugin Code: `Tflo`
+- Bundle Identifier: `eu.jfheinrich.tempoflow`
+- initiale Plugin-Version: `0.1.0`
 
-Noch festzulegen:
-
-- vierstelliger JUCE Manufacturer Code
-- vierstelliger JUCE Plugin Code
-- VST3 Class ID
-- Bundle Identifier
-- initiale Plugin-Version
+JUCE leitet die VST3 Class ID stabil aus Manufacturer Code und Plugin Code ab. Für das neue JUCE-Plugin wird deshalb keine separate VST3 Class ID festgelegt.
 
 Vorgabe:
 
-- Empfohlener Startwert für die spätere Entscheidung: `0.1.0`.
 - Produkt- und Herstellerkennungen werden nach der ersten Festlegung nicht mehr geändert.
 - Keine zufälligen Platzhalter in öffentlich verteilten Builds.
 
@@ -554,8 +551,7 @@ Alle Unit Tests, Plugin-Builds, Validator-Läufe und Cubase-Integrationstests we
 Vor dem Projektgerüst müssen entschieden werden:
 
 1. genaue JUCE-Version,
-2. technische Plugin-Kennungen,
-3. endgültige Preset-Benutzerpfade.
+2. endgültige Preset-Benutzerpfade.
 
 #### Technische Grundlagen
 
