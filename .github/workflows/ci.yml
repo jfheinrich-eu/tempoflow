@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-build-and-test:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Configure
+        run: cmake --preset windows-x64-release -B build/ci
+      - name: Build
+        run: cmake --build build/ci --config Release
+      - name: Test
+        run: ctest --test-dir build/ci -C Release --output-on-failure
+      - name: Run toolchain check
+        run: .\build\ci\TempoFlowToolchainCheck_artefacts\Release\TempoFlowToolchainCheck.exe
