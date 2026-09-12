@@ -56,3 +56,4 @@ if ($failures.Count -gt 0) {
 }
 
 Write-Output "Commit message policy tests passed: $($cases.Count) cases."
+exit 0
