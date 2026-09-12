@@ -10,7 +10,7 @@ Thank you for helping improve TempoFlow. Keep contributions focused, testable, a
 
 ## Development setup
 
-Use Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.22 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. JUCE 9.0.2 is fetched by CMake.
+Use Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.25 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. JUCE 9.0.2 is fetched by CMake from its pinned commit.
 
 ```powershell
 .\scripts\setup-dev.ps1
@@ -33,6 +33,14 @@ ctest --preset windows-x64-release
 - Preserve preset compatibility and immutable plug-in identifiers.
 - Do not commit generated output, secrets, personal data, or unlicensed assets.
 - Sign off commits with `git commit -s` to certify the [Developer Certificate of Origin](https://developercertificate.org/).
+
+## Dependency updates
+
+Dependabot proposes updates for GitHub Actions while preserving full commit-SHA pinning. Review the upstream release notes and the resolved commit before merging an update.
+
+JUCE updates are manual because Dependabot does not manage general CMake `FetchContent` declarations. Resolve the approved JUCE release tag to its full commit SHA from the official JUCE repository, update the SHA and version comment together, then run clean Debug and Release builds and tests. Never replace the SHA with a tag or branch.
+
+Native C++ test coverage is reported through Codecov. See [Code Coverage](docs/code-coverage.md) for the scope, local command, and pull-request behavior. Do not introduce a blocking threshold without an approved baseline.
 
 ## Copilot prompt files
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.25)
 
 project(
     TempoFlow
@@ -11,8 +11,7 @@ include(FetchContent)
 FetchContent_Declare(
     JUCE
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
-    GIT_TAG 9.0.2
-    GIT_SHALLOW TRUE
+    GIT_TAG 72782788ce18c2d4d760b28e0921d6ffc6431102 # 9.0.2
 )
 
 FetchContent_MakeAvailable(JUCE)
@@ -112,6 +111,15 @@ target_link_libraries(
     PRIVATE
         TempoFlowPresetValidation
 )
+
+if(MSVC)
+    target_link_options(
+        TempoFlowPresetValidatorTests
+        PRIVATE
+            $<$<CONFIG:Debug>:/PROFILE>
+            $<$<CONFIG:Debug>:/INCREMENTAL:NO>
+    )
+endif()
 
 include(CTest)
 

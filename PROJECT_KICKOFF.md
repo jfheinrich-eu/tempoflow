@@ -280,10 +280,10 @@ Windows 11 has no MVP support commitment until it receives dedicated testing.
 
 Status: confirmed
 
-- CMake 3.22 or newer
+- CMake 3.25 or newer
 - Visual Studio 18 2026 generator with MSVC
 - Windows SDK `10.0.26100.0`
-- JUCE `9.0.2` fetched with immutable Git tag `9.0.2`
+- JUCE `9.0.2` fetched from commit `72782788ce18c2d4d760b28e0921d6ffc6431102`
 - no global JUCE installation
 - reproducible Debug and Release presets
 - separate Debug and Release build directories

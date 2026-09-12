@@ -23,6 +23,21 @@ if ($codeVersion -lt [version]'1.116.0') {
     throw "VS Code 1.116 or newer is required because it includes Copilot Chat. Detected: $codeVersion"
 }
 
+$cmakeVersionText = (& cmake --version) -join "`n"
+if ($LASTEXITCODE -ne 0) {
+    throw 'Failed to determine the installed CMake version.'
+}
+
+$cmakeVersionMatch = [regex]::Match($cmakeVersionText, '(?m)^cmake version (?<version>\d+\.\d+\.\d+)')
+if (-not $cmakeVersionMatch.Success) {
+    throw 'CMake returned an unrecognized version string.'
+}
+
+$cmakeVersion = [version]$cmakeVersionMatch.Groups['version'].Value
+if ($cmakeVersion -lt [version]'3.25.0') {
+    throw "CMake 3.25 or newer is required by CMakePresets.json. Detected: $cmakeVersion"
+}
+
 $cmakeHelp = & cmake --help
 $cmakeHelpText = $cmakeHelp -join "`n"
 if ($LASTEXITCODE -ne 0 -or $cmakeHelpText -notmatch 'Visual Studio 18 2026') {

@@ -10,6 +10,7 @@
 
 <p align="center">
   <a href="https://github.com/jfheinrich-eu/tempoflow/actions/workflows/ci.yml"><img src="https://github.com/jfheinrich-eu/tempoflow/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://codecov.io/gh/jfheinrich-eu/tempoflow"><img src="https://codecov.io/gh/jfheinrich-eu/tempoflow/graph/badge.svg" alt="Code coverage"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0--only-blue.svg" alt="License: AGPL-3.0-only"></a>
   <img src="https://img.shields.io/badge/status-pre--alpha-orange.svg" alt="Status: pre-alpha">
 </p>
@@ -52,13 +53,13 @@ The PWA and VST3 plug-in do not share application source code. Their contract is
 - Windows 10 x64
 - Visual Studio Build Tools 2026 with the MSVC x64 toolchain
 - Windows SDK `10.0.26100.0`
-- CMake 3.22 or newer
+- CMake 3.25 or newer
 - Git
 - `clang-format` and `clang-tidy` from the Visual Studio LLVM tools
 - Visual Studio Code 1.116 or newer with built-in Copilot Chat
 - Microsoft C/C++ and CMake Tools extensions
 
-JUCE `9.0.2` is fetched automatically by CMake. A global JUCE installation is not required.
+JUCE `9.0.2` is fetched automatically by CMake from its pinned commit. A global JUCE installation is not required.
 
 Run the idempotent setup helper from Developer PowerShell to verify the required commands and install missing recommended VS Code extensions:
 
@@ -101,6 +102,8 @@ ctest --preset windows-x64-debug
 ctest --preset windows-x64-release
 ```
 
+The [code-coverage guide](docs/code-coverage.md) documents local collection and the informational Codecov workflow.
+
 Validate a preset file or an entire directory:
 
 ```powershell
@@ -127,6 +130,8 @@ TempoFlow presets are UTF-8 JSON files with the `.tempoflow` extension. Version 
 - internal and host playback modes.
 
 See the [Preset Format 1.0 specification](docs/Preset%20Format%201.0/Tempoflow%20Preset%20Format%201.0.md), the [JSON Schema](docs/Preset%20Format%201.0/tempoflow-preset.schema.json), and the [reference presets](docs/Preset%20Format%201.0/presets).
+
+Native C++ coverage collection and Codecov behavior are documented in [Code Coverage](docs/code-coverage.md).
 
 ## Roadmap
 

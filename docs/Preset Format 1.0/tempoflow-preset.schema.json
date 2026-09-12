@@ -78,7 +78,7 @@
           "type": "string"
         },
         "createdAt": {
-          "description": "ISO-8601 timestamp when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "description": "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
           "anyOf": [
             {
               "type": "string",
@@ -90,7 +90,7 @@
           ]
         },
         "updatedAt": {
-          "description": "ISO-8601 timestamp when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "description": "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
           "anyOf": [
             {
               "type": "string",

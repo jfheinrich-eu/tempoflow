@@ -8,7 +8,7 @@
 
 ## Project boundaries
 
-- TempoFlow is an AGPL-3.0-only metronome system built with C++17, JUCE 9.0.2, CMake, and VST3.
+- TempoFlow is an AGPL-3.0-only metronome system built with C++17, JUCE 9.0.2, CMake 3.25 or newer, and VST3.
 - The MVP targets Windows 10 x64 and Cubase Elements 15.
 - Treat the `.tempoflow` format, JSON Schema, semantic rules, and reference presets as the shared contract.
 - Do not introduce Base44, browser, cloud, account, analytics, or network dependencies into core plug-in operation.
@@ -56,10 +56,12 @@
 
 ## Build, tests, and changes
 
-- Keep JUCE pinned to an immutable release reference. Never use `master` or `develop`.
+- Keep JUCE pinned to the approved release's full commit SHA. Never use a tag or branch as the CMake fetch reference.
 - Use target-based CMake and CMake Presets locally. Keep generated content under `build/`.
 - Add tests for behavior changes, especially timing, validation, state transfer, and regressions.
 - Use all seven reference presets as acceptance fixtures. Do not alter them to hide defects.
+- Use coverage as a diagnostic signal. Do not weaken assertions, exclude production code, or add tests without behavioral value merely to increase a percentage.
+- Keep Codecov project and patch statuses informational until maintainers approve a stable baseline and explicit thresholds.
 - Run focused checks first, then all available Debug and Release checks.
 - Keep changes focused. Do not reformat or rewrite unrelated files.
 - Update public documentation and the changelog when behavior or requirements change.

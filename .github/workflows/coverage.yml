@@ -1,0 +1,93 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  windows-coverage:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Configure coverage build
+        run: cmake --preset windows-x64-debug -B build/coverage
+      - name: Build coverage tests
+        run: cmake --build build/coverage --config Debug --target TempoFlowPresetValidatorTests
+      - name: Collect native C++ coverage
+        shell: pwsh
+        env:
+          DOTNET_COVERAGE_NOLOGO: "1"
+          DOTNET_COVERAGE_TELEMETRY_OPTOUT: "1"
+        run: |
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          if (-not (Test-Path -LiteralPath $vswhere -PathType Leaf)) {
+            throw 'vswhere.exe was not found.'
+          }
+
+          $installationPath = & $vswhere `
+            -latest `
+            -products '*' `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($installationPath)) {
+            throw 'A Visual Studio installation with the MSVC x64 tools was not found.'
+          }
+
+          $coverageTool = Join-Path $installationPath `
+            'Common7\IDE\Extensions\Microsoft\CodeCoverage.Console\Microsoft.CodeCoverage.Console.exe'
+          $testExecutable = (Resolve-Path `
+            'build\coverage\TempoFlowPresetValidatorTests_artefacts\Debug\TempoFlowPresetValidatorTests.exe').Path
+          $coverageReport = Join-Path $PWD 'build\coverage\coverage.cobertura.xml'
+
+          if (-not (Test-Path -LiteralPath $coverageTool -PathType Leaf)) {
+            throw 'Microsoft.CodeCoverage.Console.exe was not found.'
+          }
+
+          & $coverageTool collect `
+            --include-files $testExecutable `
+            --output $coverageReport `
+            --output-format cobertura `
+            --nologo `
+            $testExecutable
+          if ($LASTEXITCODE -ne 0) {
+            throw "Coverage collection failed with exit code $LASTEXITCODE."
+          }
+
+          if (-not (Test-Path -LiteralPath $coverageReport -PathType Leaf)) {
+            throw 'Coverage collection did not create the expected Cobertura report.'
+          }
+
+          [xml] $coverageXml = Get-Content -LiteralPath $coverageReport -Raw
+          $projectSources = @(
+            $coverageXml.coverage.packages.package.classes.class |
+              Where-Object { $_.filename -match '[\\/]src[\\/]preset[\\/]PresetValidator\.(cpp|h)$' }
+          )
+          $coveredProjectLines = @(
+            $projectSources.lines.line |
+              Where-Object { [int]$_.hits -gt 0 }
+          )
+          if (
+            [int]$coverageXml.coverage.'lines-valid' -le 0 -or
+            $projectSources.Count -eq 0 -or
+            $coveredProjectLines.Count -eq 0
+          ) {
+            throw 'The Cobertura report contains no TempoFlow source coverage.'
+          }
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@a99c28d3f0da835de33ff2feb2e15691c7b9641f # v7
+        with:
+          disable_search: true
+          fail_ci_if_error: true
+          files: build/coverage/coverage.cobertura.xml
+          flags: unit-tests
+          name: windows-msvc
+          use_oidc: true
+          version: v11.3.1

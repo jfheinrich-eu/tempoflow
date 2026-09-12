@@ -79,6 +79,9 @@ test:
   - changed-files:
       - any-glob-to-any-file:
           - tests/**/*
+          - codecov.yml
+          - .github/workflows/coverage.yml
+          - docs/code-coverage.md
 
 vscode:
   - changed-files:

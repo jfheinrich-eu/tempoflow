@@ -124,6 +124,8 @@ Every file must contain valid JSON.
 
 `metadata.name` is required. `description`, `category`, `tags`, `author`, `createdAt`, and `updatedAt` are optional.
 
+`description`, `category`, and `author` are strings. `tags` is an array containing only strings. Populated `createdAt` and `updatedAt` values use the RFC 3339 date-time format; an empty string remains valid for compatibility with existing presets.
+
 ## 8. Tempo model
 
 `tempo.bpm` must be between 20 and 300 inclusive. Fractional values such as `120.5` are valid even when a UI displays only whole numbers.

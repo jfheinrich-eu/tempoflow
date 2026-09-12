@@ -1,9 +1,13 @@
 #include "PresetValidator.h"
 
+#include <array>
 #include <cmath>
 #include <limits>
 #include <regex>
 #include <set>
+#include <string>
+#include <string_view>
+#include <utility>
 
 namespace tempoflow::preset
 {
@@ -19,7 +23,26 @@ void require(bool condition, juce::String message, Errors &errors)
 
 [[nodiscard]] bool isInteger(const juce::var &value) noexcept
 {
-    return value.isInt() || value.isInt64();
+    if (value.isInt() || value.isInt64())
+        return true;
+
+    if (!value.isDouble())
+        return false;
+
+    const auto number = static_cast<double>(value);
+    constexpr auto int64LowerBound = -9223372036854775808.0;
+    constexpr auto int64ExclusiveUpperBound = 9223372036854775808.0;
+    return std::isfinite(number) && std::trunc(number) == number && number >= int64LowerBound &&
+           number < int64ExclusiveUpperBound;
+}
+
+[[nodiscard]] bool getInteger(const juce::var &value, juce::int64 &result) noexcept
+{
+    if (!isInteger(value))
+        return false;
+
+    result = static_cast<juce::int64>(value);
+    return true;
 }
 
 [[nodiscard]] bool isNumber(const juce::var &value) noexcept
@@ -56,10 +79,131 @@ void require(bool condition, juce::String message, Errors &errors)
     return std::regex_match(version.toStdString(), semanticVersion);
 }
 
+[[nodiscard]] bool isLeapYear(int year) noexcept
+{
+    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+}
+
+[[nodiscard]] bool parseFixedDigits(std::string_view text, std::size_t offset, std::size_t count, int &result) noexcept
+{
+    if (offset > text.size() || count > text.size() - offset)
+        return false;
+
+    result = 0;
+    for (std::size_t index = 0; index < count; ++index)
+    {
+        const auto character = text.at(offset + index);
+        if (character < '0' || character > '9')
+            return false;
+
+        result = result * 10 + (character - '0');
+    }
+
+    return true;
+}
+
+[[nodiscard]] bool isValidDateTime(const juce::String &value)
+{
+    const auto text = value.toStdString();
+    constexpr std::size_t minimumDateTimeLength = 20;
+    if (text.size() < minimumDateTimeLength || text.at(4) != '-' || text.at(7) != '-' ||
+        (text.at(10) != 'T' && text.at(10) != 't') || text.at(13) != ':' || text.at(16) != ':')
+        return false;
+
+    int year = 0;
+    int month = 0;
+    int day = 0;
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+    if (!parseFixedDigits(text, 0, 4, year) || !parseFixedDigits(text, 5, 2, month) ||
+        !parseFixedDigits(text, 8, 2, day) || !parseFixedDigits(text, 11, 2, hour) ||
+        !parseFixedDigits(text, 14, 2, minute) || !parseFixedDigits(text, 17, 2, second))
+        return false;
+
+    if (month < 1 || month > 12 || hour > 23 || minute > 59 || second > 60)
+        return false;
+
+    constexpr std::array daysPerMonth{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    const auto maximumDay = month == 2 && isLeapYear(year) ? 29 : daysPerMonth.at(static_cast<std::size_t>(month - 1));
+    if (day < 1 || day > maximumDay)
+        return false;
+
+    std::size_t position = 19;
+    if (text.at(position) == '.')
+    {
+        const auto fractionStart = ++position;
+        while (position < text.size() && text.at(position) >= '0' && text.at(position) <= '9')
+            ++position;
+
+        if (position == fractionStart)
+            return false;
+    }
+
+    if (position >= text.size())
+        return false;
+
+    if (text.at(position) == 'Z' || text.at(position) == 'z')
+        return position + 1 == text.size();
+
+    constexpr std::size_t offsetLength = 6;
+    if ((text.at(position) != '+' && text.at(position) != '-') || text.size() - position != offsetLength ||
+        text.at(position + 3) != ':')
+        return false;
+
+    int offsetHour = 0;
+    int offsetMinute = 0;
+    if (!parseFixedDigits(text, position + 1, 2, offsetHour) || !parseFixedDigits(text, position + 4, 2, offsetMinute))
+        return false;
+
+    return offsetHour <= 23 && offsetMinute <= 59;
+}
+
+void validateOptionalString(juce::DynamicObject &object, const juce::Identifier &name, Errors &errors)
+{
+    if (object.hasProperty(name))
+        require(object.getProperty(name).isString(), "metadata." + name.toString() + " must be a string", errors);
+}
+
+void validateOptionalTimestamp(juce::DynamicObject &metadata, const juce::Identifier &name, Errors &errors)
+{
+    if (!metadata.hasProperty(name))
+        return;
+
+    const auto value = metadata.getProperty(name);
+    require(value.isString() && (value.toString().isEmpty() || isValidDateTime(value.toString())),
+            "metadata." + name.toString() + " must be empty or a valid RFC 3339 date-time", errors);
+}
+
 void validateMetadata(juce::DynamicObject &metadata, Errors &errors)
 {
     const auto name = metadata.getProperty("name");
     require(name.isString() && name.toString().trim().isNotEmpty(), "metadata.name must be a non-empty string", errors);
+
+    validateOptionalString(metadata, "description", errors);
+    validateOptionalString(metadata, "category", errors);
+    validateOptionalString(metadata, "author", errors);
+    validateOptionalTimestamp(metadata, "createdAt", errors);
+    validateOptionalTimestamp(metadata, "updatedAt", errors);
+
+    if (!metadata.hasProperty("tags"))
+        return;
+
+    const auto tags = metadata.getProperty("tags");
+    if (!tags.isArray())
+    {
+        errors.push_back("metadata.tags must be an array of strings");
+        return;
+    }
+
+    for (const auto &tag : *tags.getArray())
+    {
+        if (!tag.isString())
+        {
+            errors.push_back("metadata.tags must contain only strings");
+            return;
+        }
+    }
 }
 
 void validateTempo(juce::DynamicObject &tempo, Errors &errors)
@@ -76,11 +220,13 @@ juce::int64 validateMeter(juce::DynamicObject &meter, Errors &errors)
     const auto denominatorValue = meter.getProperty("denominator");
     const auto groupingValue = meter.getProperty("grouping");
 
-    const auto numerator = isInteger(numeratorValue) ? static_cast<juce::int64>(numeratorValue) : 0;
-    require(isInteger(numeratorValue) && numerator >= 1, "meter.numerator must be an integer of at least 1", errors);
+    juce::int64 numerator = 0;
+    const auto hasValidNumerator = getInteger(numeratorValue, numerator);
+    require(hasValidNumerator && numerator >= 1, "meter.numerator must be an integer of at least 1", errors);
 
-    const auto denominator = isInteger(denominatorValue) ? static_cast<juce::int64>(denominatorValue) : 0;
-    require(denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16,
+    juce::int64 denominator = 0;
+    const auto hasValidDenominator = getInteger(denominatorValue, denominator);
+    require(hasValidDenominator && (denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16),
             "meter.denominator must be 2, 4, 8, or 16", errors);
 
     if (!groupingValue.isArray() || groupingValue.getArray()->isEmpty())
@@ -92,8 +238,8 @@ juce::int64 validateMeter(juce::DynamicObject &meter, Errors &errors)
     juce::int64 groupingSum = 0;
     for (const auto &group : *groupingValue.getArray())
     {
-        const auto groupSize = isInteger(group) ? static_cast<juce::int64>(group) : 0;
-        if (!isInteger(group) || groupSize < 1)
+        juce::int64 groupSize = 0;
+        if (!getInteger(group, groupSize) || groupSize < 1)
         {
             errors.push_back("meter.grouping values must be positive integers");
             continue;
@@ -116,15 +262,15 @@ void validateSubdivision(juce::DynamicObject &subdivision, Errors &errors)
 {
     const auto mode = subdivision.getProperty("mode");
     const auto partsPerBeat = subdivision.getProperty("partsPerBeat");
+    juce::int64 parts = 0;
 
-    if (!mode.isString() || !isInteger(partsPerBeat))
+    if (!mode.isString() || !getInteger(partsPerBeat, parts))
     {
         errors.push_back("subdivision.mode and subdivision.partsPerBeat are required");
         return;
     }
 
     const auto modeText = mode.toString();
-    const auto parts = static_cast<int>(partsPerBeat);
     require((modeText == "none" && parts == 1) || (modeText == "triplet" && parts == 3),
             "subdivision must be none/1 or triplet/3", errors);
 }
@@ -157,13 +303,13 @@ void validatePattern(juce::DynamicObject &pattern, juce::int64 numerator, Errors
         const auto positionValue = beat->getProperty("beat");
         const auto clickValue = beat->getProperty("click");
 
-        if (!isInteger(positionValue))
+        juce::int64 position = 0;
+        if (!getInteger(positionValue, position))
         {
             errors.push_back("Every beat position must be an integer");
         }
         else
         {
-            const auto position = static_cast<juce::int64>(positionValue);
             require(position >= 1 && position <= numerator, "Beat positions must be within the meter", errors);
             require(positions.insert(position).second, "Beat positions must be unique", errors);
         }
