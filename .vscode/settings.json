@@ -17,5 +17,23 @@
     "[markdown]": {
         "editor.defaultFormatter": "yzhang.markdown-all-in-one",
         "editor.wordWrap": "on"
-    }
+    },
+    "commit-message-editor.reduceEmptyLines": true,
+    "commit-message-editor.dynamicTemplate": [
+      "{type}{scope}: {description}",
+      "",
+      "{body}",
+      "",
+      "Signed-off-by: Joerg Heinrich <contact@jfheinrich.eu>",
+      "{breaking_change}{footer}"
+    ],
+    "commit-message-editor.staticTemplate": [
+      "feat: Short description",
+      "",
+      "Message body",
+      "",
+      "Signed-off-by: Joerg Heinrich <contact@jfheinrich.eu>",
+      "Message footer"
+    ]
 }
+
