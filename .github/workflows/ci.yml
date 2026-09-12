@@ -16,6 +16,14 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+      - name: Check C++ formatting
+        shell: pwsh
+        run: |
+          $files = @(
+            Get-ChildItem src, tests, tools -Recurse -File -Include *.cpp, *.h |
+              ForEach-Object FullName
+          )
+          clang-format --dry-run --Werror --style=file @files
       - name: Configure
         run: cmake --preset windows-x64-release -B build/ci
       - name: Build
