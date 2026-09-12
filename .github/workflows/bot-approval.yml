@@ -1,0 +1,140 @@
+name: Bot approval
+
+on:
+  workflow_run:
+    workflows: [CI, Commit policy, CodeQL]
+    types: [completed]
+
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  approve-owner-pull-request:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify pull request and required checks
+        id: gate
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $event = Get-Content -LiteralPath $env:GITHUB_EVENT_PATH -Raw | ConvertFrom-Json
+          $pullRequests = @($event.workflow_run.pull_requests)
+
+          if ($pullRequests.Count -ne 1) {
+            Write-Output 'eligible=false' >> $env:GITHUB_OUTPUT
+            Write-Output 'The workflow run is not associated with exactly one pull request.'
+            exit 0
+          }
+
+          $pullRequestNumber = $pullRequests[0].number
+          $pullRequest = gh api "repos/$env:GITHUB_REPOSITORY/pulls/$pullRequestNumber" | ConvertFrom-Json
+          $workflowSha = $event.workflow_run.head_sha
+          $pullRequestHeadSha = $pullRequest.head.sha
+          $isCurrentRun =
+            $workflowSha -eq $pullRequestHeadSha -or
+            $workflowSha -eq $pullRequest.merge_commit_sha
+
+          $isEligible =
+            $pullRequest.user.login -eq 'jfheinrich' -and
+            -not $pullRequest.draft -and
+            $pullRequest.head.repo.full_name -eq $env:GITHUB_REPOSITORY -and
+            $isCurrentRun
+
+          if (-not $isEligible) {
+            Write-Output 'eligible=false' >> $env:GITHUB_OUTPUT
+            Write-Output 'Only current, non-draft pull requests from jfheinrich in this repository are eligible.'
+            exit 0
+          }
+
+          $requiredChecks = @('windows-build-and-test', 'validate', 'Analyze C++')
+          $successful = $false
+
+          foreach ($attempt in 1..6) {
+            $response = gh api -H 'Accept: application/vnd.github+json' `
+              "repos/$env:GITHUB_REPOSITORY/commits/$workflowSha/check-runs?per_page=100" | ConvertFrom-Json
+            $checkRuns = @(
+              $response.check_runs |
+                Group-Object name |
+                ForEach-Object { $_.Group | Sort-Object started_at -Descending | Select-Object -First 1 }
+            )
+            $failed = @(
+              $checkRuns |
+                Where-Object { $_.name -in $requiredChecks -and $_.status -eq 'completed' -and $_.conclusion -ne 'success' }
+            )
+
+            if ($failed.Count -gt 0) {
+              throw "A required check failed: $($failed.name -join ', ')"
+            }
+
+            $passedNames = @(
+              $checkRuns |
+                Where-Object { $_.name -in $requiredChecks -and $_.status -eq 'completed' -and $_.conclusion -eq 'success' } |
+                ForEach-Object name |
+                Sort-Object -Unique
+            )
+
+            if (@($requiredChecks | Where-Object { $_ -notin $passedNames }).Count -eq 0) {
+              $successful = $true
+              break
+            }
+
+            if ($attempt -lt 6) {
+              Start-Sleep -Seconds 10
+            }
+          }
+
+          if (-not $successful) {
+            Write-Output 'eligible=false' >> $env:GITHUB_OUTPUT
+            Write-Output 'Not all required checks completed successfully during the polling window.'
+            exit 0
+          }
+
+          Write-Output 'eligible=true' >> $env:GITHUB_OUTPUT
+          Write-Output "pull_request_number=$pullRequestNumber" >> $env:GITHUB_OUTPUT
+          Write-Output "head_sha=$pullRequestHeadSha" >> $env:GITHUB_OUTPUT
+
+      - name: Approve pull request as jfheinrich-bot
+        if: steps.gate.outputs.eligible == 'true'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.BOT_REVIEW_TOKEN }}
+          HEAD_SHA: ${{ steps.gate.outputs.head_sha }}
+          PULL_REQUEST_NUMBER: ${{ steps.gate.outputs.pull_request_number }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+            throw 'The BOT_REVIEW_TOKEN repository secret is not configured.'
+          }
+
+          $reviews = @(
+            gh api --paginate "repos/$env:GITHUB_REPOSITORY/pulls/$env:PULL_REQUEST_NUMBER/reviews" |
+              ConvertFrom-Json
+          )
+          $alreadyApproved = @(
+            $reviews |
+              Where-Object {
+                $_.user.login -eq 'jfheinrich-bot' -and
+                $_.state -eq 'APPROVED' -and
+                $_.commit_id -eq $env:HEAD_SHA
+              }
+          ).Count -gt 0
+
+          if ($alreadyApproved) {
+            Write-Output 'jfheinrich-bot already approved the current head commit.'
+            exit 0
+          }
+
+          $body = @{
+            body = 'Automated approval after the required checks completed successfully.'
+            commit_id = $env:HEAD_SHA
+            event = 'APPROVE'
+          } | ConvertTo-Json
+
+          $body | gh api --method POST `
+            -H 'Accept: application/vnd.github+json' `
+            "repos/$env:GITHUB_REPOSITORY/pulls/$env:PULL_REQUEST_NUMBER/reviews" `
+            --input -

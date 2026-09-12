@@ -44,4 +44,6 @@ ctest --preset windows-x64-release
 
 Use a feature branch, keep commits understandable, complete the pull-request template, and include exact verification commands. Maintainers may request a rebase, tests, design changes, or a smaller scope.
 
+Follow the [pull request approval policy](docs/pull-request-policy.md). Pull-request authors cannot provide their own required approval.
+
 By contributing, you agree that your contribution is licensed under `AGPL-3.0-only`.
