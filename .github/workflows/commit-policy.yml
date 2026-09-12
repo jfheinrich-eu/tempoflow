@@ -1,0 +1,44 @@
+name: Commit policy
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: windows-2025-vs2026
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Test policy validator
+        shell: pwsh
+        run: .\tests\commit-message-policy.tests.ps1
+      - name: Validate commit messages
+        shell: pwsh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EVENT_SHA: ${{ github.sha }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:BASE_SHA)) {
+            $commits = @($env:EVENT_SHA)
+          }
+          else {
+            $commits = @(git rev-list "$env:BASE_SHA..$env:PR_HEAD_SHA")
+          }
+
+          if ($commits.Count -eq 0) {
+            throw 'No commits were found for policy validation.'
+          }
+
+          foreach ($commit in $commits) {
+            $message = (git show --no-patch --format=%B $commit) -join "`n"
+            Write-Output "Validating commit $commit"
+            .\scripts\validate-commit-message.ps1 -MessageText $message
+          }
