@@ -8,7 +8,7 @@ Only production sources below `src/` are included. JUCE, tests, tools, documenta
 
 The `Coverage` workflow runs for pushes to `main`, pull requests, and manual dispatches. Codecov reports project and patch coverage as informational values. Coverage does not block pull-request approval while the project establishes a reliable baseline.
 
-The upload uses GitHub OIDC and does not require a `CODECOV_TOKEN` repository secret. The Codecov GitHub App must be enabled for the repository.
+The upload uses GitHub OIDC and does not require a `CODECOV_TOKEN` repository secret. The Codecov GitHub App must be enabled for the repository. Coverage collection and upload run in separate jobs. Pull-request code executes only in the collection job, which has read-only repository permission and no OIDC permission. The upload job receives only the validated Cobertura artifact and owns the short-lived OIDC permission.
 
 ## Local collection
 

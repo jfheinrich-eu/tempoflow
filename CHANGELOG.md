@@ -9,6 +9,8 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 - Raised the minimum CMake version to 3.25 for CMake Presets schema version 6.
 - Pinned JUCE and GitHub Actions to immutable commit SHAs.
 - Enforced defined metadata types, RFC 3339 timestamps, and safe integer conversion in preset validation.
+- Bounded preset discovery, file reads, and JSON complexity before processing untrusted input.
+- Isolated Codecov OIDC access from the job that builds and executes pull-request code.
 
 ### Added
 

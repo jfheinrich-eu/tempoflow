@@ -1,25 +1,8 @@
+#include "preset/PresetFileIO.h"
 #include "preset/PresetValidator.h"
 
-#include <algorithm>
 #include <iostream>
 #include <vector>
-
-namespace
-{
-void appendPresetFiles(const juce::File &input, std::vector<juce::File> &files)
-{
-    if (input.isDirectory())
-    {
-        juce::Array<juce::File> directoryFiles;
-        input.findChildFiles(directoryFiles, juce::File::findFiles, true, "*.tempoflow");
-        for (const auto &file : directoryFiles)
-            files.push_back(file);
-        return;
-    }
-
-    files.push_back(input);
-}
-} // namespace
 
 int main(int argc, char *argv[])
 {
@@ -29,37 +12,42 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    std::vector<juce::File> files;
+    std::vector<juce::File> inputs;
     for (int index = 1; index < argc; ++index)
-        appendPresetFiles(juce::File::getCurrentWorkingDirectory().getChildFile(argv[index]), files);
+        inputs.push_back(juce::File::getCurrentWorkingDirectory().getChildFile(argv[index]));
 
-    std::sort(files.begin(), files.end(),
-              [](const auto &left, const auto &right) { return left.getFullPathName() < right.getFullPathName(); });
+    const auto collection = tempoflow::preset::collectPresetFiles(inputs);
+    for (const auto &error : collection.errors)
+        std::cerr << error << '\n';
 
-    if (files.empty())
+    if (collection.files.empty())
     {
-        std::cerr << "No .tempoflow files found.\n";
-        return 2;
+        if (collection.errors.empty())
+            std::cerr << "No .tempoflow files found.\n";
+        return collection.errors.empty() ? 2 : 1;
     }
 
-    bool allValid = true;
-    for (const auto &file : files)
+    bool allValid = collection.isValid();
+    std::int64_t totalBytesRead = 0;
+    for (const auto &file : collection.files)
     {
-        if (!file.existsAsFile())
+        const auto readResult = tempoflow::preset::readPresetFileBounded(file);
+        if (!readResult.isValid())
         {
-            std::cerr << file.getFullPathName() << ": file not found\n";
+            std::cerr << file.getFullPathName() << ": " << readResult.error << '\n';
             allValid = false;
             continue;
         }
 
-        if (file.getSize() > tempoflow::preset::maximumPresetFileSizeBytes)
+        if (totalBytesRead > tempoflow::preset::maximumTotalPresetBytes - readResult.bytesRead)
         {
-            std::cerr << file.getFileName() << ": exceeds the 1 MiB size limit\n";
+            std::cerr << "Preset processing exceeds the 16 MiB cumulative size limit\n";
             allValid = false;
-            continue;
+            break;
         }
+        totalBytesRead += readResult.bytesRead;
 
-        const auto validation = tempoflow::preset::validatePresetJson(file.loadFileAsString());
+        const auto validation = tempoflow::preset::validatePresetJson(readResult.content);
         if (validation.isValid())
         {
             std::cout << file.getFileName() << ": valid\n";

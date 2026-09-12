@@ -15,10 +15,121 @@ namespace
 {
 using Errors = std::vector<juce::String>;
 
+struct JsonContainerState
+{
+    char openingCharacter = 0;
+    std::size_t propertyCount = 0;
+    std::size_t commaCount = 0;
+    bool hasContent = false;
+};
+
 void require(bool condition, juce::String message, Errors &errors)
 {
     if (!condition)
         errors.push_back(std::move(message));
+}
+
+[[nodiscard]] juce::String validateJsonComplexity(const juce::String &jsonText)
+{
+    const std::string_view json(jsonText.toRawUTF8(), static_cast<std::size_t>(jsonText.getNumBytesAsUTF8()));
+    std::vector<JsonContainerState> containers;
+    std::size_t containerCount = 0;
+    std::size_t totalPropertyCount = 0;
+    std::size_t totalArrayElementCount = 0;
+    bool insideString = false;
+    bool escaped = false;
+
+    for (const auto character : json)
+    {
+        if (insideString)
+        {
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+
+            if (character == '\\')
+            {
+                escaped = true;
+                continue;
+            }
+
+            if (character == '"')
+                insideString = false;
+            continue;
+        }
+
+        if (character == '"')
+        {
+            insideString = true;
+            if (!containers.empty())
+                containers.back().hasContent = true;
+            continue;
+        }
+
+        if (character == '{' || character == '[')
+        {
+            if (!containers.empty())
+                containers.back().hasContent = true;
+
+            ++containerCount;
+            if (containerCount > maximumJsonContainerCount)
+                return "JSON exceeds the 2048-container limit";
+
+            containers.push_back({character});
+            if (containers.size() > maximumJsonNestingDepth)
+                return "JSON exceeds the 32-level nesting limit";
+            continue;
+        }
+
+        if (character == ':' && !containers.empty() && containers.back().openingCharacter == '{')
+        {
+            auto &object = containers.back();
+            ++object.propertyCount;
+            ++totalPropertyCount;
+            if (object.propertyCount > maximumJsonPropertiesPerObject)
+                return "JSON object exceeds the 256-property limit";
+            if (totalPropertyCount > maximumJsonTotalProperties)
+                return "JSON exceeds the 8192-property total limit";
+            continue;
+        }
+
+        if (character == ',' && !containers.empty() && containers.back().openingCharacter == '[')
+        {
+            ++containers.back().commaCount;
+            continue;
+        }
+
+        if (character == '}' || character == ']')
+        {
+            if (containers.empty())
+                continue;
+
+            const auto expectedOpening = character == '}' ? '{' : '[';
+            if (containers.back().openingCharacter != expectedOpening)
+                continue;
+
+            const auto completed = containers.back();
+            containers.pop_back();
+            if (completed.openingCharacter == '[' && completed.hasContent)
+            {
+                const auto elementCount = completed.commaCount + 1;
+                if (elementCount > maximumJsonArrayElements)
+                    return "JSON array exceeds the 4096-element limit";
+                if (totalArrayElementCount > maximumJsonTotalArrayElements - elementCount)
+                    return "JSON exceeds the 16384-array-element total limit";
+                totalArrayElementCount += elementCount;
+            }
+            continue;
+        }
+
+        if (!containers.empty() && character != ',' && character != ':' && character != ' ' && character != '\t' &&
+            character != '\r' && character != '\n')
+            containers.back().hasContent = true;
+    }
+
+    return {};
 }
 
 [[nodiscard]] bool isInteger(const juce::var &value) noexcept
@@ -349,6 +460,12 @@ ValidationResult validatePresetJson(const juce::String &jsonText)
     if (jsonText.getNumBytesAsUTF8() > maximumPresetFileSizeBytes)
     {
         validation.errors.push_back("Preset exceeds the 1 MiB size limit");
+        return validation;
+    }
+
+    if (const auto complexityError = validateJsonComplexity(jsonText); complexityError.isNotEmpty())
+    {
+        validation.errors.push_back(complexityError);
         return validation;
     }
 

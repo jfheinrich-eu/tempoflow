@@ -273,7 +273,9 @@ Presets/
 - Beat positions cover `1..numerator` without omissions or duplicates.
 - Every click uses a defined ClickType.
 - `0.0 <= volume <= 1.0`.
-- Preset files larger than 1 MiB are rejected before JSON parsing.
+- Preset files are read through one open file handle and rejected when more than 1 MiB is read.
+- JSON is rejected before parsing when it exceeds 32 nesting levels, 2,048 containers, 256 properties in one object, 4,096 elements in one array, 8,192 properties in total, or 16,384 array elements in total.
+- Directory validation does not follow symbolic links or reparse points. It is limited to 16 levels, 10,000 examined entries, 1,024 preset files, and 16 MiB of preset data.
 
 ## 28. Error behavior
 

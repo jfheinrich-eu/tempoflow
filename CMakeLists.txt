@@ -19,6 +19,8 @@ FetchContent_MakeAvailable(JUCE)
 add_library(
     TempoFlowPresetValidation
     STATIC
+        src/preset/PresetFileIO.cpp
+        src/preset/PresetFileIO.h
         src/preset/PresetValidator.cpp
         src/preset/PresetValidator.h
 )
@@ -135,4 +137,18 @@ if(BUILD_TESTING)
             TempoFlowPresetValidator
             "${CMAKE_CURRENT_SOURCE_DIR}/docs/Preset Format 1.0/presets"
     )
+
+    if(WIN32)
+        find_program(TEMPOFLOW_POWERSHELL_EXECUTABLE NAMES pwsh powershell REQUIRED)
+        add_test(
+            NAME preset-reparse-point
+            COMMAND
+                "${TEMPOFLOW_POWERSHELL_EXECUTABLE}"
+                -NoLogo
+                -NoProfile
+                -ExecutionPolicy Bypass
+                -File "${CMAKE_CURRENT_SOURCE_DIR}/tests/preset-reparse-point.tests.ps1"
+                -ValidatorPath "$<TARGET_FILE:TempoFlowPresetValidator>"
+        )
+    endif()
 endif()
