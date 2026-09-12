@@ -280,14 +280,14 @@
       "schemaVersion": "1.0.0",
       "metadata": {
         "name": "Slow Blues Shuffle",
-        "description": "Langsames Blues-Shuffle-Übungspreset",
+        "description": "A slow blues shuffle practice preset",
         "category": "blues",
         "tags": [
           "blues",
           "shuffle",
           "practice"
         ],
-        "author": "Jörg",
+        "author": "Joerg",
         "createdAt": "2026-09-06T21:30:00+02:00",
         "updatedAt": "2026-09-06T21:30:00+02:00"
       },
