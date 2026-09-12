@@ -6,13 +6,13 @@
 
 namespace
 {
-void appendPresetFiles(const juce::File& input, std::vector<juce::File>& files)
+void appendPresetFiles(const juce::File &input, std::vector<juce::File> &files)
 {
     if (input.isDirectory())
     {
         juce::Array<juce::File> directoryFiles;
         input.findChildFiles(directoryFiles, juce::File::findFiles, true, "*.tempoflow");
-        for (const auto& file : directoryFiles)
+        for (const auto &file : directoryFiles)
             files.push_back(file);
         return;
     }
@@ -21,7 +21,7 @@ void appendPresetFiles(const juce::File& input, std::vector<juce::File>& files)
 }
 } // namespace
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
@@ -33,9 +33,8 @@ int main(int argc, char* argv[])
     for (int index = 1; index < argc; ++index)
         appendPresetFiles(juce::File::getCurrentWorkingDirectory().getChildFile(argv[index]), files);
 
-    std::sort(files.begin(), files.end(), [](const auto& left, const auto& right) {
-        return left.getFullPathName() < right.getFullPathName();
-    });
+    std::sort(files.begin(), files.end(),
+              [](const auto &left, const auto &right) { return left.getFullPathName() < right.getFullPathName(); });
 
     if (files.empty())
     {
@@ -44,7 +43,7 @@ int main(int argc, char* argv[])
     }
 
     bool allValid = true;
-    for (const auto& file : files)
+    for (const auto &file : files)
     {
         if (!file.existsAsFile())
         {
@@ -69,7 +68,7 @@ int main(int argc, char* argv[])
 
         allValid = false;
         std::cerr << file.getFileName() << ": invalid\n";
-        for (const auto& error : validation.errors)
+        for (const auto &error : validation.errors)
             std::cerr << "  - " << error << '\n';
     }
 

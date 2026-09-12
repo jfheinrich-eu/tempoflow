@@ -19,5 +19,5 @@ struct ValidationResult
     std::vector<juce::String> errors;
 };
 
-[[nodiscard]] ValidationResult validatePresetJson(const juce::String& jsonText);
+[[nodiscard]] ValidationResult validatePresetJson(const juce::String &jsonText);
 } // namespace tempoflow::preset
