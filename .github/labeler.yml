@@ -1,0 +1,89 @@
+build:
+  - changed-files:
+      - any-glob-to-any-file:
+          - CMakeLists.txt
+          - CMakePresets.json
+          - scripts/setup-dev.ps1
+          - tools/toolchain_check.cpp
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/**/*
+
+cpp:
+  - changed-files:
+      - any-glob-to-any-file:
+          - src/**/*.cpp
+          - src/**/*.h
+          - tests/**/*.cpp
+          - tests/**/*.h
+          - tools/**/*.cpp
+          - tools/**/*.h
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/dependabot.yml
+          - CMakeLists.txt
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - CHANGELOG.md
+          - CITATION.cff
+          - docs/**/*
+
+git:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .gitattributes
+          - .gitignore
+          - .githooks/**/*
+
+github:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**/*
+
+labels:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/labeler.yml
+          - .github/workflows/pr-labeler.yml
+
+lint:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .clang-format
+          - .clang-tidy
+          - .editorconfig
+
+presets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.tempoflow"
+          - docs/Preset Format 1.0/**/*
+          - src/preset/**/*
+          - tests/preset_validator_tests.cpp
+          - tools/preset_validator.cpp
+
+security:
+  - changed-files:
+      - any-glob-to-any-file:
+          - SECURITY.md
+          - .github/workflows/codeql.yml
+
+test:
+  - changed-files:
+      - any-glob-to-any-file:
+          - tests/**/*
+          - codecov.yml
+          - .github/workflows/coverage.yml
+          - docs/code-coverage.md
+
+vscode:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .vscode/**/*

@@ -1,0 +1,5 @@
+# Default owners for all repository content.
+* @jfheinrich-eu/maintainers @jfheinrich-bot
+
+# Protect repository policy and automation explicitly.
+/.github/ @jfheinrich-eu/maintainers @jfheinrich-bot

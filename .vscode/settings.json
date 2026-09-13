@@ -1,0 +1,38 @@
+{
+    "cmake.configureOnOpen": true,
+    "cmake.buildBeforeRun": true,
+    "cmake.generator": "Visual Studio 18 2026",
+    "cmake.configureSettings": {
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_CXX_STANDARD_REQUIRED": "ON"
+    },
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c17",
+    "files.associations": {
+        "CMakeLists.txt": "cmake",
+        "*.cmake": "cmake",
+        "LICENSE": "plaintext",
+        "LICENSE.*": "plaintext"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "yzhang.markdown-all-in-one",
+        "editor.wordWrap": "on"
+    },
+    "commit-message-editor.reduceEmptyLines": true,
+    "commit-message-editor.dynamicTemplate": [
+      "{type}{scope}: {description}",
+      "",
+      "{body}",
+      "",
+      "Signed-off-by: Joerg Heinrich <contact@jfheinrich.eu>",
+      "{breaking_change}{footer}"
+    ],
+    "commit-message-editor.staticTemplate": [
+      "feat: Short description",
+      "",
+      "Message body",
+      "",
+      "Signed-off-by: Joerg Heinrich <contact@jfheinrich.eu>",
+      "Message footer"
+    ]
+}

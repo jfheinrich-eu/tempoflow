@@ -1,5 +1,5 @@
 ---
-title: TempoFlow – Projekt-Kickoff
+title: TempoFlow Project Kickoff
 aliases:
   - TempoFlow Kickoff
 project: TempoFlow
@@ -15,178 +15,142 @@ tags:
   - preset
 ---
 
-# TempoFlow – Projekt-Kickoff
+# TempoFlow Project Kickoff
 
-## Kurzfassung
+## Executive summary
 
-TempoFlow ist ein plattformübergreifendes Metronom-System. Es besteht zunächst aus:
+TempoFlow is a cross-platform metronome system. Its initial product family consists of:
 
-1. einer Base44-PWA für den eigenständigen Betrieb im Browser,
-2. einem nativen VST3-Plugin für den synchronen Betrieb in einer DAW,
-3. dem gemeinsamen, plattformunabhängigen `.tempoflow`-Presetformat.
+1. a Base44 PWA for standalone browser use;
+2. a native VST3 plug-in synchronized to a DAW;
+3. the shared, platform-independent `.tempoflow` preset format.
 
-PWA und VST3 teilen nicht denselben Programmcode. Sie teilen Preset-Schema, musikalische Semantik, Validierungsregeln und Preset-Dateien.
+The PWA and VST3 plug-in do not share application source code. They share the preset schema, musical semantics, validation rules, and preset files.
 
-Der erste technische Schwerpunkt ist ein schlankes VST3-MVP für Cubase Elements 15. Es folgt dem Host samplegenau, erzeugt Metronom-Audio und lädt die bereits definierten `.tempoflow`-Presets. Eine direkte Cloud- oder Base44-Anbindung gehört ausdrücklich nicht zum MVP.
+The first engineering target is a lean VST3 MVP for Cubase Elements 15. It follows the host with sample accuracy, generates metronome audio, and loads the existing `.tempoflow` presets. Direct cloud or Base44 integration is explicitly outside the MVP.
 
-## Produktidee
+## Product concept
 
-TempoFlow stellt Metronom-Setups unabhängig von Oberfläche und Laufzeitumgebung bereit.
+A TempoFlow setup describes:
 
-Ein Setup beschreibt:
+- tempo;
+- meter and musical grouping;
+- subdivision;
+- beat pattern;
+- click roles;
+- sound set;
+- master volume;
+- playback mode.
 
-- Tempo,
-- Taktart und musikalische Gruppierung,
-- Subdivision,
-- Schlagmuster,
-- Klangrollen,
-- SoundSet,
-- Gesamtlautstärke,
-- Wiedergabemodus.
+The same preset must work in at least the PWA and VST3 plug-in. Standalone, mobile, and desktop applications may follow later.
 
-Dasselbe Preset soll mindestens in der PWA und im VST3 nutzbar sein. Spätere Standalone-, Mobile- oder Desktop-Versionen bleiben möglich.
+### Target audience hypothesis
 
-## Zielgruppen und Nutzen
+> TempoFlow is for musicians who need flexible metronome patterns for practice and production and want to move those patterns between a browser and a DAW.
 
-Die primäre Zielgruppe ist noch nicht ausdrücklich dokumentiert. Aus den vorhandenen Presets und Trainer-Ideen ergibt sich als Arbeitshypothese:
+This target audience still requires explicit product validation.
 
-> TempoFlow richtet sich an Musiker, die flexible Metronom-Patterns für Übung und Produktion verwenden und zwischen Browser und DAW austauschen wollen.
+## Current assets
 
-Diese Zielgruppendefinition muss noch bestätigt werden. Die technische Produktidee ist dagegen bereits konkret.
-
-## Bestand
-
-### Base44-PWA
+### Base44 PWA
 
 - Name: TempoFlow
-- Base44-App-ID: `6a1fa5495a74e26d9d8fe055`
-- Geplanter Betrieb: öffentlich
-- Besucher-Login: nicht vorgesehen
-- Der Base44-Login dient nur dem Betreiberzugriff über „Edit with Base44“.
-- Im bisherigen Base44-Zugriff war nur das Benutzer-Modell mit `admin` und `user` sichtbar.
-- Eigene Entity-Schemas waren nicht sichtbar.
-- Die PWA bildet den Internal Mode ab und kontrolliert Tempo, Start, Stop, Takt, Subdivision und Pattern.
-- Die PWA-Implementierung ist für JavaScript beziehungsweise TypeScript und Web Audio vorgesehen.
+- Base44 app ID: `6a1fa5495a74e26d9d8fe055`
+- Intended availability: public
+- Visitor login: not planned
+- Base44 login is limited to operator access through “Edit with Base44”.
+- Previous inspection exposed only the built-in `admin` and `user` model.
+- Custom entity schemas were not visible.
+- The PWA represents Internal Mode and controls tempo, start, stop, meter, subdivision, and pattern.
+- The intended implementation uses JavaScript or TypeScript and Web Audio.
 
-Noch offen ist, ob die PWA Daten clientseitig, in nicht sichtbaren Base44-Ressourcen oder über externe Dienste verarbeitet.
+It remains unclear whether the PWA processes data exclusively in the client, in hidden Base44 resources, or through external services.
 
 ### Preset Format 1.0
 
-Vorhanden sind:
+Available artifacts:
 
-- eine fachlich freigegebene Spezifikation,
-- ein JSON Schema nach Draft 2020-12,
-- sieben Referenz-Presets.
+- approved domain specification;
+- Draft 2020-12 JSON Schema;
+- seven reference presets.
 
-Hauptdokument:
+Documentation:
 
-- [[docs/Preset Format 1.0/Tempoflow Preset Format 1.0|TempoFlow Preset Format 1.0]]
+- [TempoFlow Preset Format 1.0](docs/Preset%20Format%201.0/Tempoflow%20Preset%20Format%201.0.md)
+- [TempoFlow Preset JSON Schema](docs/Preset%20Format%201.0/tempoflow-preset.schema.json)
+- [Reference presets](docs/Preset%20Format%201.0/presets)
 
-Formales Schema:
-
-- [[docs/Preset Format 1.0/tempoflow-preset.schema.json|TempoFlow Preset JSON Schema]]
-
-Referenz-Presets:
-
-- [[docs/Preset Format 1.0/presets/Standard 4-4.tempoflow|Standard 4/4]]
-- [[docs/Preset Format 1.0/presets/Standard 3-4.tempoflow|Standard 3/4]]
-- [[docs/Preset Format 1.0/presets/Standard 6-8.tempoflow|Standard 6/8]]
-- [[docs/Preset Format 1.0/presets/Beat 1 Only.tempoflow|Beat 1 Only]]
-- [[docs/Preset Format 1.0/presets/Beats 2 + 4.tempoflow|Beats 2 + 4]]
-- [[docs/Preset Format 1.0/presets/Slow Blues Shuffle.tempoflow|Slow Blues Shuffle]]
-- [[docs/Preset Format 1.0/presets/12-8 Blues.tempoflow|12/8 Blues]]
-
-Alle sieben Dateien sind gültiges JSON und bestehen die dokumentierten semantischen Kernprüfungen zu BPM, Taktart, Gruppierung, Beat-Positionen, ClickTypes, Subdivision und Lautstärke.
+All seven reference files are valid JSON and satisfy the documented semantic core checks for BPM, meter, grouping, beat positions, click roles, subdivision, and volume.
 
 ### VST3
 
-Der VST3-Prototyp ist spezifiziert, aber noch nicht implementiert.
+The VST3 prototype is specified but not implemented.
 
-- Technologie: C++ und JUCE
-- Plugin-Format: VST3
-- Referenz-Host: Cubase Elements 15
-- Betriebsart in der DAW: automatisch Host Mode
-- Audioverarbeitung: intern Mono
-- Hauptausgang: Mono
-- Zusätzliche Audioausgänge: architektonisch vorsehen, nicht im MVP umsetzen
-- Timing: Host-Transport, Sample-Position und Audio-Buffer-Position
-- Ziel: samplegenaue Click-Erzeugung
+- Technology: C++ and JUCE
+- Plug-in format: VST3 only
+- Reference host: Cubase Elements 15
+- DAW mode: automatic Host Mode
+- Internal audio processing: mono
+- Main output: mono
+- Additional outputs: preserve architectural extensibility; do not implement in the MVP
+- Timing inputs: host transport, PPQ/sample position, and audio-buffer position
+- Goal: sample-accurate click generation
 
-Eine Browser-/ASIO-Bridge und eine direkte Base44-Abhängigkeit im Plugin sind ausgeschlossen.
+A browser-to-ASIO bridge and a Base44 runtime dependency are excluded.
 
-## Gemeinsames fachliches Modell
+## Shared domain model
 
 ```text
 TempoFlow Core
-│
-├── Tempo
-├── Meter
-│   └── Grouping
-├── Subdivision
-├── Pattern
-│   └── ClickType
-├── SoundSet
-├── Volume
-└── Playback Mode
+|
++-- Tempo
++-- Meter
+|   +-- Grouping
++-- Subdivision
++-- Pattern
+|   +-- ClickType
++-- SoundSet
++-- Volume
++-- Playback Mode
 ```
 
-Die vier technischen Bereiche bleiben getrennt:
+Keep these technical areas separate:
 
 ```text
 TempoFlow
-│
-├── Musical Model
-├── Preset Model
-├── Playback Engine
-└── User Interface
+|
++-- Musical Model
++-- Preset Model
++-- Playback Engine
++-- User Interface
 ```
 
-## Presetformat
+## Preset contract
 
-### Technische Form
+- Extension: `.tempoflow`
+- Encoding and representation: UTF-8 JSON
+- Schema discriminator: `tempoflow-preset`
+- Current reference schema version: `1.0.0`
+- Versioning: Semantic Versioning
 
-- Dateiendung: `.tempoflow`
-- Inhalt: UTF-8 JSON
-- Schema-Kennung: `tempoflow-preset`
-- aktuelle Schema-Version der Referenzdateien: `1.0.0`
-- Versionierung: Semantic Versioning
+Core rules:
 
-### Root-Struktur
+- BPM range: `20` to `300`; fractional values are allowed.
+- V1 meter denominators: `2`, `4`, `8`, and `16`.
+- `meter.grouping` is required.
+- The sum of `grouping` equals `meter.numerator`.
+- The beat count equals `meter.numerator`.
+- Beat positions cover `1..numerator` without omissions or duplicates.
+- Volume range: `0.0` to `1.0`.
+- Unknown optional fields are ignored.
+- Unsupported required values produce an error.
 
-```json
-{
-  "schema": "tempoflow-preset",
-  "schemaVersion": "1.0.0",
-  "metadata": {},
-  "tempo": {},
-  "meter": {},
-  "subdivision": {},
-  "pattern": {},
-  "sound": {},
-  "playback": {}
-}
-```
+V1 subdivisions:
 
-### Verbindliche Regeln
+- `none` with `partsPerBeat: 1`;
+- `triplet` with `partsPerBeat: 3`.
 
-- BPM: `20` bis `300`, Fließkomma zulässig
-- Takt-Nenner in V1: `2`, `4`, `8`, `16`
-- `meter.grouping` ist Pflicht
-- Summe von `grouping` entspricht `meter.numerator`
-- Anzahl der Beats entspricht `meter.numerator`
-- Beat-Positionen decken lückenlos `1..numerator` ab
-- Lautstärke: `0.0` bis `1.0`
-- Unbekannte optionale Felder werden ignoriert
-- Nicht unterstützte Pflichtwerte erzeugen einen Fehler
-
-### Subdivision V1
-
-- `none` mit `partsPerBeat: 1`
-- `triplet` mit `partsPerBeat: 3`
-
-Weitere Subdivision-Typen sind reserviert, aber nicht Teil von V1.
-
-### ClickTypes
+Click roles:
 
 ```text
 accent
@@ -197,482 +161,338 @@ wood
 mute
 ```
 
-Ein ClickType ist eine Klangrolle und keine konkrete Audiodatei. Das gewählte SoundSet ordnet die Rolle einem Sample oder einem synthetisch erzeugten Klang zu.
+A click role is not a concrete audio file. The selected sound set maps each role to a sample or synthesized sound.
 
-### Nicht im Preset
+Application-specific state is not stored in a preset. This includes ASIO devices, audio interfaces, Cubase buses, sample rate, buffer size, window geometry, UI theme, browser state, and Base44 user data.
 
-Nicht gespeichert werden unter anderem:
-
-- ASIO-Gerät,
-- Audiointerface,
-- Cubase-Bus,
-- Sample Rate,
-- Buffer Size,
-- Fensterposition und Fenstergröße,
-- UI-Theme,
-- Browser- und PWA-Zustände,
-- Base44-Benutzerinformationen.
-
-Diese Werte gehören zur jeweiligen Anwendung und nicht zum musikalischen Preset.
-
-## Wiedergabemodi
+## Playback modes
 
 ### Internal Mode
 
-Die PWA beziehungsweise eine spätere Standalone-Anwendung kontrolliert:
-
-- Tempo,
-- Start und Stop,
-- Takt,
-- Subdivision,
-- Pattern.
-
-Der BPM-Wert des Presets ist aktiv.
+TempoFlow controls tempo, transport, meter, subdivision, and pattern. The preset BPM is active.
 
 ### Host Mode
 
-Beim Laden als VST3 wird der Host Mode automatisch aktiv.
+Loading TempoFlow as VST3 activates Host Mode automatically. The DAW controls tempo, transport, song/sample position, and time signature. TempoFlow continues to control click roles, pattern, sound set, master volume, and subdivision behavior.
 
-Die DAW kontrolliert:
+Host tempo and time signature override preset values at runtime without modifying the preset. TempoFlow may run alongside the Cubase metronome and does not disable or replace it.
 
-- Tempo,
-- Transport,
-- Song- und Sample-Position,
-- Taktart.
+## Audio strategy
 
-TempoFlow kontrolliert weiterhin:
+- Prefer redistributable samples with documented provenance and licensing.
+- Synthesize a click when no suitable sample is available.
+- `mute` needs no audio resource.
+- V1 has one master volume at `sound.volume`.
+- V1 has no per-click-role volume.
 
-- ClickTypes,
-- Pattern,
-- SoundSet,
-- Gesamtlautstärke,
-- Subdivision-Verhalten.
+The MVP uses synthetic clicks so unresolved sample licenses cannot block the prototype.
 
-Im Host Mode haben Host-Tempo und Host-Taktart Vorrang vor den Presetwerten. Das Preset selbst wird dadurch nicht verändert.
+## VST3 MVP
 
-TempoFlow darf parallel zum Cubase-Metronom laufen. Es deaktiviert oder ersetzt das Cubase-Metronom nicht automatisch.
+The first viable prototype must:
 
-## Audio-Strategie
+- load reliably in Cubase Elements 15;
+- provide one mono main output;
+- generate audio;
+- follow host transport, tempo, and time signature;
+- detect beat 1 with sample accuracy;
+- support all six click roles;
+- load and validate `.tempoflow` presets;
+- apply the master volume;
+- restore consistent state when reopening a Cubase project;
+- operate without Base44 or network access.
 
-- Geeignete frei nutzbare Samples werden bevorzugt.
-- Die Lizenz muss die Weitergabe mit dem Plugin erlauben.
-- Quelle und Lizenz müssen für ein Release dokumentiert sein.
-- Fehlt ein geeignetes Sample, wird der Klang synthetisch erzeugt.
-- `mute` benötigt keine Audioressource.
-- V1 besitzt nur eine zentrale Lautstärke über `sound.volume`.
-- Einzelne ClickTypes erhalten in V1 keine eigene Lautstärkeregelung.
+The MVP excludes cloud synchronization, direct Base44 integration, a plug-in preset editor, Silent Bar Trainer, Tempo Trainer, user-defined sound sets, mobile integration, elaborate UI animation, and functional multi-output routing.
 
-## Technisches Zielbild
+## Public PWA requirements
 
-```text
-                         .tempoflow Preset
-                                 │
-                  ┌──────────────┴──────────────┐
-                  │                             │
-                  ▼                             ▼
-          TempoFlow PWA                  TempoFlow VST3
-       Base44 / TypeScript                 JUCE / C++
-                  │                             │
-                  ▼                             ▼
-             Web Audio                    Cubase Host
-                                                │
-                                                ▼
-                                        ASIO Audio Engine
-```
+Before publication, provide:
 
-Zwischen PWA und VST3 wird kein Quellcode geteilt. Gemeinsamer Vertrag sind Schema, Semantik, Validierung und Preset-Dateien.
+- a legal notice;
+- a privacy policy based on verified data flows;
+- a central contact address;
+- a suitable operator address;
+- documentation of external services and data processing.
 
-## VST3-MVP
+The “Edit with Base44” button is a low technical risk and a P3 branding issue. Remove it after the planned plan change, but do not change plans for this reason alone. Recheck plans, pricing, GitHub synchronization, and external-agent access immediately before purchase.
 
-Der erste belastbare Prototyp muss:
+## Confirmed decisions
 
-- in Cubase Elements 15 als VST3 geladen werden,
-- einen Mono-Hauptausgang bereitstellen,
-- Audio erzeugen,
-- Cubase-Transport verfolgen,
-- Cubase-Tempo verfolgen,
-- Cubase-Taktart verfolgen,
-- Beat 1 korrekt und samplegenau erkennen,
-- alle sechs ClickTypes unterstützen,
-- `.tempoflow`-Presets laden und validieren,
-- die zentrale Lautstärke anwenden.
+- `.tempoflow` is the shared preset format.
+- JSON is the internal representation.
+- The preset model remains platform independent.
+- Pattern and sound set remain separate.
+- `meter.grouping` is mandatory.
+- PWA and VST3 do not share application implementation.
+- VST3 uses C++ and JUCE.
+- VST3 uses host timing rather than an independent clock.
+- Cubase is the timing authority in Host Mode.
+- Host tempo and meter override preset values only at runtime.
+- Audio processing and the main output are mono.
+- Additional outputs remain architecturally possible.
+- Base44 is not a VST3 runtime dependency.
+- No browser-to-ASIO bridge will be built.
+- Redistributable samples are preferred; synthesis is the fallback.
 
-Nicht Teil des MVP sind:
+## VST3 engineering decisions
 
-- Cloud-Synchronisation,
-- direkte Base44-Anbindung,
-- Preset-Editor im Plugin,
-- Silent Bar Trainer,
-- Tempo Trainer,
-- benutzerdefinierte SoundSets,
-- Mobile-Integration,
-- aufwendige GUI und Animationen,
-- vollständig nutzbare Mehrfachausgänge.
+### VST-001 — Development environment
 
-## Base44-PWA und Veröffentlichung
+Status: confirmed
 
-Für die öffentliche PWA gilt der vereinbarte Minimalstandard:
+- Editor: Visual Studio Code
+- Development and test OS: Windows 10 x64
+- Project system: CMake
+- Compiler: MSVC from Visual Studio Build Tools 2026
+- Windows SDK: `10.0.26100.0`
+- Build entry point: CMake Presets
+- Language standard: C++17
+- JUCE: `9.0.2`
 
-- Impressum,
-- Datenschutzerklärung,
-- zentrale Kontaktadresse,
-- Betreiberanschrift über einen geeigneten Impressumsdienst,
-- dokumentierte Datenflüsse und externe Dienste.
+### VST-002 — Local workflow
 
-Der „Edit with Base44“-Button gilt als niedriges technisches Risiko und als Branding-Thema:
+Status: confirmed
 
-- Entfernung nach geplantem Tarifwechsel
-- Priorität P3
-- kein Tarifwechsel allein wegen dieses Buttons
+- Editing, builds, and tests run on Windows 10.
+- VS Code is the only IDE.
+- CMake Tools controls configuration and builds.
+- CMake produces native Windows x64 builds with MSVC.
+- Plug-in validation and Cubase tests run on the same Windows system.
+- Debug and Release use separate build directories.
 
-Tarife, Preise, GitHub-Synchronisation und externer Agentenzugriff müssen vor einer Buchung aktuell geprüft werden.
+Native work on the target platform avoids unnecessary cross-build and ABI risks.
 
-## Abgeschlossene Entscheidungen
+### VST-003 — Target and format
 
-- `.tempoflow` ist das gemeinsame Presetformat.
-- JSON ist die interne Repräsentation.
-- Das Presetmodell bleibt plattformunabhängig.
-- Pattern und SoundSet sind getrennt.
-- `meter.grouping` ist verbindlich.
-- PWA und VST3 teilen keine Implementierung.
-- VST3 wird mit C++ und JUCE entwickelt.
-- VST3 nutzt Host-Timing statt einer eigenen Zeitbasis.
-- Cubase ist im Host Mode Timing-Master.
-- Host-Tempo und Host-Taktart überschreiben Presetwerte nur zur Laufzeit.
-- Audioverarbeitung und Hauptausgang sind Mono.
-- Zusätzliche Ausgänge bleiben architektonisch möglich.
-- Base44 ist keine Laufzeitabhängigkeit des VST3.
-- Eine Browser-/ASIO-Bridge wird nicht gebaut.
-- Rechtssicher weitergebbare Samples werden bevorzugt, Synthese ist der Fallback.
+Status: confirmed
 
-## Offene Entscheidungen
+- MVP platform: Windows x64
+- Supported OS: Windows 10
+- Format: VST3 only
+- Reference host: Cubase Elements 15
+- Linux binary: outside the MVP
+- Standalone application: outside the MVP
+- Other plug-in formats: outside the MVP
 
-### Produkt
+Windows 11 has no MVP support commitment until it receives dedicated testing.
 
-- Primäre Zielgruppe verbindlich bestätigen
-- wichtigste drei Nutzerabläufe definieren
-- klare Abgrenzung zu bestehenden DAW-Metronomen formulieren
-- Nutzen des Preset-Austauschs zwischen PWA und VST3 konkretisieren
+### VST-004 — Build and dependencies
 
-### VST3
+Status: confirmed
 
-#### VST-001 – Entwicklungsumgebung
+- CMake 3.25 or newer
+- Visual Studio 18 2026 generator with MSVC
+- Windows SDK `10.0.26100.0`
+- JUCE `9.0.2` fetched from commit `72782788ce18c2d4d760b28e0921d6ffc6431102`
+- no global JUCE installation
+- reproducible Debug and Release presets
+- separate Debug and Release build directories
+- no moving JUCE branches such as `master` or `develop`
 
-Status: festgelegt
+Local verification on September 11, 2026 confirmed that both presets configure, build, and run the toolchain check and report `JUCE v9.0.2`.
 
-- Editor und zentrale Arbeitsoberfläche: Visual Studio Code
-- Entwicklungs- und Testsystem: Windows 10 x64
-- Projektverwaltung: CMake
-- Compiler: MSVC aus den Visual Studio 2022 Build Tools
-- Windows SDK: Windows 10 SDK
-- Build-Ausführung: CMake Presets
-- Sprachstandard: C++17
+License model: confirmed
 
-JUCE verlangt aktuell CMake 3.22 oder neuer. Die konkrete JUCE-Version wird vor Projektanlage als stabiler Release fest gepinnt.
+- TempoFlow is developed and published under `AGPL-3.0-only`.
+- JUCE is used under its AGPLv3 option.
+- Distributed binaries must include corresponding source or an AGPL-compliant source offer.
+- JUCE changes, TempoFlow source, build configuration, and required notices must be provided.
 
-#### VST-002 – Lokaler Entwicklungsablauf
+### VST-005 — Plug-in identity
 
-Status: festgelegt
+Status: confirmed
 
-- Quellcodebearbeitung, Build und Tests laufen unter Windows 10.
-- VS Code bleibt die einzige IDE.
-- Die Erweiterung CMake Tools steuert Konfiguration und Build.
-- CMake erzeugt native Windows-x64-Builds mit MSVC.
-- Plugin-Validierung und Cubase-Tests laufen auf demselben Windows-System.
-- Debug- und Release-Ausgaben liegen in getrennten Build-Verzeichnissen.
+- Plug-in name: `TempoFlow`
+- Manufacturer: `jfheinrich`
+- JUCE manufacturer code: `Jfhe`
+- JUCE plug-in code: `Tflo`
+- Bundle identifier: `eu.jfheinrich.tempoflow`
+- Initial version: `0.1.0`
 
-Begründung:
+JUCE derives the VST3 class ID from the manufacturer and plug-in codes. Do not define a separate ID for this new JUCE plug-in. Product and manufacturer identifiers become immutable after first release.
 
-- Cubase Elements 15 ist der verbindliche Referenz-Host.
-- Das MVP benötigt ein Windows-x64-VST3-Bundle.
-- JUCE nennt für Windows eine MSVC-/Visual-Studio-Toolchain.
-- Native Entwicklung und Test auf der Zielplattform vermeiden Cross-Build- und ABI-Risiken.
+### VST-006 — Preset locations
 
-Zielbild:
+Status: proposed
 
-```text
-VS Code auf Windows 10 x64
-│
-├── CMake Presets
-├── MSVC und Windows 10 SDK
-├── Preset-Core und Unit Tests
-├── JUCE VST3 Build
-├── VST3 Validator
-└── Cubase Elements 15
-```
+- Ship factory presets read-only in the plug-in bundle or installer.
+- Store user presets in a user-specific TempoFlow directory.
+- Never hard-code absolute paths.
+- Use JUCE to resolve platform-appropriate directories.
 
-#### VST-003 – Zielplattform und Pluginformat
-
-Status: festgelegt
-
-- MVP-Plattform: Windows x64
-- unterstütztes Betriebssystem: Windows 10
-- Pluginformat: ausschließlich VST3
-- Referenz-Host: Cubase Elements 15
-- Linux-Binary: nicht Teil des MVP
-- Standalone-Anwendung: nicht Teil des MVP
-- weitere Pluginformate: nicht Teil des MVP
-
-Windows 11 erhält im MVP keine verbindliche Supportzusage. Eine spätere Freigabe setzt eigene Tests voraus.
-
-#### VST-004 – Buildsystem und Abhängigkeiten
-
-Status: Empfehlung zur Freigabe
-
-- CMake 3.22 oder neuer
-- Visual Studio 2022 CMake-Generator mit MSVC
-- Windows 10 SDK
-- JUCE als fest gepinnte Projektabhängigkeit
-- keine global installierte JUCE-Version als Voraussetzung
-- reproduzierbare Debug- und Release-Presets
-- getrennte Build-Verzeichnisse für Debug und Release
-
-Empfehlung für JUCE: Ein stabiler Release wird über CMake `FetchContent` mit unveränderlichem Git-Tag eingebunden. Ein beweglicher Branch wie `master` oder `develop` ist ausgeschlossen.
-
-Lizenzmodell: festgelegt
-
-- TempoFlow wird quelloffen unter `AGPL-3.0-only` entwickelt und veröffentlicht.
-- Für JUCE wird die freie AGPLv3-Option genutzt.
-- Der vollständige Lizenztext liegt in [[LICENSE]].
-- Eine kostenpflichtige JUCE-Starter-, Indie- oder Pro-Lizenz ist für dieses Lizenzmodell nicht erforderlich.
-- Veröffentlichte Binärdateien werden zusammen mit dem korrespondierenden Quellcode oder einem AGPL-konformen Bezugsangebot bereitgestellt.
-- JUCE-Änderungen, TempoFlow-Quellcode, Build-Konfiguration und erforderliche Lizenzhinweise werden vollständig mitgeliefert.
-- Empfänger dürfen den veröffentlichten Code entsprechend der AGPLv3 verwenden, verändern und weitergeben.
-- Das Repository darf während der privaten Entwicklungsphase nicht öffentlich sein. Spätestens mit der öffentlichen Weitergabe des Plugins müssen die AGPL-Pflichten erfüllt sein.
-
-#### VST-005 – Plugin-Identität
-
-Status: festgelegt
-
-Festgelegt:
-
-- Plugin-Name: `TempoFlow`
-- Herstellername: `jfheinrich`
-- vierstelliger JUCE Manufacturer Code: `Jfhe`
-- vierstelliger JUCE Plugin Code: `Tflo`
-- Bundle Identifier: `eu.jfheinrich.tempoflow`
-- initiale Plugin-Version: `0.1.0`
-
-JUCE leitet die VST3 Class ID stabil aus Manufacturer Code und Plugin Code ab. Für das neue JUCE-Plugin wird deshalb keine separate VST3 Class ID festgelegt.
-
-Vorgabe:
-
-- Produkt- und Herstellerkennungen werden nach der ersten Festlegung nicht mehr geändert.
-- Keine zufälligen Platzhalter in öffentlich verteilten Builds.
-
-#### VST-006 – Preset-Speicherorte
-
-Status: Empfehlung zur Freigabe
-
-- Mitgelieferte Factory-Presets liegen schreibgeschützt im Plugin-Bundle beziehungsweise Installer-Paket.
-- Benutzer-Presets liegen in einem benutzerspezifischen TempoFlow-Verzeichnis.
-- Das Plugin enthält keine fest codierten absoluten Pfade.
-- JUCE ermittelt den plattformgerechten Basisordner.
-
-Empfohlener Windows-Pfad:
+Proposed Windows user-preset path:
 
 ```text
 %APPDATA%\TempoFlow\Presets
 ```
 
-Empfohlener Entwicklungsordner im Repository:
+Proposed repository path:
 
 ```text
 presets/factory
 ```
 
-Der VST3-Entwicklungsbuild wird benutzerspezifisch installiert. Der von Steinberg vorgesehene Windows-Pfad vermeidet Administratorrechte:
+User-scoped VST3 development installation path:
 
 ```text
 %LOCALAPPDATA%\Programs\Common\VST3
 ```
 
-#### VST-007 – Verhalten bei Presetfehlern
+### VST-007 — Preset failures
 
-Status: Empfehlung zur Freigabe
+Status: proposed
 
-- Ein fehlerhaftes Preset verändert den aktiven Pluginzustand nicht.
-- JSON-Syntax, Schema und semantische Regeln werden vor Übernahme vollständig geprüft.
-- Fehlermeldungen nennen Datei, Regel und betroffenen Wert.
-- Unbekannte optionale Felder werden ignoriert.
-- Unbekannte Major-Versionen werden abgelehnt.
-- Unterstützte `1.x`-Versionen werden geladen, sofern alle bekannten Pflichtwerte gültig sind.
-- Fehler im Audio-Thread lösen keine Dateizugriffe, Dialoge oder Exceptions aus.
+- A failed preset must not modify active state.
+- Validate JSON syntax, schema, and semantics before applying state.
+- Errors identify the file, violated rule, and offending value.
+- Ignore unknown optional fields.
+- Reject unknown major versions.
+- Load supported `1.x` versions when all known required values are valid.
+- Never perform file I/O, show dialogs, or throw exceptions from the audio thread.
+- Read and validate files outside the audio thread, then publish immutable validated state safely.
 
-Preset-Dateien werden außerhalb des Audio-Threads gelesen und validiert. Der fertige Zustand wird anschließend threadsicher an die Audioverarbeitung übergeben.
+### VST-008 — MVP sound source
 
-#### VST-008 – Klangquelle des MVP
+Status: proposed
 
-Status: Empfehlung zur Freigabe
+- Use synthesized clicks for the MVP.
+- Give all six click roles clearly distinguishable behavior.
+- `mute` produces no audio.
+- Add external samples only after license review.
 
-- Das MVP verwendet synthetisch erzeugte Klicksounds.
-- Alle sechs ClickTypes erhalten klar unterscheidbare Klangrollen.
-- `mute` erzeugt kein Audio.
-- Externe Samples werden erst nach Lizenzprüfung ergänzt.
+### VST-009 — Host timing and meter changes
 
-Damit blockiert keine ungeklärte Sample-Lizenz den Prototyp.
+Status: proposed
 
-#### VST-009 – Host-Timing und Taktartwechsel
+- Read the current host position for every audio block.
+- Use PPQ position, BPM, time signature, sample rate, and block size as the time base.
+- Calculate click events as sample offsets within the current block.
+- Reset scheduler state safely on start, stop, and seek.
+- Apply tempo and meter changes no later than the first block containing new host data.
+- Treat preset BPM and meter as reference values in Host Mode.
+- Produce silence rather than free-running timing when host data is absent or invalid.
 
-Status: Empfehlung zur Freigabe
+Test Cubase behavior for multiple host changes within one audio block during prototyping.
 
-- Der Audio-Thread liest bei jedem Block die aktuelle Host-Position.
-- PPQ-Position, BPM, Taktart, Sample Rate und Blockgröße bilden die Zeitbasis.
-- Click-Ereignisse werden als Sample-Offsets innerhalb des aktuellen Blocks berechnet.
-- Start, Stop und Sprünge setzen den internen Scheduler kontrolliert neu auf.
-- Tempo- und Taktartänderungen werden spätestens am ersten Block mit neuen Hostdaten übernommen.
-- Preset-BPM und Preset-Taktart bleiben im Host Mode reine Referenzwerte.
-- Bei fehlenden oder ungültigen Hostdaten erzeugt das Plugin keinen frei laufenden Ersatz-Transport.
+### VST-010 — Test matrix
 
-Die Detailstrategie für mehrere Hoständerungen innerhalb eines einzelnen Audio-Blocks muss beim Prototyp gegen die von Cubase gelieferten Positionsdaten getestet werden.
+Status: prepared
 
-#### VST-010 – Testmatrix
+- Debug and Release
+- 44.1, 48, and 96 kHz
+- buffer sizes 32, 64, 128, 256, 512, and 1024
+- fixed and automated tempo
+- simple, compound, and odd meters
+- start at a bar boundary and within a bar
+- stop, restart, loop, and seek
+- time-signature changes
+- all seven reference presets
+- invalid JSON, invalid schema, and invalid semantics
+- Cubase project save and reopen
 
-Status: Entscheidung vorbereitet
+Run unit tests, builds, validator checks, and Cubase integration tests on Windows 10.
 
-Mindestens zu prüfen sind:
+### VST-011 — Remaining approval
 
-- Debug- und Release-Build
-- 44,1 kHz, 48 kHz und 96 kHz
-- Buffer-Größen 32, 64, 128, 256, 512 und 1024 Samples
-- konstantes und automatisiertes Tempo
-- gerade, zusammengesetzte und ungerade Taktarten
-- Start ab Taktanfang und innerhalb eines Taktes
-- Stop, Neustart, Loop und Positionssprung
-- Taktartwechsel im Projekt
-- Laden aller sieben Referenz-Presets
-- ungültiges JSON, ungültiges Schema und semantisch ungültige Presets
-- Speichern und erneutes Öffnen eines Cubase-Projekts
+Confirm the final user-preset path before the plug-in scaffold depends on it.
 
-Alle Unit Tests, Plugin-Builds, Validator-Läufe und Cubase-Integrationstests werden unter Windows 10 ausgeführt.
+## Open product decisions
 
-#### VST-011 – Noch offene Freigaben
+- Confirm the primary audience.
+- Define the three most important user journeys.
+- Explain the product advantage over built-in DAW metronomes.
+- Demonstrate the value of preset exchange between PWA and VST3.
 
-Vor dem Projektgerüst müssen entschieden werden:
+## Open Base44 work
 
-1. genaue JUCE-Version,
-2. endgültige Preset-Benutzerpfade.
+- Inventory visible and hidden data storage.
+- Inspect local storage, cookies, analytics, and external requests.
+- Verify `.tempoflow` import and export.
+- Align legal notice and privacy policy with actual data flows.
+- Check public reachability of operator and admin routes.
 
-#### Technische Grundlagen
+## Open preset-format work
 
-- [JUCE – Repository und Systemanforderungen](https://github.com/juce-framework/JUCE/blob/master/README.md)
-- [JUCE – CMake API](https://github.com/juce-framework/JUCE/blob/master/docs/CMake%20API.md)
-- [Steinberg – VST3-Entwicklungsumgebung](https://steinbergmedia.github.io/vst3_dev_portal/pages/Getting%2BStarted/How%2Bto%2Bsetup%2Bmy%2Bsystem.html)
-- [Steinberg – VST3-Speicherorte](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html)
+- Define schema migration behavior.
+- Define stable error codes and user-facing error messages.
+- Express semantic validation as a shared executable test suite.
+- Confirm behavior for unknown major versions.
 
-### Base44
+## Risks
 
-- Datenhaltung und sichtbare beziehungsweise versteckte Ressourcen inventarisieren
-- Local Storage, Cookies, Analytics und externe Requests prüfen
-- Import und Export von `.tempoflow`-Dateien in der PWA verifizieren
-- Impressum und Datenschutz an die tatsächlichen Datenflüsse anpassen
-- Betreiber- und Admin-Routen auf öffentliche Erreichbarkeit prüfen
+### P1 — Real-time and host synchronization
 
-### Presetformat
+Transport, meter changes, tempo automation, seeks, loops, and buffer boundaries must not drift or double-trigger.
 
-- Migrationsstrategie für spätere Schema-Versionen definieren
-- Fehlercodes und nutzerverständliche Fehlermeldungen festlegen
-- semantische Validierung als gemeinsame Testsuite formulieren
-- Verhalten bei unbekannten Major-Versionen festlegen
+### P1 — Semantic preset validation
 
-## Dokumentationsstatus
+JSON Schema cannot express all arithmetic relationships between sibling fields. Applications must separately validate grouping sums, beat counts, and beat positions.
 
-Die Spezifikation wurde auf Dokumentversion `1.1.2` konsolidiert:
+### P1 — Unverified PWA data flows
 
-- Das vollständige Beispiel enthält das verbindliche `meter.grouping`.
-- Die Phasen 3A, 3B und 3C sind als abgeschlossen dokumentiert.
-- Das JSON Schema und die sieben Referenz-Presets bilden den freigegebenen Stand ab.
-- Phase 4, das TempoFlow VST3 MVP, ist der nächste technische Schritt.
+The Base44 app has not been fully inventoried. Its privacy and security status remains provisional.
 
-„Preset Format 1.0“ bezeichnet die fachliche Formatgeneration. `1.1.2` bezeichnet die Version des Spezifikationsdokuments. Die Referenz-Presets verwenden Schema-Version `1.0.0`.
+### P2 — Sound licenses
 
-## Risiken
+Unclear sample licenses can block distribution. Synthetic sounds are the safe MVP fallback.
 
-### P1 – Echtzeit- und Host-Synchronisation
+### P3 — Base44 branding
 
-Transport, Taktartwechsel, Tempoänderungen und Buffer-Grenzen müssen ohne Drift oder Doppeltrigger verarbeitet werden.
+The visible “Edit with Base44” button looks unprofessional but is not an urgent security issue.
 
-### P1 – Semantische Presetvalidierung
+## Delivery stages
 
-Das JSON Schema kann Summen und Beziehungen zwischen Geschwisterfeldern nicht vollständig prüfen. Anwendungen müssen unter anderem Grouping-Summe, Beat-Anzahl und Beat-Positionen zusätzlich validieren.
+### A — Specification completion
 
-### P1 – Ungeklärte PWA-Datenflüsse
+- Express schema and semantic rules as executable tests.
+- Confirm the MVP sound source.
 
-Die Base44-App ist noch nicht vollständig inventarisiert. Datenschutz- und Sicherheitsstatus bleiben deshalb vorläufig.
+### B — VST3 scaffold
 
-### P2 – Sound-Lizenzen
+- Add the JUCE plug-in target.
+- Define immutable VST3 metadata.
+- Configure a mono bus.
+- Load the plug-in in Cubase Elements 15.
 
-Unklare Sample-Lizenzen können eine Veröffentlichung verhindern. Synthetische Sounds sind der sichere MVP-Fallback.
+### C — Host synchronization
 
-### P3 – Base44-Branding
+- Read transport, tempo, time signature, PPQ, sample position, and buffer position.
+- Calculate beat and bar boundaries with sample accuracy.
 
-Der sichtbare „Edit with Base44“-Button wirkt unprofessionell, ist aber kein akutes Sicherheitsproblem.
+### D — Audio and pattern
 
-## Umsetzungsabschnitte
+- Implement the click engine.
+- Map all six click roles.
+- Apply master volume.
+- Process grouping and triplet subdivision.
 
-### Abschnitt A – Restarbeiten an der Spezifikation
+### E — Presets
 
-- Schema und semantische Regeln als verbindliche Testfälle festhalten
-- MVP-Soundquelle entscheiden
+- Load `.tempoflow` files.
+- Validate structure and semantics.
+- Report errors without destabilizing active state.
+- Use all seven presets as integration tests.
 
-### Abschnitt B – VST3-Grundgerüst
+### F — PWA alignment
 
-- JUCE-Projekt anlegen
-- VST3-Metadaten definieren
-- Mono-Bus konfigurieren
-- Plugin in Cubase Elements 15 laden
+- Verify import and export.
+- Test identical semantics with the same reference files.
+- Inspect data flows and publication requirements.
 
-### Abschnitt C – Host-Synchronisation
+### G — Release preparation
 
-- Transport lesen
-- Tempo lesen
-- Taktart lesen
-- Sample- und Buffer-Position verarbeiten
-- Beat- und Taktgrenzen samplegenau bestimmen
+- Document installation and preset paths.
+- Provide dependency and sample license evidence.
+- Run the full test matrix.
+- Complete legal notice, privacy policy, and download page.
 
-### Abschnitt D – Audio und Pattern
+## VST3 prototype definition of done
 
-- Click-Engine implementieren
-- sechs ClickTypes abbilden
-- Master-Lautstärke anwenden
-- Meter-Grouping und Triplet-Subdivision verarbeiten
+The prototype is complete when Cubase Elements 15 loads it reliably; transport, position, tempo, and meter are correct; clicks remain sample accurate across buffer sizes; every click role behaves correctly; all reference presets load; invalid presets fail safely; Host Mode never overrides the host; project reopening restores consistent state; and core operation requires no Base44 or network connection.
 
-### Abschnitt E – Presets
+## References
 
-- `.tempoflow` laden
-- strukturell und semantisch validieren
-- Fehler robust melden
-- sieben Referenz-Presets als Integrationstests verwenden
-
-### Abschnitt F – PWA-Abgleich
-
-- Preset-Import und -Export prüfen
-- gleiche Semantik mit denselben Referenzdateien testen
-- Base44-Datenflüsse und Veröffentlichungsanforderungen prüfen
-
-### Abschnitt G – Release-Vorbereitung
-
-- Installations- und Presetpfade dokumentieren
-- Lizenznachweise für Samples und Abhängigkeiten erstellen
-- Testmatrix ausführen
-- Impressum, Datenschutz und Downloadseite fertigstellen
-
-## Definition of Done für den VST3-Prototyp
-
-Der Prototyp gilt als erfolgreich, wenn:
-
-- Cubase Elements 15 das Plugin zuverlässig lädt,
-- Start, Stop, Position, Tempo und Taktart korrekt erkannt werden,
-- der Click über mehrere Buffer-Größen hinweg samplegenau bleibt,
-- alle sechs ClickTypes hörbar beziehungsweise stumm korrekt funktionieren,
-- alle sieben Referenz-Presets geladen werden,
-- ungültige Presets kontrolliert abgewiesen werden,
-- Preset-Tempo und -Taktart im Host Mode nicht den Host überschreiben,
-- ein erneutes Öffnen des Cubase-Projekts einen konsistenten Zustand herstellt,
-- keine Base44- oder Netzwerkverbindung für den Kernbetrieb erforderlich ist.
-
-## Nächster sinnvoller Schritt
-
-Vor dem JUCE-Grundgerüst sollte die Spezifikation kurz konsolidiert werden. Danach folgt unmittelbar das VST3-Projekt mit Mono-Ausgang, Host-Transport und einer zunächst synthetischen Click-Engine.
-
-Die sieben vorhandenen Presets werden von Beginn an als ausführbare Akzeptanztests behandelt. So bleibt das gemeinsame Format der verbindliche Vertrag zwischen PWA und VST3.
+- [JUCE repository and requirements](https://github.com/juce-framework/JUCE/blob/9.0.2/README.md)
+- [JUCE CMake API](https://github.com/juce-framework/JUCE/blob/9.0.2/docs/CMake%20API.md)
+- [Steinberg VST3 development setup](https://steinbergmedia.github.io/vst3_dev_portal/pages/Getting%2BStarted/How%2Bto%2Bsetup%2Bmy%2Bsystem.html)
+- [Steinberg VST3 locations](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html)

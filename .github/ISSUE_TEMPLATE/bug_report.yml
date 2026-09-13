@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible TempoFlow defect
+title: "[Bug]: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: Do not report security vulnerabilities here. Use SECURITY.md.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the observed defect.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Provide the smallest reliable sequence.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include revision, Windows and Cubase versions, sample rate, buffer size, and build configuration.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs or additional evidence
+      description: Remove personal information, credentials, and copyrighted project content.
