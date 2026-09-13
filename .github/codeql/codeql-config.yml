@@ -1,0 +1,6 @@
+name: TempoFlow first-party C++
+
+paths:
+  - src
+  - tests
+  - tools
