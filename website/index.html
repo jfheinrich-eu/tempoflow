@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="TempoFlow is an open-source project for sample-accurate metronome tools, a host-synchronized VST3 plug-in, and portable JSON presets."
+    >
+    <meta name="theme-color" content="#071b35">
+    <meta property="og:title" content="TempoFlow">
+    <meta
+      property="og:description"
+      content="Sample-accurate metronome tools for musicians."
+    >
+    <meta property="og:type" content="website">
+    <meta
+      property="og:image"
+      content="https://jfheinrich-eu.github.io/tempoflow/assets/tempoflow-social-preview.jpg"
+    >
+    <title>TempoFlow — Sample-accurate metronome tools</title>
+    <link rel="icon" href="assets/favicon.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="TempoFlow home">
+        <img src="assets/favicon.png" alt="" width="48" height="48">
+        <span>TempoFlow</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#direction">Direction</a>
+        <a href="#status">Status</a>
+        <a href="https://github.com/jfheinrich-eu/tempoflow">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Open source · Pre-alpha</p>
+          <h1 id="hero-title">Sample-accurate metronome tools for musicians.</h1>
+          <p class="hero-summary">
+            TempoFlow is building a host-synchronized VST3 plug-in and a portable
+            preset format for reliable tempo, meter, accents, and click sounds.
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="https://github.com/jfheinrich-eu/tempoflow">
+              View the source
+            </a>
+            <a
+              class="button button-secondary"
+              href="https://github.com/jfheinrich-eu/tempoflow/tree/main/docs/Preset%20Format%201.0"
+            >
+              Read the preset specification
+            </a>
+          </div>
+        </div>
+        <figure class="hero-art">
+          <img
+            src="assets/tempoflow-logo.jpg"
+            alt="TempoFlow metronome symbol with a flowing waveform"
+            width="560"
+            height="560"
+          >
+        </figure>
+      </section>
+
+      <section id="direction" class="section" aria-labelledby="direction-title">
+        <div class="section-heading">
+          <p class="eyebrow">Product direction</p>
+          <h2 id="direction-title">One musical contract, two focused tools</h2>
+        </div>
+        <div class="card-grid">
+          <article class="card">
+            <p class="card-number">01</p>
+            <h3>VST3 plug-in</h3>
+            <p>
+              The first engineering target is a native Windows x64 plug-in for
+              Cubase Elements 15, synchronized to host transport and timing.
+            </p>
+          </article>
+          <article class="card">
+            <p class="card-number">02</p>
+            <h3>Portable presets</h3>
+            <p>
+              The versioned <code>.tempoflow</code> JSON format describes tempo,
+              meter, grouping, beat roles, sound selection, and playback mode.
+            </p>
+          </article>
+          <article class="card">
+            <p class="card-number">03</p>
+            <h3>Shared semantics</h3>
+            <p>
+              Native and browser applications share the schema, semantic rules,
+              validator behavior, and reference presets—not application code.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="status" class="section status" aria-labelledby="status-title">
+        <div>
+          <p class="eyebrow">Current status</p>
+          <h2 id="status-title">Foundation in place. Audio engine next.</h2>
+          <p>
+            The repository currently contains the preset specification, JSON
+            Schema, semantic validator, seven reference presets, Windows build
+            setup, automated tests, security checks, and coverage reporting.
+          </p>
+          <p>
+            The VST3 processor and audio callback are not implemented yet. Do not
+            use the project as a production plug-in or depend on API stability.
+          </p>
+        </div>
+        <dl class="facts">
+          <div>
+            <dt>Target</dt>
+            <dd>Windows 10 x64</dd>
+          </div>
+          <div>
+            <dt>Toolchain</dt>
+            <dd>C++17 · JUCE · CMake</dd>
+          </div>
+          <div>
+            <dt>Host</dt>
+            <dd>Cubase Elements 15</dd>
+          </div>
+          <div>
+            <dt>License</dt>
+            <dd>AGPL-3.0-only</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="section contribute" aria-labelledby="contribute-title">
+        <div>
+          <p class="eyebrow">Contribute</p>
+          <h2 id="contribute-title">Help build TempoFlow carefully</h2>
+          <p>
+            Focused issues and pull requests are welcome. Review the contribution,
+            security, and preset compatibility requirements before making changes.
+          </p>
+        </div>
+        <a class="text-link" href="https://github.com/jfheinrich-eu/tempoflow/blob/main/CONTRIBUTING.md">
+          Contribution guide <span aria-hidden="true">→</span>
+        </a>
+      </section>
+    </main>
+
+    <footer>
+      <div class="organization-mark">
+        <img
+          src="assets/jfheinrich-eu-mark.png"
+          alt="jfheinrich-eu wolf and eagle mark"
+          width="64"
+          height="64"
+        >
+        <span>A jfheinrich-eu project</span>
+      </div>
+      <div class="legal">
+        <p>TempoFlow is licensed under the GNU Affero General Public License v3.0 only.</p>
+        <a href="https://github.com/jfheinrich-eu/tempoflow/blob/main/LICENSE">License</a>
+      </div>
+    </footer>
+  </body>
+</html>
