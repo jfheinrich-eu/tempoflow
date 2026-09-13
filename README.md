@@ -152,6 +152,8 @@ TempoFlow welcomes focused issues and pull requests. Read [CONTRIBUTING.md](CONT
 
 Do not report vulnerabilities in public issues. Follow the private reporting process in [SECURITY.md](SECURITY.md).
 
+The [CodeQL analysis guide](docs/codeql-analysis.md) defines the first-party scan scope, dependency boundary, alert triage, and review criteria.
+
 ## License
 
 TempoFlow is licensed under the [GNU Affero General Public License v3.0 only](LICENSE). JUCE is used under its AGPLv3 option. Distribution of binaries must comply with all corresponding-source and notice obligations.
