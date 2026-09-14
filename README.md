@@ -102,6 +102,20 @@ ctest --preset windows-x64-debug
 ctest --preset windows-x64-release
 ```
 
+## Build the VST3 scaffold
+
+The initial VST3 target is an instrument with no input bus, one mono output, and no custom editor. It intentionally produces silence while the host integration is established.
+
+The regular Debug and Release build presets include the VST3 target and its processor tests. The Debug VST3 bundle is generated under:
+
+```text
+build/windows-x64-debug/TempoFlowPlugin_artefacts/Debug/VST3/TempoFlow.vst3
+```
+
+Building does not copy the plug-in into a system or user VST3 directory. Installation remains an explicit step.
+
+Build and run Steinberg's reference command-line test host as described in the [VST 3 Validator guide](docs/steinberg-validator.md).
+
 The [code-coverage guide](docs/code-coverage.md) documents local collection and the informational Codecov workflow.
 
 Validate a preset file or an entire directory:

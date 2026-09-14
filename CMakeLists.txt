@@ -16,6 +16,59 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(JUCE)
 
+juce_add_plugin(
+    TempoFlowPlugin
+    COMPANY_NAME "jfheinrich"
+    BUNDLE_ID "eu.jfheinrich.tempoflow"
+    PLUGIN_MANUFACTURER_CODE Jfhe
+    PLUGIN_CODE Tflo
+    FORMATS VST3
+    PRODUCT_NAME "TempoFlow"
+    IS_SYNTH TRUE
+    NEEDS_MIDI_INPUT FALSE
+    NEEDS_MIDI_OUTPUT FALSE
+    IS_MIDI_EFFECT FALSE
+    EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+    COPY_PLUGIN_AFTER_BUILD FALSE
+    NEEDS_WEB_BROWSER FALSE
+    NEEDS_CURL FALSE
+)
+
+target_sources(
+    TempoFlowPlugin
+    PRIVATE
+        src/plugin/PluginProcessor.cpp
+        src/plugin/PluginProcessor.h
+)
+
+target_include_directories(
+    TempoFlowPlugin
+    PUBLIC
+        src
+)
+
+target_compile_features(
+    TempoFlowPlugin
+    PUBLIC
+        cxx_std_17
+)
+
+target_compile_definitions(
+    TempoFlowPlugin
+    PUBLIC
+        JUCE_USE_CURL=0
+        JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_WEB_BROWSER=0
+)
+
+target_link_libraries(
+    TempoFlowPlugin
+    PUBLIC
+        juce::juce_audio_processors_headless
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags
+)
+
 add_library(
     TempoFlowPresetValidation
     STATIC
@@ -114,9 +167,33 @@ target_link_libraries(
         TempoFlowPresetValidation
 )
 
+juce_add_console_app(
+    TempoFlowPluginTests
+    PRODUCT_NAME "TempoFlow Plugin Tests"
+)
+
+target_sources(
+    TempoFlowPluginTests
+    PRIVATE
+        tests/plugin_processor_tests.cpp
+)
+
+target_link_libraries(
+    TempoFlowPluginTests
+    PRIVATE
+        TempoFlowPlugin
+)
+
 if(MSVC)
     target_link_options(
         TempoFlowPresetValidatorTests
+        PRIVATE
+            $<$<CONFIG:Debug>:/PROFILE>
+            $<$<CONFIG:Debug>:/INCREMENTAL:NO>
+    )
+
+    target_link_options(
+        TempoFlowPluginTests
         PRIVATE
             $<$<CONFIG:Debug>:/PROFILE>
             $<$<CONFIG:Debug>:/INCREMENTAL:NO>
@@ -136,6 +213,11 @@ if(BUILD_TESTING)
         COMMAND
             TempoFlowPresetValidator
             "${CMAKE_CURRENT_SOURCE_DIR}/docs/Preset Format 1.0/presets"
+    )
+
+    add_test(
+        NAME plugin-processor-unit-tests
+        COMMAND TempoFlowPluginTests
     )
 
     if(WIN32)
