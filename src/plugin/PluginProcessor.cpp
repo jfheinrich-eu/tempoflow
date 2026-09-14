@@ -77,9 +77,9 @@ void TempoFlowAudioProcessor::setCurrentProgram(int)
 {
 }
 
-const juce::String TempoFlowAudioProcessor::getProgramName(int)
+const juce::String TempoFlowAudioProcessor::getProgramName(int index)
 {
-    return {};
+    return index == 0 ? juce::String("Default") : juce::String();
 }
 
 void TempoFlowAudioProcessor::changeProgramName(int, const juce::String &)

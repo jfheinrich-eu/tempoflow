@@ -26,6 +26,8 @@ bool testIdentityAndCapabilities()
     passed &= expect(!processor.isMidiEffect(), "The scaffold must not be a MIDI effect");
     passed &= expect(!processor.hasEditor(), "The scaffold must not expose a custom editor");
     passed &= expect(processor.createEditor() == nullptr, "The scaffold editor must be null");
+    passed &= expect(processor.getNumPrograms() == 1, "The scaffold must expose one factory program");
+    passed &= expect(processor.getProgramName(0) == "Default", "The factory program must have a stable non-empty name");
     return passed;
 }
 
