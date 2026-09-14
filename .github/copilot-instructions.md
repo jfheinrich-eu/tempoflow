@@ -13,6 +13,9 @@
 - Treat the `.tempoflow` format, JSON Schema, semantic rules, and reference presets as the shared contract.
 - Do not introduce Base44, browser, cloud, account, analytics, or network dependencies into core plug-in operation.
 - Do not add another plug-in format, standalone target, multi-output implementation, or elaborate GUI unless explicitly approved.
+- Keep the initial VST3 scaffold headless. Do not add a custom plug-in editor or project-owned graphical interface until explicitly approved and the JUCE graphics dependency findings are reassessed.
+- Resolve user presets under `%APPDATA%\TempoFlow\Presets`. Treat factory presets from `presets/factory` as read-only distribution content.
+- Use synthesized click sounds for the MVP. Do not introduce external sound samples without an explicit license review.
 - Do not change `Jfhe`, `Tflo`, `eu.jfheinrich.tempoflow`, or released parameter identifiers without an approved compatibility plan.
 
 ## Clean C++
