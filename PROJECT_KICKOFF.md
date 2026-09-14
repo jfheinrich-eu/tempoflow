@@ -202,7 +202,7 @@ The first viable prototype must:
 - restore consistent state when reopening a Cubase project;
 - operate without Base44 or network access.
 
-The MVP excludes cloud synchronization, direct Base44 integration, a plug-in preset editor, Silent Bar Trainer, Tempo Trainer, user-defined sound sets, mobile integration, elaborate UI animation, and functional multi-output routing.
+The MVP excludes cloud synchronization, direct Base44 integration, a plug-in preset editor, Silent Bar Trainer, Tempo Trainer, user-defined sound sets, mobile integration, a custom plug-in editor, and functional multi-output routing. The initial VST3 scaffold exposes no project-owned graphical interface.
 
 ## Public PWA requirements
 
@@ -313,20 +313,20 @@ JUCE derives the VST3 class ID from the manufacturer and plug-in codes. Do not d
 
 ### VST-006 — Preset locations
 
-Status: proposed
+Status: confirmed
 
 - Ship factory presets read-only in the plug-in bundle or installer.
 - Store user presets in a user-specific TempoFlow directory.
 - Never hard-code absolute paths.
 - Use JUCE to resolve platform-appropriate directories.
 
-Proposed Windows user-preset path:
+Windows user-preset path:
 
 ```text
 %APPDATA%\TempoFlow\Presets
 ```
 
-Proposed repository path:
+Factory-preset repository path:
 
 ```text
 presets/factory
@@ -353,7 +353,7 @@ Status: proposed
 
 ### VST-008 — MVP sound source
 
-Status: proposed
+Status: confirmed
 
 - Use synthesized clicks for the MVP.
 - Give all six click roles clearly distinguishable behavior.
@@ -392,9 +392,16 @@ Status: prepared
 
 Run unit tests, builds, validator checks, and Cubase integration tests on Windows 10.
 
-### VST-011 — Remaining approval
+### VST-011 — Scaffold readiness
 
-Confirm the final user-preset path before the plug-in scaffold depends on it.
+Status: confirmed
+
+- User presets use `%APPDATA%\TempoFlow\Presets`.
+- Factory presets originate from `presets/factory` and ship read-only with the plug-in or installer.
+- The MVP uses synthesized click sounds.
+- The initial VST3 scaffold has no custom graphical editor.
+
+No unresolved decision in this section blocks the initial VST3 scaffold.
 
 ## Open product decisions
 

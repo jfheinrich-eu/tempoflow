@@ -135,7 +135,7 @@ Native C++ coverage collection and Codecov behavior are documented in [Code Cove
 
 ## Roadmap
 
-1. Add the JUCE VST3 project with a mono output.
+1. Add the headless JUCE VST3 scaffold with a mono output.
 2. Implement sample-accurate host synchronization.
 3. Add the synthetic click engine and click-role mapping.
 4. Integrate the semantic preset validator with plug-in state loading.
