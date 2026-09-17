@@ -1,7 +1,35 @@
 #include "plugin/PluginProcessor.h"
 
+#include <optional>
+
 namespace tempoflow::plugin
 {
+namespace
+{
+std::optional<timing::HostTiming> readHostTiming(const juce::AudioPlayHead::PositionInfo &position, double sampleRate,
+                                                 int blockSize) noexcept
+{
+    const auto bpm = position.getBpm();
+    const auto timeSignature = position.getTimeSignature();
+    const auto ppqPosition = position.getPpqPosition();
+    const auto lastBarStart = position.getPpqPositionOfLastBarStart();
+    const auto samplePosition = position.getTimeInSamples();
+
+    if (!bpm || !timeSignature || !ppqPosition || !lastBarStart || !samplePosition)
+        return std::nullopt;
+
+    return timing::HostTiming{position.getIsPlaying(),
+                              *bpm,
+                              timeSignature->numerator,
+                              timeSignature->denominator,
+                              *ppqPosition,
+                              *lastBarStart,
+                              *samplePosition,
+                              sampleRate,
+                              blockSize};
+}
+} // namespace
+
 TempoFlowAudioProcessor::TempoFlowAudioProcessor()
     : AudioProcessor(BusesProperties().withOutput("Output", juce::AudioChannelSet::mono(), true))
 {
@@ -9,10 +37,12 @@ TempoFlowAudioProcessor::TempoFlowAudioProcessor()
 
 void TempoFlowAudioProcessor::prepareToPlay(double, int)
 {
+    beatScheduler.reset();
 }
 
 void TempoFlowAudioProcessor::releaseResources()
 {
+    beatScheduler.reset();
 }
 
 bool TempoFlowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
@@ -24,6 +54,26 @@ bool TempoFlowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts)
 void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &midi)
 {
     const juce::ScopedNoDenormals noDenormals;
+
+    const auto *hostPlayHead = getPlayHead();
+    const auto position = hostPlayHead != nullptr ? hostPlayHead->getPosition() : std::nullopt;
+
+    if (position)
+    {
+        if (const auto timing = readHostTiming(*position, getSampleRate(), audio.getNumSamples()))
+        {
+            [[maybe_unused]] const auto scheduledBeats = beatScheduler.schedule(*timing);
+        }
+        else
+        {
+            beatScheduler.reset();
+        }
+    }
+    else
+    {
+        beatScheduler.reset();
+    }
+
     audio.clear();
     midi.clear();
 }

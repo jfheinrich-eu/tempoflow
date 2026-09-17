@@ -1,5 +1,7 @@
 #pragma once
 
+#include "timing/BeatScheduler.h"
+
 #include <juce_audio_processors_headless/juce_audio_processors_headless.h>
 
 namespace tempoflow::plugin
@@ -34,6 +36,8 @@ class TempoFlowAudioProcessor final : public juce::AudioProcessor
     void setStateInformation(const void *data, int sizeInBytes) override;
 
   private:
+    tempoflow::timing::BeatScheduler beatScheduler;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TempoFlowAudioProcessor)
 };
 } // namespace tempoflow::plugin
