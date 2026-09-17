@@ -362,7 +362,7 @@ Status: confirmed
 
 ### VST-009 — Host timing and meter changes
 
-Status: proposed
+Status: confirmed
 
 - Read the current host position for every audio block.
 - Use PPQ position, BPM, time signature, sample rate, and block size as the time base.
