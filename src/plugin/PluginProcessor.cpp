@@ -35,14 +35,16 @@ TempoFlowAudioProcessor::TempoFlowAudioProcessor()
 {
 }
 
-void TempoFlowAudioProcessor::prepareToPlay(double, int)
+void TempoFlowAudioProcessor::prepareToPlay(double sampleRate, int)
 {
     beatScheduler.reset();
+    clickEngine.prepare(sampleRate);
 }
 
 void TempoFlowAudioProcessor::releaseResources()
 {
     beatScheduler.reset();
+    clickEngine.reset();
 }
 
 bool TempoFlowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts) const
@@ -54,6 +56,8 @@ bool TempoFlowAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts)
 void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce::MidiBuffer &midi)
 {
     const juce::ScopedNoDenormals noDenormals;
+    audio.clear();
+    midi.clear();
 
     const auto *hostPlayHead = getPlayHead();
     const auto position = hostPlayHead != nullptr ? hostPlayHead->getPosition() : std::nullopt;
@@ -62,20 +66,40 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
     {
         if (const auto timing = readHostTiming(*position, getSampleRate(), audio.getNumSamples()))
         {
-            [[maybe_unused]] const auto scheduledBeats = beatScheduler.schedule(*timing);
+            const auto schedule = beatScheduler.schedule(*timing);
+            if (!schedule.hostTimingValid)
+            {
+                clickEngine.reset();
+                return;
+            }
+
+            if (schedule.transportDiscontinuity)
+                clickEngine.reset();
+
+            auto *output = audio.getWritePointer(0);
+            auto renderedSamples = 0;
+
+            for (std::size_t index = 0; index < schedule.beats.size(); ++index)
+            {
+                const auto &beat = schedule.beats[index];
+                clickEngine.render(output + renderedSamples, beat.sampleOffset - renderedSamples);
+                clickEngine.trigger(beat.isBarStart ? audio::ClickType::accent : audio::ClickType::normal);
+                renderedSamples = beat.sampleOffset;
+            }
+
+            clickEngine.render(output + renderedSamples, audio.getNumSamples() - renderedSamples);
         }
         else
         {
             beatScheduler.reset();
+            clickEngine.reset();
         }
     }
     else
     {
         beatScheduler.reset();
+        clickEngine.reset();
     }
-
-    audio.clear();
-    midi.clear();
 }
 
 juce::AudioProcessorEditor *TempoFlowAudioProcessor::createEditor()
@@ -110,7 +134,7 @@ bool TempoFlowAudioProcessor::isMidiEffect() const
 
 double TempoFlowAudioProcessor::getTailLengthSeconds() const
 {
-    return 0.0;
+    return audio::SyntheticClickEngine::maximumTailSeconds;
 }
 
 int TempoFlowAudioProcessor::getNumPrograms()

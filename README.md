@@ -149,9 +149,9 @@ Native C++ coverage collection and Codecov behavior are documented in [Code Cove
 
 ## Roadmap
 
-1. Add the headless JUCE VST3 scaffold with a mono output.
-2. Implement sample-accurate host synchronization.
-3. Add the synthetic click engine and click-role mapping.
+1. Add the headless JUCE VST3 scaffold with a mono output. Complete.
+2. Implement sample-accurate host synchronization. Complete.
+3. Add the synthetic click engine and initial click-role mapping. Complete.
 4. Integrate the semantic preset validator with plug-in state loading.
 5. Validate the plug-in with Steinberg tools and Cubase Elements 15.
 6. Verify preset interoperability with the PWA.

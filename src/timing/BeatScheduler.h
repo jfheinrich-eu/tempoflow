@@ -51,6 +51,7 @@ struct BeatSchedule final
 {
     ScheduledBeatBuffer beats;
     bool transportDiscontinuity = false;
+    bool hostTimingValid = false;
 };
 
 class BeatScheduler final

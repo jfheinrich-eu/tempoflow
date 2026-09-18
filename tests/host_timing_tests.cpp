@@ -37,8 +37,13 @@ bool testStoppedAndInvalidTimingProduceNoEvents()
     auto invalid = makeTiming(0.0, 0.0, 0, 512);
     invalid.bpm = std::numeric_limits<double>::quiet_NaN();
 
-    return expect(scheduler.schedule(stopped).beats.empty(), "Stopped transport must produce no beats") &&
-           expect(scheduler.schedule(invalid).beats.empty(), "Invalid host timing must produce no beats");
+    const auto stoppedResult = scheduler.schedule(stopped);
+    const auto invalidResult = scheduler.schedule(invalid);
+
+    return expect(stoppedResult.beats.empty(), "Stopped transport must produce no beats") &&
+           expect(!stoppedResult.hostTimingValid, "Stopped transport must not be accepted as valid timing") &&
+           expect(invalidResult.beats.empty(), "Invalid host timing must produce no beats") &&
+           expect(!invalidResult.hostTimingValid, "Invalid host timing must not be accepted");
 }
 
 bool testBeatAtBlockStart()
@@ -47,6 +52,7 @@ bool testBeatAtBlockStart()
     const auto result = scheduler.schedule(makeTiming(0.0, 0.0, 0, 512));
 
     return expect(result.transportDiscontinuity, "The first playing block must be a transport discontinuity") &&
+           expect(result.hostTimingValid, "Valid playing timing must be accepted") &&
            expect(result.beats.size() == 1, "A block starting on a beat must contain one beat") &&
            expect(result.beats[0].sampleOffset == 0, "The first beat must be at sample zero") &&
            expect(result.beats[0].beatNumber == 1, "The first beat must be beat one") &&

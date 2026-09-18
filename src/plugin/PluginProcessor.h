@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio/ClickEngine.h"
 #include "timing/BeatScheduler.h"
 
 #include <juce_audio_processors_headless/juce_audio_processors_headless.h>
@@ -36,6 +37,7 @@ class TempoFlowAudioProcessor final : public juce::AudioProcessor
     void setStateInformation(const void *data, int sizeInBytes) override;
 
   private:
+    tempoflow::audio::SyntheticClickEngine clickEngine;
     tempoflow::timing::BeatScheduler beatScheduler;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TempoFlowAudioProcessor)

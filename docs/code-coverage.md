@@ -1,6 +1,6 @@
 # Code Coverage
 
-TempoFlow measures native C++ line coverage for the preset-validation and host-timing libraries on Windows. Coverage is collected from their Debug unit-test executables with Microsoft Code Coverage, merged, and uploaded to Codecov as Cobertura XML.
+TempoFlow measures native C++ line coverage for the preset-validation, host-timing, and click-engine libraries on Windows. Coverage is collected from their Debug unit-test executables with Microsoft Code Coverage, merged, and uploaded to Codecov as Cobertura XML.
 
 Only production sources below `src/` are included. JUCE, tests, tools, documentation, and generated build files are excluded from the reported project coverage.
 
@@ -17,7 +17,7 @@ Build the instrumented Debug test executables from Developer PowerShell for VS 1
 ```powershell
 cmake --preset windows-x64-debug -B build/coverage
 cmake --build build/coverage --config Debug `
-  --target TempoFlowPresetValidatorTests TempoFlowHostTimingTests
+  --target TempoFlowPresetValidatorTests TempoFlowHostTimingTests TempoFlowClickEngineTests
 ```
 
 Locate `Microsoft.CodeCoverage.Console.exe` below the active Visual Studio installation, then collect the report:
@@ -29,6 +29,8 @@ $presetTestExecutable = (Resolve-Path `
   'build\coverage\TempoFlowPresetValidatorTests_artefacts\Debug\TempoFlowPresetValidatorTests.exe').Path
 $timingTestExecutable = (Resolve-Path `
   'build\coverage\Debug\TempoFlowHostTimingTests.exe').Path
+$clickTestExecutable = (Resolve-Path `
+  'build\coverage\Debug\TempoFlowClickEngineTests.exe').Path
 
 & $coverageTool collect `
   --include-files $presetTestExecutable `
@@ -44,9 +46,17 @@ $timingTestExecutable = (Resolve-Path `
   --nologo `
   $timingTestExecutable
 
+& $coverageTool collect `
+  --include-files $clickTestExecutable `
+  --output 'build\coverage\click-tests.coverage' `
+  --output-format coverage `
+  --nologo `
+  $clickTestExecutable
+
 & $coverageTool merge `
   'build\coverage\preset-tests.coverage' `
   'build\coverage\timing-tests.coverage' `
+  'build\coverage\click-tests.coverage' `
   --output 'build\coverage\coverage.cobertura.xml' `
   --output-format cobertura `
   --nologo
