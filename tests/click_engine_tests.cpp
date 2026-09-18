@@ -73,6 +73,12 @@ bool testMuteProducesSilence()
     return expect(magnitude(renderClick(ClickType::mute)) == 0.0F, "Mute must produce silence");
 }
 
+bool testUnsupportedRoleProducesSilence()
+{
+    const auto unsupportedRole = static_cast<ClickType>(999);
+    return expect(magnitude(renderClick(unsupportedRole)) == 0.0F, "An unsupported click role must produce silence");
+}
+
 bool testTriggerStartsAtTheCurrentSample()
 {
     SyntheticClickEngine engine;
@@ -138,8 +144,9 @@ bool testInvalidPreparationStaysSilent()
 int main()
 {
     const bool passed = testRolesAreAudibleAndDistinct() && testMuteProducesSilence() &&
-                        testTriggerStartsAtTheCurrentSample() && testTailContinuesAcrossBlocksAndResetStopsIt() &&
-                        testOutputIsFiniteAndBounded() && testInvalidPreparationStaysSilent();
+                        testUnsupportedRoleProducesSilence() && testTriggerStartsAtTheCurrentSample() &&
+                        testTailContinuesAcrossBlocksAndResetStopsIt() && testOutputIsFiniteAndBounded() &&
+                        testInvalidPreparationStaysSilent();
 
     if (!passed)
         return 1;

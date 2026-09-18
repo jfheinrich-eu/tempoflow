@@ -64,10 +64,13 @@ void SyntheticClickEngine::reset() noexcept
 
 void SyntheticClickEngine::trigger(ClickType type) noexcept
 {
-    if (type == ClickType::mute || currentSampleRate <= 0.0)
+    if (currentSampleRate <= 0.0)
         return;
 
     const auto parameters = parametersFor(type);
+    if (parameters.amplitude <= 0.0F || parameters.frequency <= 0.0 || parameters.decaySeconds <= 0.0)
+        return;
+
     auto &voice = voiceForTrigger();
     const auto frequency = std::min(parameters.frequency, currentSampleRate * 0.45);
     const auto decaySamples = parameters.decaySeconds * currentSampleRate;
