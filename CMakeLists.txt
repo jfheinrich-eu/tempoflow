@@ -16,6 +16,32 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(JUCE)
 
+add_library(
+    TempoFlowHostTiming
+    STATIC
+        src/timing/BeatScheduler.cpp
+        src/timing/BeatScheduler.h
+)
+
+target_include_directories(
+    TempoFlowHostTiming
+    PUBLIC
+        src
+)
+
+target_compile_features(
+    TempoFlowHostTiming
+    PUBLIC
+        cxx_std_17
+)
+
+target_link_libraries(
+    TempoFlowHostTiming
+    PRIVATE
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags
+)
+
 juce_add_plugin(
     TempoFlowPlugin
     COMPANY_NAME "jfheinrich"
@@ -67,6 +93,8 @@ target_link_libraries(
         juce::juce_audio_processors_headless
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags
+    PRIVATE
+        TempoFlowHostTiming
 )
 
 add_library(
@@ -184,6 +212,17 @@ target_link_libraries(
         TempoFlowPlugin
 )
 
+add_executable(
+    TempoFlowHostTimingTests
+    tests/host_timing_tests.cpp
+)
+
+target_link_libraries(
+    TempoFlowHostTimingTests
+    PRIVATE
+        TempoFlowHostTiming
+)
+
 if(MSVC)
     target_link_options(
         TempoFlowPresetValidatorTests
@@ -194,6 +233,13 @@ if(MSVC)
 
     target_link_options(
         TempoFlowPluginTests
+        PRIVATE
+            $<$<CONFIG:Debug>:/PROFILE>
+            $<$<CONFIG:Debug>:/INCREMENTAL:NO>
+    )
+
+    target_link_options(
+        TempoFlowHostTimingTests
         PRIVATE
             $<$<CONFIG:Debug>:/PROFILE>
             $<$<CONFIG:Debug>:/INCREMENTAL:NO>
@@ -218,6 +264,11 @@ if(BUILD_TESTING)
     add_test(
         NAME plugin-processor-unit-tests
         COMMAND TempoFlowPluginTests
+    )
+
+    add_test(
+        NAME host-timing-unit-tests
+        COMMAND TempoFlowHostTimingTests
     )
 
     if(WIN32)

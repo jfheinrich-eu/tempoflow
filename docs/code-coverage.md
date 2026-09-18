@@ -1,6 +1,6 @@
 # Code Coverage
 
-TempoFlow measures native C++ line coverage for the preset-validation library on Windows. Coverage is collected from the Debug unit-test executable with Microsoft Code Coverage and uploaded to Codecov as Cobertura XML.
+TempoFlow measures native C++ line coverage for the preset-validation and host-timing libraries on Windows. Coverage is collected from their Debug unit-test executables with Microsoft Code Coverage, merged, and uploaded to Codecov as Cobertura XML.
 
 Only production sources below `src/` are included. JUCE, tests, tools, documentation, and generated build files are excluded from the reported project coverage.
 
@@ -12,11 +12,12 @@ The upload uses GitHub OIDC and does not require a `CODECOV_TOKEN` repository se
 
 ## Local collection
 
-Build the instrumented Debug test executable from Developer PowerShell for VS 18:
+Build the instrumented Debug test executables from Developer PowerShell for VS 18:
 
 ```powershell
 cmake --preset windows-x64-debug -B build/coverage
-cmake --build build/coverage --config Debug --target TempoFlowPresetValidatorTests
+cmake --build build/coverage --config Debug `
+  --target TempoFlowPresetValidatorTests TempoFlowHostTimingTests
 ```
 
 Locate `Microsoft.CodeCoverage.Console.exe` below the active Visual Studio installation, then collect the report:
@@ -24,15 +25,31 @@ Locate `Microsoft.CodeCoverage.Console.exe` below the active Visual Studio insta
 ```powershell
 $coverageTool = Join-Path $env:VSINSTALLDIR `
   'Common7\IDE\Extensions\Microsoft\CodeCoverage.Console\Microsoft.CodeCoverage.Console.exe'
-$testExecutable = (Resolve-Path `
+$presetTestExecutable = (Resolve-Path `
   'build\coverage\TempoFlowPresetValidatorTests_artefacts\Debug\TempoFlowPresetValidatorTests.exe').Path
+$timingTestExecutable = (Resolve-Path `
+  'build\coverage\Debug\TempoFlowHostTimingTests.exe').Path
 
 & $coverageTool collect `
-  --include-files $testExecutable `
+  --include-files $presetTestExecutable `
+  --output 'build\coverage\preset-tests.coverage' `
+  --output-format coverage `
+  --nologo `
+  $presetTestExecutable
+
+& $coverageTool collect `
+  --include-files $timingTestExecutable `
+  --output 'build\coverage\timing-tests.coverage' `
+  --output-format coverage `
+  --nologo `
+  $timingTestExecutable
+
+& $coverageTool merge `
+  'build\coverage\preset-tests.coverage' `
+  'build\coverage\timing-tests.coverage' `
   --output 'build\coverage\coverage.cobertura.xml' `
   --output-format cobertura `
-  --nologo `
-  $testExecutable
+  --nologo
 ```
 
-The command fails if the test executable fails. Review `build/coverage/coverage.cobertura.xml` before changing Codecov targets or thresholds.
+Each collection command fails if its test executable fails. Review `build/coverage/coverage.cobertura.xml` before changing Codecov targets or thresholds.
