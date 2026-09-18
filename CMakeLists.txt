@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.25)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(
+        FATAL_ERROR
+        "In-source builds are not supported. Use a checked-in CMake preset so generated files stay below build/."
+    )
+endif()
+
 project(
     TempoFlow
     VERSION 0.1.0
