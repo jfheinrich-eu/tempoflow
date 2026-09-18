@@ -142,6 +142,7 @@ BeatSchedule BeatScheduler::schedule(const HostTiming &timing) noexcept
     wasPlaying = true;
     expectedNextSamplePosition = timing.samplePosition + timing.blockSize;
     expectedNextPpqPosition = nextPpqPosition;
+    result.hostTimingValid = true;
 
     const auto beatLengthPpq = 4.0 / static_cast<double>(timing.timeSignatureDenominator);
     const auto relativePpq = timing.ppqPosition - timing.ppqPositionOfLastBarStart;

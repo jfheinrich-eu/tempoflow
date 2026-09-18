@@ -22,6 +22,8 @@ cmake --build --preset windows-x64-release
 ctest --preset windows-x64-release
 ```
 
+See [Building the TempoFlow VST3](docs/building-vst3.md) for target-only builds, bundle locations, validation, installation, and in-source build safeguards.
+
 ## Contribution rules
 
 - Use English for code, comments, documentation, commits, issues, and pull requests.

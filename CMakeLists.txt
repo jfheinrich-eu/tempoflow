@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.25)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(
+        FATAL_ERROR
+        "In-source builds are not supported. Use a checked-in CMake preset so generated files stay below build/."
+    )
+endif()
+
 project(
     TempoFlow
     VERSION 0.1.0
@@ -15,6 +22,32 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(JUCE)
+
+add_library(
+    TempoFlowClickEngine
+    STATIC
+        src/audio/ClickEngine.cpp
+        src/audio/ClickEngine.h
+)
+
+target_include_directories(
+    TempoFlowClickEngine
+    PUBLIC
+        src
+)
+
+target_compile_features(
+    TempoFlowClickEngine
+    PUBLIC
+        cxx_std_17
+)
+
+target_link_libraries(
+    TempoFlowClickEngine
+    PRIVATE
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags
+)
 
 add_library(
     TempoFlowHostTiming
@@ -94,6 +127,7 @@ target_link_libraries(
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags
     PRIVATE
+        TempoFlowClickEngine
         TempoFlowHostTiming
 )
 
@@ -223,6 +257,17 @@ target_link_libraries(
         TempoFlowHostTiming
 )
 
+add_executable(
+    TempoFlowClickEngineTests
+    tests/click_engine_tests.cpp
+)
+
+target_link_libraries(
+    TempoFlowClickEngineTests
+    PRIVATE
+        TempoFlowClickEngine
+)
+
 if(MSVC)
     target_link_options(
         TempoFlowPresetValidatorTests
@@ -240,6 +285,13 @@ if(MSVC)
 
     target_link_options(
         TempoFlowHostTimingTests
+        PRIVATE
+            $<$<CONFIG:Debug>:/PROFILE>
+            $<$<CONFIG:Debug>:/INCREMENTAL:NO>
+    )
+
+    target_link_options(
+        TempoFlowClickEngineTests
         PRIVATE
             $<$<CONFIG:Debug>:/PROFILE>
             $<$<CONFIG:Debug>:/INCREMENTAL:NO>
@@ -269,6 +321,11 @@ if(BUILD_TESTING)
     add_test(
         NAME host-timing-unit-tests
         COMMAND TempoFlowHostTimingTests
+    )
+
+    add_test(
+        NAME click-engine-unit-tests
+        COMMAND TempoFlowClickEngineTests
     )
 
     if(WIN32)

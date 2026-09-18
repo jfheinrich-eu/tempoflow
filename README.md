@@ -27,7 +27,7 @@ The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, seven reference presets, Windows build environment, and JUCE dependency setup are available. The VST3 processor is not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, seven reference presets, Windows build environment, sample-accurate host synchronization, and synthetic VST3 click engine are available. Preset loading and stable public plug-in state are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -102,17 +102,28 @@ ctest --preset windows-x64-debug
 ctest --preset windows-x64-release
 ```
 
-## Build the VST3 scaffold
+## Build the VST3
 
-The initial VST3 target is an instrument with no input bus, one mono output, and no custom editor. It intentionally produces silence while the host integration is established.
+TempoFlow is an instrument with no input bus, one mono output, and no custom editor. It follows valid host transport data and generates synthetic clicks.
 
-The regular Debug and Release build presets include the VST3 target and its processor tests. The Debug VST3 bundle is generated under:
+Build the Release bundle from **Developer PowerShell for VS 18**:
+
+```powershell
+cmake --preset windows-x64-release
+cmake --build build/windows-x64-release `
+  --config Release `
+  --target TempoFlowPlugin_VST3
+```
+
+The Release VST3 bundle is generated under:
 
 ```text
-build/windows-x64-debug/TempoFlowPlugin_artefacts/Debug/VST3/TempoFlow.vst3
+build/windows-x64-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
 ```
 
 Building does not copy the plug-in into a system or user VST3 directory. Installation remains an explicit step.
+
+The complete configure, Debug and Release build, test, validation, installation, and troubleshooting procedure is documented in [Building the TempoFlow VST3](docs/building-vst3.md).
 
 Build and run Steinberg's reference command-line test host as described in the [VST 3 Validator guide](docs/steinberg-validator.md).
 
@@ -128,8 +139,13 @@ Validate a preset file or an entire directory:
 Expected output:
 
 ```text
-TempoFlow toolchain OK
-JUCE v9.0.2
+12-8 Blues.tempoflow: valid
+Beat 1 Only.tempoflow: valid
+Beats 2 + 4.tempoflow: valid
+Slow Blues Shuffle.tempoflow: valid
+Standard 3-4.tempoflow: valid
+Standard 4-4.tempoflow: valid
+Standard 6-8.tempoflow: valid
 ```
 
 ## Preset format
@@ -149,9 +165,9 @@ Native C++ coverage collection and Codecov behavior are documented in [Code Cove
 
 ## Roadmap
 
-1. Add the headless JUCE VST3 scaffold with a mono output.
-2. Implement sample-accurate host synchronization.
-3. Add the synthetic click engine and click-role mapping.
+1. Add the headless JUCE VST3 scaffold with a mono output. Complete.
+2. Implement sample-accurate host synchronization. Complete.
+3. Add the synthetic click engine and initial click-role mapping. Complete.
 4. Integrate the semantic preset validator with plug-in state loading.
 5. Validate the plug-in with Steinberg tools and Cubase Elements 15.
 6. Verify preset interoperability with the PWA.
