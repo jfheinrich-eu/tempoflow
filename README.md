@@ -139,8 +139,13 @@ Validate a preset file or an entire directory:
 Expected output:
 
 ```text
-TempoFlow toolchain OK
-JUCE v9.0.2
+12-8 Blues.tempoflow: valid
+Beat 1 Only.tempoflow: valid
+Beats 2 + 4.tempoflow: valid
+Slow Blues Shuffle.tempoflow: valid
+Standard 3-4.tempoflow: valid
+Standard 4-4.tempoflow: valid
+Standard 6-8.tempoflow: valid
 ```
 
 ## Preset format
