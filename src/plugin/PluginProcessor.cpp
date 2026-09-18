@@ -67,8 +67,9 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
         if (const auto timing = readHostTiming(*position, getSampleRate(), audio.getNumSamples()))
         {
             const auto schedule = beatScheduler.schedule(*timing);
-            if (!schedule.hostTimingValid)
+            if (!schedule.hostTimingValid || schedule.beats.overflowed())
             {
+                beatScheduler.reset();
                 clickEngine.reset();
                 return;
             }

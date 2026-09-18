@@ -155,12 +155,36 @@ bool testStoppedTransportClearsClickTail()
     return expect(playingAudio.getMagnitude(0, sampleCount) > 0.1F, "Playing transport must produce a click") &&
            expect(stoppedAudio.getMagnitude(0, sampleCount) == 0.0F, "Stopped transport must clear click tails");
 }
+
+bool testSchedulerOverflowProducesSilence()
+{
+    tempoflow::plugin::TempoFlowAudioProcessor processor;
+    TestPlayHead playHead;
+    constexpr auto sampleRate = 100.0;
+    constexpr auto sampleCount = 1'000;
+    setPlayingPosition(playHead, 0.0, 0);
+    playHead.position.setBpm(300.0);
+    playHead.position.setTimeSignature(juce::AudioPlayHead::TimeSignature{4, 16});
+
+    processor.setPlayHead(&playHead);
+    processor.setRateAndBufferSizeDetails(sampleRate, sampleCount);
+    processor.prepareToPlay(sampleRate, sampleCount);
+
+    juce::AudioBuffer<float> audio(1, sampleCount);
+    juce::MidiBuffer midi;
+    processor.processBlock(audio, midi);
+    processor.releaseResources();
+
+    return expect(audio.getMagnitude(0, sampleCount) == 0.0F,
+                  "A block that exceeds the scheduler capacity must remain silent");
+}
 } // namespace
 
 int main()
 {
     const bool passed = testIdentityAndCapabilities() && testBusLayout() && testSilentProcessing() &&
-                        testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail();
+                        testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail() &&
+                        testSchedulerOverflowProducesSilence();
 
     if (!passed)
         return 1;
