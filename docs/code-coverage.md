@@ -1,6 +1,6 @@
 # Code Coverage
 
-TempoFlow measures native C++ line coverage for the preset-validation, host-timing, and click-engine libraries on Windows. Coverage is collected from their Debug unit-test executables with Microsoft Code Coverage, merged, and uploaded to Codecov as Cobertura XML.
+TempoFlow measures native C++ line coverage for the preset-validation, host-timing, and click-engine libraries on Windows. The current workflow does not yet collect the typed preset runtime model or plugin-processor tests. Coverage is collected from the selected Debug unit-test executables with Microsoft Code Coverage, merged, and uploaded to Codecov as Cobertura XML.
 
 Only production sources below `src/` are included. JUCE, tests, tools, documentation, and generated build files are excluded from the reported project coverage.
 

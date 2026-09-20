@@ -14,6 +14,7 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 
 ### Added
 
+- Typed preset runtime model with bounded file loading and focused tests.
 - Informational native C++ coverage reporting through Codecov.
 - JUCE 9.0.2 CMake dependency and Windows Debug/Release presets.
 - Toolchain verification executable.

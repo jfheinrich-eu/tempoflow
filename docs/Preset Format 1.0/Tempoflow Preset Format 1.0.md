@@ -342,7 +342,8 @@ The PWA uses JavaScript or TypeScript. VST3 uses C++ and JUCE. They share schema
 - Phase 3A — preset schema: complete.
 - Phase 3B — formal [JSON Schema](tempoflow-preset.schema.json): complete.
 - Phase 3C — seven [reference presets](presets): complete.
-- Phase 4 — TempoFlow VST3 MVP in C++/JUCE: next.
+- Phase 4A — Headless VST3 scaffold, host timing, synthetic click engine, and typed preset runtime model: implemented and unit-tested.
+- Phase 4B — Plugin state loading, preset-driven pattern playback, and project-state restoration: next.
 
 ## 36. VST3 MVP definition
 
@@ -402,4 +403,4 @@ Grouping is musically meaningful. In 7/8, `2+2+3`, `3+2+2`, and `2+3+2` are dist
 
 TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.2`.
 
-Completed decisions cover grouping, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, and seven reference presets are complete. The next phase is the TempoFlow VST3 MVP in C++ with JUCE.
+Completed decisions cover grouping, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing prototype, synthetic click engine, and typed runtime model are complete. The next phase is plugin-state integration and external VST3/Cubase validation.

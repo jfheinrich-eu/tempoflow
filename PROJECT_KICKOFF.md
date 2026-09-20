@@ -3,8 +3,8 @@ title: TempoFlow Project Kickoff
 aliases:
   - TempoFlow Kickoff
 project: TempoFlow
-status: discovery
-updated: 2026-09-11
+status: implementation
+updated: 2026-09-20
 tags:
   - tempoflow
   - metronome
@@ -84,9 +84,9 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The VST3 prototype is specified but not implemented.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, and typed preset runtime model. Plugin state loading, preset-driven playback, and external Cubase validation remain incomplete.
 
-- Technology: C++ and JUCE
+- Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
 - Reference host: Cubase Elements 15
 - DAW mode: automatic Host Mode
@@ -94,7 +94,8 @@ The VST3 prototype is specified but not implemented.
 - Main output: mono
 - Additional outputs: preserve architectural extensibility; do not implement in the MVP
 - Timing inputs: host transport, PPQ/sample position, and audio-buffer position
-- Goal: sample-accurate click generation
+- Current implementation: sample-accurate host-timing prototype with synthetic default accent/normal clicks
+- Goal: preset-driven, sample-accurate click generation with safe project-state restoration
 
 A browser-to-ASIO bridge and a Base44 runtime dependency are excluded.
 
@@ -401,7 +402,7 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor.
 
-No unresolved decision in this section blocks the initial VST3 scaffold.
+The initial scaffold is present. Plugin-state integration and external host validation remain release-blocking for the MVP.
 
 ## Open product decisions
 
