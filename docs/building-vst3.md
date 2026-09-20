@@ -28,10 +28,10 @@ cmake .
 
 Use the checked-in presets instead. Their build directories are:
 
-| Configuration | Build directory |
-|---|---|
-| Debug | `build/windows-x64-debug` |
-| Release | `build/windows-x64-release` |
+| Configuration | Build directory             |
+| ------------- | --------------------------- |
+| Debug         | `build/windows-x64-debug`   |
+| Release       | `build/windows-x64-release` |
 
 The top-level `CMakeLists.txt` also rejects in-source builds with a fatal configuration error.
 
@@ -55,6 +55,21 @@ The resulting VST3 bundle is:
 
 ```text
 build/windows-x64-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
+```
+
+Copy the VST3 into the local users VST3 folder:
+
+```powershell
+$source = (Resolve-Path `
+   '.\build\windows-x64-release\TempoFlowPlugin_artefacts\Release\VST3\TempoFlow.vst3').Path
+ $destinationRoot = Join-Path $env:LOCALAPPDATA 'Programs\Common\VST3'
+ $destination = Join-Path $destinationRoot 'TempoFlow.vst3'
+
+ New-Item -ItemType Directory -Path $destinationRoot -Force | Out-Null
+ if (Test-Path -LiteralPath $destination) {
+     Remove-Item -LiteralPath $destination -Recurse -Force
+ }
+ Copy-Item -LiteralPath $source -Destination $destination -Recurse
 ```
 
 On Windows, a `.vst3` bundle is a directory. Copy or move the complete `TempoFlow.vst3` directory, not only the binary below `Contents`.

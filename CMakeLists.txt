@@ -136,6 +136,8 @@ add_library(
     STATIC
         src/preset/PresetFileIO.cpp
         src/preset/PresetFileIO.h
+        src/preset/PresetRuntimeModel.cpp
+        src/preset/PresetRuntimeModel.h
         src/preset/PresetValidator.cpp
         src/preset/PresetValidator.h
 )
@@ -268,6 +270,17 @@ target_link_libraries(
         TempoFlowClickEngine
 )
 
+add_executable(
+    TempoFlowPresetRuntimeModelTests
+    tests/preset_runtime_model_tests.cpp
+)
+
+target_link_libraries(
+    TempoFlowPresetRuntimeModelTests
+    PRIVATE
+        TempoFlowPresetValidation
+)
+
 if(MSVC)
     target_link_options(
         TempoFlowPresetValidatorTests
@@ -326,6 +339,11 @@ if(BUILD_TESTING)
     add_test(
         NAME click-engine-unit-tests
         COMMAND TempoFlowClickEngineTests
+    )
+
+    add_test(
+        NAME preset-runtime-model-unit-tests
+        COMMAND TempoFlowPresetRuntimeModelTests
     )
 
     if(WIN32)
