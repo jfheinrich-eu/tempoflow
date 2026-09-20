@@ -41,7 +41,8 @@
         "TempoFlowPluginTests",
         "TempoFlowToolchainCheck",
         "TempoFlowPresetValidator",
-        "TempoFlowPresetValidatorTests"
+        "TempoFlowPresetValidatorTests",
+        "TempoFlowPresetRuntimeModelTests"
       ]
     },
     {
@@ -55,7 +56,8 @@
         "TempoFlowPluginTests",
         "TempoFlowToolchainCheck",
         "TempoFlowPresetValidator",
-        "TempoFlowPresetValidatorTests"
+        "TempoFlowPresetValidatorTests",
+        "TempoFlowPresetRuntimeModelTests"
       ]
     }
   ],
