@@ -27,7 +27,7 @@ The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, seven reference presets, Windows build environment, sample-accurate host synchronization, and synthetic VST3 click engine are available. Preset loading and stable public plug-in state are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, and synthetic VST3 click engine are available. Plugin preset loading and stable public plug-in state are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -168,9 +168,10 @@ Native C++ coverage collection and Codecov behavior are documented in [Code Cove
 1. Add the headless JUCE VST3 scaffold with a mono output. Complete.
 2. Implement sample-accurate host synchronization. Complete.
 3. Add the synthetic click engine and initial click-role mapping. Complete.
-4. Integrate the semantic preset validator with plug-in state loading.
-5. Validate the plug-in with Steinberg tools and Cubase Elements 15.
-6. Verify preset interoperability with the PWA.
+4. Add the typed preset runtime model. Complete.
+5. Integrate the semantic preset validator and runtime model with plug-in state loading.
+6. Validate the plug-in with Steinberg tools and Cubase Elements 15.
+7. Verify preset interoperability with the PWA.
 
 Detailed decisions and risks are tracked in [PROJECT_KICKOFF.md](PROJECT_KICKOFF.md).
 
