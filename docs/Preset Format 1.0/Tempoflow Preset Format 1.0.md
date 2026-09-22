@@ -343,7 +343,7 @@ The PWA uses JavaScript or TypeScript. VST3 uses C++ and JUCE. They share schema
 - Phase 3B — formal [JSON Schema](tempoflow-preset.schema.json): complete.
 - Phase 3C — seven [reference presets](presets): complete.
 - Phase 4A — Headless VST3 scaffold, host timing, synthetic click engine, and typed preset runtime model: implemented and unit-tested.
-- Phase 4B — Plugin state loading, preset-driven pattern playback, and project-state restoration: next.
+- Phase 4B — Plugin state loading, preset-driven beat roles and volume, and project-state restoration: implemented and unit-tested. User-facing preset selection, grouping-driven playback, and audible triplet subdivisions remain open.
 
 ## 36. VST3 MVP definition
 

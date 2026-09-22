@@ -127,6 +127,7 @@ jobs:
             '[\\/]src[\\/]timing[\\/]BeatScheduler\.(cpp|h)$',
             '[\\/]src[\\/]audio[\\/]ClickEngine\.(cpp|h)$',
             '[\\/]src[\\/]preset[\\/]PresetRuntimeModel\.(cpp|h)$',
+            '[\\/]src[\\/]plugin[\\/]PluginPresetState\.(cpp|h)$',
             '[\\/]src[\\/]plugin[\\/]PluginProcessor\.(cpp|h)$'
           )
           if ([int]$coverageXml.coverage.'lines-valid' -le 0) {
@@ -186,6 +187,7 @@ jobs:
             '^src/timing/BeatScheduler\.(cpp|h)$',
             '^src/audio/ClickEngine\.(cpp|h)$',
             '^src/preset/PresetRuntimeModel\.(cpp|h)$',
+            '^src/plugin/PluginPresetState\.(cpp|h)$',
             '^src/plugin/PluginProcessor\.(cpp|h)$'
           )
           foreach ($requiredSource in $requiredNormalizedSources) {

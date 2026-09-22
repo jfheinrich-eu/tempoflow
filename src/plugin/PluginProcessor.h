@@ -1,9 +1,16 @@
 #pragma once
 
 #include "audio/ClickEngine.h"
+#include "plugin/PluginPresetState.h"
+#include "preset/PresetRuntimeModel.h"
 #include "timing/BeatScheduler.h"
 
 #include <juce_audio_processors_headless/juce_audio_processors_headless.h>
+
+#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <vector>
 
 namespace tempoflow::plugin
 {
@@ -36,9 +43,23 @@ class TempoFlowAudioProcessor final : public juce::AudioProcessor
     void getStateInformation(juce::MemoryBlock &destinationData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
 
+    [[nodiscard]] preset::RuntimePresetResult applyPresetJson(const juce::String &jsonText);
+    [[nodiscard]] preset::RuntimePresetResult loadPresetFile(const juce::File &file);
+    [[nodiscard]] std::vector<juce::String> getLastPresetErrors() const;
+
   private:
+    void recordPresetErrors(const std::vector<juce::String> &errors);
+
     tempoflow::audio::SyntheticClickEngine clickEngine;
     tempoflow::timing::BeatScheduler beatScheduler;
+    PluginPresetStateExchange presetStateExchange;
+    RealtimePresetState realtimePresetState;
+    std::uint64_t realtimePresetGeneration = 0;
+
+    mutable std::mutex persistentStateMutex;
+    juce::String persistentPresetJson;
+    std::vector<juce::String> lastPresetErrors;
+    std::atomic<bool> stateRestoreException{false};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TempoFlowAudioProcessor)
 };

@@ -84,7 +84,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, and typed preset runtime model. Plugin state loading, preset-driven playback, and external Cubase validation remain incomplete.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, and VST3 project-state restoration. User-facing preset selection, grouping and triplet playback, and external Cubase validation remain incomplete.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -94,7 +94,7 @@ The repository contains a headless VST3 scaffold with a mono output, host-timing
 - Main output: mono
 - Additional outputs: preserve architectural extensibility; do not implement in the MVP
 - Timing inputs: host transport, PPQ/sample position, and audio-buffer position
-- Current implementation: sample-accurate host-timing prototype with synthetic default accent/normal clicks
+- Current implementation: sample-accurate host timing with validated preset roles, master volume, and project-state restoration
 - Goal: preset-driven, sample-accurate click generation with safe project-state restoration
 
 A browser-to-ASIO bridge and a Base44 runtime dependency are excluded.
@@ -341,7 +341,7 @@ User-scoped VST3 development installation path:
 
 ### VST-007 — Preset failures
 
-Status: proposed
+Status: confirmed
 
 - A failed preset must not modify active state.
 - Validate JSON syntax, schema, and semantics before applying state.
@@ -402,7 +402,7 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor.
 
-The initial scaffold is present. Plugin-state integration and external host validation remain release-blocking for the MVP.
+The initial scaffold and internal plug-in-state integration are present. User-facing preset selection, remaining playback semantics, and external host validation remain release-blocking for the MVP.
 
 ## Open product decisions
 
@@ -476,10 +476,10 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 
 ### E — Presets
 
-- Load `.tempoflow` files.
-- Validate structure and semantics.
-- Report errors without destabilizing active state.
-- Use all seven presets as integration tests.
+- Load `.tempoflow` files. Implemented internally; a user-facing selector remains open.
+- Validate structure and semantics. Implemented.
+- Report errors without destabilizing active state. Implemented.
+- Use all seven presets as integration tests. Implemented.
 
 ### F — PWA alignment
 

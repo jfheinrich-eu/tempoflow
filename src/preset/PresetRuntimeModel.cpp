@@ -141,6 +141,10 @@ RuntimePresetResult loadPresetFile(const juce::File &file)
     if (!readResult.isValid())
         return {{}, {file.getFullPathName() + ": " + readResult.error}};
 
-    return parsePresetJson(readResult.content);
+    auto result = parsePresetJson(readResult.content);
+    for (auto &error : result.errors)
+        error = file.getFullPathName() + ": " + error;
+
+    return result;
 }
 } // namespace tempoflow::preset
