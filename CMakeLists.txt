@@ -96,6 +96,8 @@ juce_add_plugin(
 target_sources(
     TempoFlowPlugin
     PRIVATE
+        src/plugin/PluginPresetState.cpp
+        src/plugin/PluginPresetState.h
         src/plugin/PluginProcessor.cpp
         src/plugin/PluginProcessor.h
 )
@@ -165,6 +167,12 @@ target_link_libraries(
     TempoFlowPresetValidation
     PUBLIC
         juce::juce_core
+)
+
+target_link_libraries(
+    TempoFlowPlugin
+    PRIVATE
+        TempoFlowPresetValidation
 )
 
 juce_add_console_app(
@@ -240,6 +248,12 @@ target_sources(
     TempoFlowPluginTests
     PRIVATE
         tests/plugin_processor_tests.cpp
+)
+
+target_compile_definitions(
+    TempoFlowPluginTests
+    PRIVATE
+        TEMPOFLOW_REFERENCE_PRESET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/docs/Preset Format 1.0/presets"
 )
 
 target_link_libraries(

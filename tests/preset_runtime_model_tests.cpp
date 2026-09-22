@@ -86,12 +86,32 @@ bool testLoadsPresetThroughBoundedFileReader()
            expect(result.preset.name == "Runtime Test", "The bounded file loader must preserve the parsed model") &&
            expect(removed, "The temporary runtime model directory must be removable");
 }
+
+bool testFileValidationErrorsIdentifyTheirSource()
+{
+    const auto directory = juce::File::getSpecialLocation(juce::File::tempDirectory)
+                               .getNonexistentChildFile("tempoflow-runtime-model-errors", {}, true);
+    if (directory.createDirectory().failed())
+        return expect(false, "The runtime model error test directory must be created");
+
+    const auto file = directory.getChildFile("invalid.tempoflow");
+    const auto invalidPreset = validPreset.replace("\"bpm\": 120.5", "\"bpm\": 301");
+    const auto created = file.replaceWithData(invalidPreset.toRawUTF8(), invalidPreset.getNumBytesAsUTF8());
+    const auto result = created ? tempoflow::preset::loadPresetFile(file) : tempoflow::preset::RuntimePresetResult{};
+    const auto removed = directory.deleteRecursively(false);
+
+    return expect(created, "The invalid runtime model fixture must be created") &&
+           expect(!result.isValid() && !result.errors.empty(), "The invalid runtime model fixture must fail") &&
+           expect(result.errors.front().startsWith(file.getFullPathName() + ": "),
+                  "Runtime model file errors must identify the source file") &&
+           expect(removed, "The runtime model error test directory must be removable");
+}
 } // namespace
 
 int main()
 {
     const auto passed = testParsesTypedRuntimeModel() && testRejectsInvalidPresetBeforeModelConstruction() &&
-                        testLoadsPresetThroughBoundedFileReader();
+                        testLoadsPresetThroughBoundedFileReader() && testFileValidationErrorsIdentifyTheirSource();
     if (!passed)
         return 1;
 

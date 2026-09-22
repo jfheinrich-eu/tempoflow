@@ -27,7 +27,7 @@ The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, and synthetic VST3 click engine are available. Plugin preset loading and stable public plug-in state are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal plug-in preset loading, and VST3 project-state restoration are available. A user-facing preset selector, grouping-driven playback, and audible triplet subdivisions are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -104,7 +104,7 @@ ctest --preset windows-x64-release
 
 ## Build the VST3
 
-TempoFlow is an instrument with no input bus, one mono output, and no custom editor. It follows valid host transport data and generates synthetic clicks.
+TempoFlow is an instrument with no input bus, one mono output, and no custom editor. It follows valid host transport data and generates preset-driven synthetic clicks.
 
 Build the Release bundle from **Developer PowerShell for VS 18**:
 
@@ -163,13 +163,15 @@ See the [Preset Format 1.0 specification](docs/Preset%20Format%201.0/Tempoflow%2
 
 Native C++ coverage collection and Codecov behavior are documented in [Code Coverage](docs/code-coverage.md).
 
+Preset loading, transactional failure handling, real-time publication, and Cubase project-state restoration are documented in [Plug-in Preset State](docs/plugin-state.md).
+
 ## Roadmap
 
 1. Add the headless JUCE VST3 scaffold with a mono output. Complete.
 2. Implement sample-accurate host synchronization. Complete.
 3. Add the synthetic click engine and initial click-role mapping. Complete.
 4. Add the typed preset runtime model. Complete.
-5. Integrate the semantic preset validator and runtime model with plug-in state loading.
+5. Integrate the semantic preset validator and runtime model with plug-in state loading. Complete.
 6. Validate the plug-in with Steinberg tools and Cubase Elements 15.
 7. Verify preset interoperability with the PWA.
 
