@@ -11,6 +11,7 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 - Enforced defined metadata types, RFC 3339 timestamps, and safe integer conversion in preset validation.
 - Bounded preset discovery, file reads, and JSON complexity before processing untrusted input.
 - Isolated Codecov OIDC access from the job that builds and executes pull-request code.
+- Extended native coverage to the typed preset runtime model and plugin processor.
 
 ### Added
 

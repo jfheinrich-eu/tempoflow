@@ -25,6 +25,7 @@ jobs:
         run: >-
           cmake --build build/coverage --config Debug
           --target TempoFlowPresetValidatorTests TempoFlowHostTimingTests TempoFlowClickEngineTests
+          TempoFlowPresetRuntimeModelTests TempoFlowPluginTests
       - name: Collect native C++ coverage
         shell: pwsh
         env:
@@ -53,9 +54,17 @@ jobs:
             'build\coverage\Debug\TempoFlowHostTimingTests.exe').Path
           $clickTestExecutable = (Resolve-Path `
             'build\coverage\Debug\TempoFlowClickEngineTests.exe').Path
+          $runtimeModelTestExecutable = (Resolve-Path `
+            'build\coverage\Debug\TempoFlowPresetRuntimeModelTests.exe').Path
+          $pluginTestExecutable = (Resolve-Path `
+            'build\coverage\TempoFlowPluginTests_artefacts\Debug\TempoFlowPluginTests.exe').Path
+          $dynamicCoverageSettings = (Resolve-Path `
+            'cmake\microsoft-code-coverage-dynamic.config').Path
           $presetCoverage = Join-Path $PWD 'build\coverage\preset-tests.coverage'
           $timingCoverage = Join-Path $PWD 'build\coverage\timing-tests.coverage'
           $clickCoverage = Join-Path $PWD 'build\coverage\click-tests.coverage'
+          $runtimeModelCoverage = Join-Path $PWD 'build\coverage\runtime-model-tests.coverage'
+          $pluginCoverage = Join-Path $PWD 'build\coverage\plugin-tests.coverage'
           $coverageReport = Join-Path $PWD 'build\coverage\coverage.cobertura.xml'
 
           if (-not (Test-Path -LiteralPath $coverageTool -PathType Leaf)) {
@@ -65,15 +74,22 @@ jobs:
           function Invoke-CoverageCollection {
             param(
               [Parameter(Mandatory)] [string] $Executable,
-              [Parameter(Mandatory)] [string] $Output
+              [Parameter(Mandatory)] [string] $Output,
+              [string] $Settings
             )
 
-            & $coverageTool collect `
-              --include-files $Executable `
-              --output $Output `
-              --output-format coverage `
-              --nologo `
-              $Executable
+            $arguments = @(
+              'collect'
+              '--include-files', $Executable
+              '--output', $Output
+              '--output-format', 'coverage'
+              '--nologo'
+            )
+            if (-not [string]::IsNullOrWhiteSpace($Settings)) {
+              $arguments += @('--settings', $Settings)
+            }
+
+            & $coverageTool @arguments $Executable
             if ($LASTEXITCODE -ne 0) {
               throw "Coverage collection failed for $Executable with exit code $LASTEXITCODE."
             }
@@ -82,11 +98,18 @@ jobs:
           Invoke-CoverageCollection -Executable $presetTestExecutable -Output $presetCoverage
           Invoke-CoverageCollection -Executable $timingTestExecutable -Output $timingCoverage
           Invoke-CoverageCollection -Executable $clickTestExecutable -Output $clickCoverage
+          Invoke-CoverageCollection -Executable $runtimeModelTestExecutable -Output $runtimeModelCoverage
+          Invoke-CoverageCollection `
+            -Executable $pluginTestExecutable `
+            -Output $pluginCoverage `
+            -Settings $dynamicCoverageSettings
 
           & $coverageTool merge `
             $presetCoverage `
             $timingCoverage `
             $clickCoverage `
+            $runtimeModelCoverage `
+            $pluginCoverage `
             --output $coverageReport `
             --output-format cobertura `
             --nologo
@@ -102,7 +125,9 @@ jobs:
           $requiredSources = @(
             '[\\/]src[\\/]preset[\\/]PresetValidator\.(cpp|h)$',
             '[\\/]src[\\/]timing[\\/]BeatScheduler\.(cpp|h)$',
-            '[\\/]src[\\/]audio[\\/]ClickEngine\.(cpp|h)$'
+            '[\\/]src[\\/]audio[\\/]ClickEngine\.(cpp|h)$',
+            '[\\/]src[\\/]preset[\\/]PresetRuntimeModel\.(cpp|h)$',
+            '[\\/]src[\\/]plugin[\\/]PluginProcessor\.(cpp|h)$'
           )
           if ([int]$coverageXml.coverage.'lines-valid' -le 0) {
             throw 'The Cobertura report contains no TempoFlow source coverage.'
@@ -159,7 +184,9 @@ jobs:
           $requiredNormalizedSources = @(
             '^src/preset/PresetValidator\.(cpp|h)$',
             '^src/timing/BeatScheduler\.(cpp|h)$',
-            '^src/audio/ClickEngine\.(cpp|h)$'
+            '^src/audio/ClickEngine\.(cpp|h)$',
+            '^src/preset/PresetRuntimeModel\.(cpp|h)$',
+            '^src/plugin/PluginProcessor\.(cpp|h)$'
           )
           foreach ($requiredSource in $requiredNormalizedSources) {
             if (@($normalizedSourcePaths | Where-Object { $_ -match $requiredSource }).Count -eq 0) {

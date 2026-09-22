@@ -309,6 +309,13 @@ if(MSVC)
             $<$<CONFIG:Debug>:/PROFILE>
             $<$<CONFIG:Debug>:/INCREMENTAL:NO>
     )
+
+    target_link_options(
+        TempoFlowPresetRuntimeModelTests
+        PRIVATE
+            $<$<CONFIG:Debug>:/PROFILE>
+            $<$<CONFIG:Debug>:/INCREMENTAL:NO>
+    )
 endif()
 
 include(CTest)
