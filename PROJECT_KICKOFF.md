@@ -341,7 +341,7 @@ User-scoped VST3 development installation path:
 
 ### VST-007 — Preset failures
 
-Status: proposed
+Status: confirmed
 
 - A failed preset must not modify active state.
 - Validate JSON syntax, schema, and semantics before applying state.
