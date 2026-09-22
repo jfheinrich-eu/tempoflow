@@ -31,9 +31,6 @@ void PluginPresetStateExchange::publish(const RealtimePresetState &state) noexce
     }
 
     jassert(targetSlot >= 0 && targetSlot < slotCount);
-    if (targetSlot < 0 || targetSlot >= slotCount)
-        return;
-
     const auto nextGeneration = publishedGeneration.load(std::memory_order_relaxed) + 1;
     slots[static_cast<std::size_t>(targetSlot)] = {state, nextGeneration};
     activeSlot.store(targetSlot, std::memory_order_seq_cst);

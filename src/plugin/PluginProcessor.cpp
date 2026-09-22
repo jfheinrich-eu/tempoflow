@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <optional>
-#include <utility>
 
 namespace tempoflow::plugin
 {
@@ -71,31 +70,19 @@ audio::ClickType toAudioClickType(preset::ClickType type) noexcept
     return audio::ClickType::mute;
 }
 
-bool makeRealtimePresetState(const preset::RuntimePreset &preset, RealtimePresetState &state, juce::String &error)
+RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset) noexcept
 {
-    if (preset.pattern.beats.size() > state.clicks.size())
-    {
-        error = "pattern.beats exceeds the real-time beat capacity";
-        return false;
-    }
-
-    RealtimePresetState candidate;
-    candidate.beatCount = preset.pattern.beats.size();
-    candidate.volume = static_cast<float>(preset.sound.volume);
+    RealtimePresetState state;
+    state.beatCount = preset.pattern.beats.size();
+    state.volume = static_cast<float>(preset.sound.volume);
 
     for (const auto &beat : preset.pattern.beats)
     {
-        if (beat.beat < 1 || static_cast<std::uint64_t>(beat.beat) > candidate.beatCount)
-        {
-            error = "pattern.beats contains an invalid real-time beat position";
-            return false;
-        }
-
-        candidate.clicks[static_cast<std::size_t>(beat.beat - 1)] = toAudioClickType(beat.click);
+        jassert(beat.beat >= 1 && static_cast<std::uint64_t>(beat.beat) <= state.beatCount);
+        state.clicks[static_cast<std::size_t>(beat.beat - 1)] = toAudioClickType(beat.click);
     }
 
-    state = candidate;
-    return true;
+    return state;
 }
 
 std::vector<juce::String> prefixErrors(const juce::String &prefix, const std::vector<juce::String> &errors)
@@ -290,14 +277,7 @@ preset::RuntimePresetResult TempoFlowAudioProcessor::applyPresetJson(const juce:
         return result;
     }
 
-    RealtimePresetState realtimeState;
-    juce::String conversionError;
-    if (!makeRealtimePresetState(result.preset, realtimeState, conversionError))
-    {
-        result.errors.push_back(std::move(conversionError));
-        recordPresetErrors(result.errors);
-        return result;
-    }
+    const auto realtimeState = makeRealtimePresetState(result.preset);
 
     {
         const std::lock_guard<std::mutex> lock(persistentStateMutex);

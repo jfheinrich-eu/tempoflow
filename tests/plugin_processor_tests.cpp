@@ -253,6 +253,44 @@ bool testPresetPatternAndMasterVolumeAreApplied()
                   "Master volume must scale the rendered level linearly");
 }
 
+bool testRealtimePresetStateExchangePublishesCompleteGenerations()
+{
+    tempoflow::plugin::PluginPresetStateExchange exchange;
+    tempoflow::plugin::RealtimePresetState consumedState;
+    std::uint64_t generation = 0;
+
+    const auto unchangedBeforePublish = !exchange.consumeIfChanged(consumedState, generation);
+
+    tempoflow::plugin::RealtimePresetState firstState;
+    firstState.beatCount = 2;
+    firstState.clicks[0] = tempoflow::audio::ClickType::accent;
+    firstState.clicks[1] = tempoflow::audio::ClickType::wood;
+    firstState.volume = 0.25F;
+    exchange.publish(firstState);
+
+    const auto consumedFirstGeneration = exchange.consumeIfChanged(consumedState, generation);
+    const auto unchangedAfterConsume = !exchange.consumeIfChanged(consumedState, generation);
+    const auto firstGeneration = generation;
+
+    tempoflow::plugin::RealtimePresetState secondState;
+    secondState.beatCount = 1;
+    secondState.clicks[0] = tempoflow::audio::ClickType::low;
+    secondState.volume = 0.75F;
+    exchange.publish(secondState);
+    const auto consumedSecondGeneration = exchange.consumeIfChanged(consumedState, generation);
+
+    return expect(unchangedBeforePublish, "An unpublished state exchange must remain unchanged") &&
+           expect(consumedFirstGeneration, "The first published state must be consumed") &&
+           expect(firstGeneration > 0, "The first published state must have a generation") &&
+           expect(unchangedAfterConsume, "A consumed generation must not be consumed twice") &&
+           expect(consumedSecondGeneration && generation > firstGeneration,
+                  "A later published state must advance the generation") &&
+           expect(consumedState.beatCount == secondState.beatCount &&
+                      consumedState.clicks[0] == tempoflow::audio::ClickType::low &&
+                      consumedState.volume == secondState.volume,
+                  "The state exchange must publish one complete generation");
+}
+
 bool testUndefinedHostBeatRemainsSilent()
 {
     tempoflow::plugin::TempoFlowAudioProcessor processor;
@@ -353,6 +391,7 @@ bool testFileErrorsIdentifyThePresetAndPreserveState()
     const auto created = file.replaceWithData(invalidPreset.toRawUTF8(), invalidPreset.getNumBytesAsUTF8());
     const auto result = created ? processor.loadPresetFile(file) : tempoflow::preset::RuntimePresetResult{};
     const auto removed = directory.deleteRecursively(false);
+    const auto missingResult = removed ? processor.loadPresetFile(file) : tempoflow::preset::RuntimePresetResult{};
 
     return expect(created, "The invalid preset fixture must be created") &&
            expect(!result.isValid() && !result.errors.empty(), "The invalid preset file must be rejected") &&
@@ -360,7 +399,13 @@ bool testFileErrorsIdentifyThePresetAndPreserveState()
                   "Preset file errors must identify the source file") &&
            expect(getSerializedState(processor) == stateBeforeFailure,
                   "A failed preset file load must preserve active state") &&
-           expect(removed, "The plug-in state test directory must be removable");
+           expect(removed, "The plug-in state test directory must be removable") &&
+           expect(!missingResult.isValid() && !missingResult.errors.empty(),
+                  "A missing preset file must be rejected") &&
+           expect(missingResult.errors.front().startsWith(file.getFullPathName() + ": "),
+                  "A missing preset file error must identify the source path") &&
+           expect(getSerializedState(processor) == stateBeforeFailure,
+                  "A missing preset file must preserve active state");
 }
 
 bool testAllReferencePresetsLoadIntoTheProcessor()
@@ -386,6 +431,7 @@ int main()
     const bool passed = testIdentityAndCapabilities() && testBusLayout() && testSilentProcessing() &&
                         testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail() &&
                         testSchedulerOverflowProducesSilence() && testPresetPatternAndMasterVolumeAreApplied() &&
+                        testRealtimePresetStateExchangePublishesCompleteGenerations() &&
                         testUndefinedHostBeatRemainsSilent() && testInvalidPresetLeavesActiveStateUnchanged() &&
                         testProjectStateRoundTripPreservesPreset() && testInvalidStatePayloadsAreRejected() &&
                         testFileErrorsIdentifyThePresetAndPreserveState() &&
