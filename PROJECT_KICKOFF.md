@@ -316,15 +316,35 @@ JUCE derives the VST3 class ID from the manufacturer and plug-in codes. Do not d
 
 Status: confirmed
 
-- Ship factory presets read-only in the plug-in bundle or installer.
-- Store user presets in a user-specific TempoFlow directory.
-- Never hard-code absolute paths.
-- Use JUCE to resolve platform-appropriate directories.
+- Keep `.tempoflow` as the TempoFlow interchange format. Cubase does not discover this format as a VST3 preset.
+- Let Cubase manage user-created `.vstpreset` files and VST3 project state through the standard host state callbacks.
+- Install shared factory `.vstpreset` files read-only through the installer.
+- Ship raw factory `.tempoflow` resources read-only in the plug-in bundle or installer when the plug-in needs them directly.
+- Import external `.tempoflow` files from a user-selected path. Do not silently move or copy the source file.
+- Never hard-code absolute paths. Resolve Windows known folders through JUCE or the operating-system APIs.
 
-Windows user-preset path:
+Windows user-created VST3 preset path:
 
 ```text
-%APPDATA%\TempoFlow\Presets
+%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow
+```
+
+Windows shared factory VST3 preset path:
+
+```text
+%PROGRAMDATA%\VST3 Presets\jfheinrich\TempoFlow
+```
+
+TempoFlow roaming configuration path:
+
+```text
+%APPDATA%\jfheinrich\TempoFlow
+```
+
+TempoFlow machine-local cache path:
+
+```text
+%LOCALAPPDATA%\jfheinrich\TempoFlow
 ```
 
 Factory-preset repository path:
@@ -397,12 +417,42 @@ Run unit tests, builds, validator checks, and Cubase integration tests on Window
 
 Status: confirmed
 
-- User presets use `%APPDATA%\TempoFlow\Presets`.
-- Factory presets originate from `presets/factory` and ship read-only with the plug-in or installer.
+- Cubase-managed user presets use `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
+- Shared factory `.vstpreset` files use `%PROGRAMDATA%\VST3 Presets\jfheinrich\TempoFlow`.
+- Raw factory `.tempoflow` resources originate from `presets/factory` and ship read-only with the plug-in or installer.
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor.
 
 The initial scaffold and internal plug-in-state integration are present. User-facing preset selection, remaining playback semantics, and external host validation remain release-blocking for the MVP.
+
+### VST-012 — Cubase preset and project-state validation
+
+Status: prepared
+
+The next step starts with the host integration that can be validated without a project-owned editor. A conclusive non-default state-restoration test requires an approved user-facing `.tempoflow` loading mechanism.
+
+1. Build and install the Release VST3 bundle.
+2. Load TempoFlow in Cubase Elements 15 and complete the discovery, playback, transport, and project-lifecycle smoke tests.
+3. Save the current default state as a Cubase-managed `.vstpreset`.
+4. Confirm that Cubase stores the user preset below `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
+5. Reload the `.vstpreset` and confirm that Cubase accepts the state without an error.
+6. Save and reopen a `.cpr` project and confirm that Cubase accepts the project state without an error.
+7. Repeat playback after stop, restart, seek, and a host meter change.
+8. Record the Cubase version, sample rate, buffer size, observed preset path, and result in the [Cubase validation protocol](docs/cubase-validation.md).
+
+After an approved `.tempoflow` loading mechanism exists:
+
+1. Load a non-default reference preset with distinguishable click roles and master volume.
+2. Save and reload it as a Cubase-managed `.vstpreset`.
+3. Save and reopen a `.cpr` project containing that state.
+4. Verify that both restore paths reproduce the non-default audible state and complete preset JSON.
+
+Acceptance criteria:
+
+- Cubase loads the Release plug-in without a blocklist or scan error.
+- Cubase can save and accept the default `.vstpreset` and project state without an error.
+- TempoFlow writes no separate project-state file and does not write into its VST3 bundle.
+- The full acceptance test remains incomplete until a non-default `.tempoflow` preset can be loaded through an explicitly approved user interaction.
 
 ## Open product decisions
 
@@ -503,4 +553,6 @@ The prototype is complete when Cubase Elements 15 loads it reliably; transport, 
 - [JUCE repository and requirements](https://github.com/juce-framework/JUCE/blob/9.0.2/README.md)
 - [JUCE CMake API](https://github.com/juce-framework/JUCE/blob/9.0.2/docs/CMake%20API.md)
 - [Steinberg VST3 development setup](https://steinbergmedia.github.io/vst3_dev_portal/pages/Getting%2BStarted/How%2Bto%2Bsetup%2Bmy%2Bsystem.html)
+- [Steinberg VST3 preset locations](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Preset%2BLocations.html)
+- [Steinberg VST3 presets and program lists](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Presets%2BProgram%2BLists/Index.html)
 - [Steinberg VST3 locations](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html)

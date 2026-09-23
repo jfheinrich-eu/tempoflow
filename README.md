@@ -127,6 +127,8 @@ The complete configure, Debug and Release build, test, validation, installation,
 
 Build and run Steinberg's reference command-line test host as described in the [VST 3 Validator guide](docs/steinberg-validator.md).
 
+Run and record the manual host checks with the [Cubase validation protocol](docs/cubase-validation.md).
+
 The [code-coverage guide](docs/code-coverage.md) documents local collection and the informational Codecov workflow.
 
 Validate a preset file or an entire directory:
