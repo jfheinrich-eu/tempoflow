@@ -6,6 +6,7 @@
         "CMAKE_CXX_STANDARD": "17",
         "CMAKE_CXX_STANDARD_REQUIRED": "ON"
     },
+    "cmake.ctest.testExplorerIntegrationEnabled": true,
     "C_Cpp.default.cppStandard": "c++17",
     "C_Cpp.default.cStandard": "c17",
     "files.associations": {
