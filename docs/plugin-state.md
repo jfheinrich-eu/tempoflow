@@ -10,7 +10,7 @@ TempoFlow uses the approved `.tempoflow` JSON document as its VST3 project state
 - `setStateInformation` validates host-provided state before publishing it.
 - `getLastPresetErrors` returns diagnostics from the most recent failed load or restore operation.
 
-The headless plug-in does not yet expose a user-facing file chooser or preset browser. The loading API is the integration boundary for a future approved selection mechanism. VST3 project save and restore already use the standard JUCE state callbacks.
+The headless plug-in intentionally relies on the host for native `.vstpreset` selection and saving. VST3 project save and restore already use the standard JUCE state callbacks. The `.tempoflow` loading API supports internal tooling and factory-preset generation; any future direct interchange-file import is separate from the standard host-managed preset workflow.
 
 ## State flow
 

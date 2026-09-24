@@ -4,9 +4,9 @@ This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It com
 
 ## Current limitation
 
-TempoFlow does not yet expose a user-facing `.tempoflow` loader. The current protocol can validate plug-in discovery, default playback, transport behavior, Cubase-managed preset creation, and project lifecycle. Saving and reloading only the default state does not conclusively prove restoration of a changed state.
+TempoFlow does not yet ship generated factory `.vstpreset` files. The current protocol can validate plug-in discovery, default playback, transport behavior, Cubase-managed preset creation, and project lifecycle. Saving and reloading only the default state does not conclusively prove restoration of a changed state.
 
-The non-default preset and project-state checks remain pending until an approved loading interaction exists.
+The non-default preset and project-state checks remain pending until the native factory `.vstpreset` files are generated and installed.
 
 ## Prerequisites
 
@@ -45,10 +45,10 @@ Expected user preset root:
 
 ## Phase 2 — Non-default state restoration
 
-Run this phase only after TempoFlow has an approved user-facing `.tempoflow` loading mechanism.
+Run this phase only after TempoFlow's native factory `.vstpreset` files have been generated and installed.
 
-1. Load a reference preset whose click roles and volume differ audibly from the default.
-2. Record the preset file name and expected audible behavior.
+1. Load a factory `.vstpreset` through Cubase whose click roles and volume differ audibly from the default.
+2. Record the factory preset name, source `.tempoflow` reference, and expected audible behavior.
 3. Save the state as a Cubase-managed `.vstpreset`.
 4. Switch to a different TempoFlow preset, then reload the saved `.vstpreset`.
 5. Verify that click roles and master volume match the originally saved non-default preset.
@@ -72,7 +72,7 @@ Sample rate:
 ASIO buffer size:
 Installed VST3 path:
 Observed .vstpreset path:
-Reference .tempoflow preset, if applicable:
+Factory .vstpreset and source .tempoflow preset, if applicable:
 
 Release CTest: PASS / FAIL / NOT RUN
 Steinberg validator: PASS / FAIL / NOT RUN

@@ -27,7 +27,7 @@ The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal plug-in preset loading, and VST3 project-state restoration are available. A user-facing preset selector, grouping-driven playback, and audible triplet subdivisions are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal preset-state loading, and VST3 project-state restoration are available. Native factory `.vstpreset` generation, grouping-driven playback, and audible triplet subdivisions are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
