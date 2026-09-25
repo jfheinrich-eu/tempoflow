@@ -154,6 +154,42 @@ The system-wide 64-bit location is `C:\Program Files\Common Files\VST3` and norm
 
 After installation, start Cubase and allow it to rescan VST3 plug-ins. TempoFlow appears as a mono-output instrument.
 
+## Generate and install factory presets
+
+Build the native factory presets after building the Release VST3:
+
+```powershell
+cmake --build build/windows-x64-release `
+  --config Release `
+  --target TempoFlowFactoryPresets
+```
+
+The target validates every `.tempoflow` source, loads the actual built VST3 component, writes the native container with Steinberg's `PresetFile` helper, and verifies a round trip through a fresh component. The seven generated files are written to:
+
+```text
+build/windows-x64-release/factory-presets/Release
+```
+
+Preview the per-user development installation:
+
+```powershell
+.\scripts\install-factory-presets.ps1 -Configuration Release -WhatIf
+```
+
+Install the presets:
+
+```powershell
+.\scripts\install-factory-presets.ps1 -Configuration Release
+```
+
+The destination is Steinberg's per-user factory preset location:
+
+```text
+%APPDATA%\VST3 Presets\jfheinrich\TempoFlow
+```
+
+This location differs from Cubase's user-created preset location below `%USERPROFILE%\Documents\VST3 Presets`. Do not copy `.tempoflow` files into either VST3 preset directory.
+
 ## Troubleshooting
 
 ### `cmake` or `cl` is not found
@@ -167,3 +203,7 @@ Stop before running another configure command. Remove only the generated root ar
 ### Cubase does not find TempoFlow
 
 Verify that the complete bundle exists at one of the predefined VST3 locations and restart Cubase. If the bundle is present but rejected, run `Invoke-VstValidator` before investigating Cubase-specific behavior.
+
+### Cubase does not list the factory presets
+
+Verify that all seven `.vstpreset` files exist below `%APPDATA%\VST3 Presets\jfheinrich\TempoFlow`. Restart Cubase after installing them. Files with the `.tempoflow` suffix are interchange sources and are not discoverable native VST3 presets.

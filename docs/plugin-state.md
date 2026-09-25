@@ -12,6 +12,8 @@ TempoFlow uses the approved `.tempoflow` JSON document as its VST3 project state
 
 The headless plug-in intentionally relies on the host for native `.vstpreset` selection and saving. VST3 project save and restore already use the standard JUCE state callbacks. The `.tempoflow` loading API supports internal tooling and factory-preset generation; any future direct interchange-file import is separate from the standard host-managed preset workflow.
 
+`TempoFlowVst3PresetGenerator` loads the built VST3 module, locates its audio component and immutable processor class ID, applies each validated reference JSON through `IComponent::setState`, and serializes the result with Steinberg's `PresetFile` helper. It then loads every generated container into a fresh component and compares the restored JSON state before writing the file. This exercises the same JUCE VST3 state wrapper that Cubase uses instead of duplicating its binary representation.
+
 ## State flow
 
 ```mermaid

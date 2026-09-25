@@ -175,6 +175,113 @@ target_link_libraries(
         TempoFlowPresetValidation
 )
 
+if(WIN32)
+    set(
+        TEMPOFLOW_VST3_SDK_DIR
+        "${juce_SOURCE_DIR}/modules/juce_audio_processors_headless/format_types/VST3_SDK"
+    )
+
+    juce_add_console_app(
+        TempoFlowVst3PresetGenerator
+        PRODUCT_NAME "TempoFlow VST3 Preset Generator"
+    )
+
+    target_sources(
+        TempoFlowVst3PresetGenerator
+        PRIVATE
+            tools/vst3_preset_generator.cpp
+            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module.cpp"
+            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_win32.cpp"
+    )
+
+    set_source_files_properties(
+        "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module.cpp"
+        PROPERTIES
+            COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS
+    )
+
+    target_compile_features(
+        TempoFlowVst3PresetGenerator
+        PRIVATE
+            cxx_std_17
+    )
+
+    target_compile_definitions(
+        TempoFlowVst3PresetGenerator
+        PRIVATE
+            JUCE_USE_CURL=0
+            JUCE_WEB_BROWSER=0
+    )
+
+    target_link_libraries(
+        TempoFlowVst3PresetGenerator
+        PRIVATE
+            TempoFlowPresetValidation
+            juce::juce_audio_processors_headless
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_warning_flags
+    )
+
+    set(
+        TEMPOFLOW_FACTORY_PRESET_NAMES
+        "12-8 Blues"
+        "Beat 1 Only"
+        "Beats 2 + 4"
+        "Slow Blues Shuffle"
+        "Standard 3-4"
+        "Standard 4-4"
+        "Standard 6-8"
+    )
+
+    set(
+        TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR
+        "${CMAKE_CURRENT_SOURCE_DIR}/docs/Preset Format 1.0/presets"
+    )
+    set(
+        TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/factory-presets/$<CONFIG>"
+    )
+
+    set(TEMPOFLOW_FACTORY_PRESET_SOURCES)
+    set(TEMPOFLOW_FACTORY_PRESET_OUTPUTS)
+    foreach(preset_name IN LISTS TEMPOFLOW_FACTORY_PRESET_NAMES)
+        list(
+            APPEND
+            TEMPOFLOW_FACTORY_PRESET_SOURCES
+            "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}/${preset_name}.tempoflow"
+        )
+        list(
+            APPEND
+            TEMPOFLOW_FACTORY_PRESET_OUTPUTS
+            "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}/${preset_name}.vstpreset"
+        )
+    endforeach()
+
+    add_custom_command(
+        OUTPUT
+            ${TEMPOFLOW_FACTORY_PRESET_OUTPUTS}
+        COMMAND
+            "${CMAKE_COMMAND}" -E make_directory "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
+        COMMAND
+            "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
+            "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+            "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
+            "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
+        DEPENDS
+            TempoFlowPlugin_VST3
+            TempoFlowVst3PresetGenerator
+            ${TEMPOFLOW_FACTORY_PRESET_SOURCES}
+        COMMENT "Generating native TempoFlow VST3 factory presets"
+        VERBATIM
+    )
+
+    add_custom_target(
+        TempoFlowFactoryPresets
+        DEPENDS
+            ${TEMPOFLOW_FACTORY_PRESET_OUTPUTS}
+    )
+endif()
+
 juce_add_console_app(
     TempoFlowToolchainCheck
     PRODUCT_NAME "TempoFlow Toolchain Check"
@@ -369,6 +476,19 @@ if(BUILD_TESTING)
 
     if(WIN32)
         find_program(TEMPOFLOW_POWERSHELL_EXECUTABLE NAMES pwsh powershell REQUIRED)
+        add_test(
+            NAME vst3-factory-preset-generation
+            COMMAND
+                "${TEMPOFLOW_POWERSHELL_EXECUTABLE}"
+                -NoLogo
+                -NoProfile
+                -ExecutionPolicy Bypass
+                -File "${CMAKE_CURRENT_SOURCE_DIR}/tests/vst3-factory-presets.tests.ps1"
+                -GeneratorPath "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
+                -PluginPath "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+                -SourceDirectory "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
+                -OutputRoot "${CMAKE_CURRENT_BINARY_DIR}/factory-presets-test/$<CONFIG>"
+        )
         add_test(
             NAME preset-reparse-point
             COMMAND

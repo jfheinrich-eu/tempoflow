@@ -84,7 +84,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, and VST3 project-state restoration. User-facing preset selection, grouping and triplet playback, and external Cubase validation remain incomplete.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase discovery validation, grouping-driven playback, and triplet playback remain incomplete.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -463,7 +463,7 @@ Acceptance criteria:
 
 ### VST-013 — Native VST3 factory presets
 
-Status: confirmed
+Status: implemented; Cubase acceptance pending
 
 TempoFlow is a simple VST3 plug-in and follows Steinberg's host-managed preset model. Cubase provides the user interface for selecting and saving presets. TempoFlow does not add a custom editor or a VST3 program list for this purpose.
 
@@ -491,6 +491,15 @@ Implementation rules:
 - Keep preset generation outside the audio thread and outside normal plug-in playback.
 - Keep `.tempoflow` as the platform-independent source format and `.vstpreset` as the host-facing distribution format.
 - Treat direct `.tempoflow` import and export in the VST3 as separate interoperability work requiring its own decision.
+
+Implementation:
+
+- `TempoFlowVst3PresetGenerator` loads the built TempoFlow VST3 module through Steinberg's hosting helper.
+- The generator obtains the processor class ID from the module factory rather than duplicating or hard-coding it.
+- Each validated `.tempoflow` document is applied through `IComponent::setState` and serialized through Steinberg's `PresetFile` helper.
+- Each generated container is restored into a fresh component and its JSON state is compared with the source before the file is written.
+- The `TempoFlowFactoryPresets` build target writes all seven files below `build/<preset>/factory-presets/<configuration>`.
+- `scripts/install-factory-presets.ps1` installs the exact expected set into the per-user factory location and supports `-WhatIf`.
 
 Acceptance criteria:
 
@@ -572,7 +581,7 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 
 ### E — Presets
 
-- Load preset state. Internal `.tempoflow` validation and state application are implemented; native VST-013 factory `.vstpreset` generation is confirmed but not implemented.
+- Load preset state. Internal `.tempoflow` validation, state application, and native VST-013 factory `.vstpreset` generation are implemented; Cubase acceptance remains pending.
 - Validate structure and semantics. Implemented.
 - Report errors without destabilizing active state. Implemented.
 - Use all seven presets as integration tests. Implemented.

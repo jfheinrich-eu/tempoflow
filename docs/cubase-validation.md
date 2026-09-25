@@ -4,15 +4,14 @@ This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It com
 
 ## Current limitation
 
-TempoFlow does not yet ship generated factory `.vstpreset` files. The current protocol can validate plug-in discovery, default playback, transport behavior, Cubase-managed preset creation, and project lifecycle. Saving and reloading only the default state does not conclusively prove restoration of a changed state.
-
-The non-default preset and project-state checks remain pending until the native factory `.vstpreset` files are generated and installed.
+TempoFlow generates native factory `.vstpreset` files, but Cubase discovery and audible non-default state restoration still require manual validation. Automated generation verifies the Steinberg container, processor class ID, and component-state round trip before writing each file.
 
 ## Prerequisites
 
 - Use a clean checkout of the intended commit.
 - Run the Debug and Release CTest presets successfully.
 - Build, validate, and install the Release bundle by following [Building the TempoFlow VST3](building-vst3.md).
+- Build the `TempoFlowFactoryPresets` target and install the generated presets with `scripts/install-factory-presets.ps1`.
 - Confirm that `Invoke-VstValidator` reports 47 passed tests and no failures.
 - Close Cubase before replacing an installed VST3 bundle.
 
@@ -26,6 +25,12 @@ Expected user preset root:
 
 ```text
 %USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow
+```
+
+Expected per-user factory preset root:
+
+```text
+%APPDATA%\VST3 Presets\jfheinrich\TempoFlow
 ```
 
 ## Phase 1 — Host smoke test
@@ -44,8 +49,6 @@ Expected user preset root:
 12. Save the Cubase project, close it, reopen it, and confirm that the plug-in loads and plays.
 
 ## Phase 2 — Non-default state restoration
-
-Run this phase only after TempoFlow's native factory `.vstpreset` files have been generated and installed.
 
 1. Load a factory `.vstpreset` through Cubase whose click roles and volume differ audibly from the default.
 2. Record the factory preset name, source `.tempoflow` reference, and expected audible behavior.
