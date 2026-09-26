@@ -27,7 +27,7 @@ The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal plug-in preset loading, and VST3 project-state restoration are available. A user-facing preset selector, grouping-driven playback, and audible triplet subdivisions are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal preset-state loading, VST3 project-state restoration, and native factory `.vstpreset` generation are available. Grouping-driven playback and audible triplet subdivisions are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -122,6 +122,28 @@ build/windows-x64-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
 ```
 
 Building does not copy the plug-in into a system or user VST3 directory. Installation remains an explicit step.
+
+Generate the seven native factory presets from the validated `.tempoflow` sources:
+
+```powershell
+cmake --build build/windows-x64-release `
+  --config Release `
+  --target TempoFlowFactoryPresets
+```
+
+The generated and round-trip-verified files are written to:
+
+```text
+build/windows-x64-release/factory-presets/Release
+```
+
+Install them into Steinberg's per-user factory preset location for development:
+
+```powershell
+.\scripts\install-factory-presets.ps1 -Configuration Release
+```
+
+Use `-WhatIf` to preview the installation. The script installs only the expected seven `.vstpreset` files under `%APPDATA%\VST3 Presets\jfheinrich\TempoFlow`. Cubase-managed user presets remain under `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
 
 The complete configure, Debug and Release build, test, validation, installation, and troubleshooting procedure is documented in [Building the TempoFlow VST3](docs/building-vst3.md).
 

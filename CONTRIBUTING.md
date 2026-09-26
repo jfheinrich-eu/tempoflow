@@ -33,6 +33,7 @@ See [Building the TempoFlow VST3](docs/building-vst3.md) for target-only builds,
 - Keep audio-thread code allocation-free, lock-free, exception-free, and free of I/O.
 - Add tests for new behavior and regressions.
 - Preserve preset compatibility and immutable plug-in identifiers.
+- **Always follow the official Steinberg VST3 standards for plug-in behavior, lifecycle, formats, locations, preset handling, and host integration before introducing a project-specific solution.** Any necessary deviation requires an explicit engineering decision that documents the standard approach, the incompatibility or limitation, and the verification strategy.
 - Do not commit generated output, secrets, personal data, or unlicensed assets.
 - Sign off commits with `git commit -s` to certify the [Developer Certificate of Origin](https://developercertificate.org/).
 

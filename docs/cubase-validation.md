@@ -2,17 +2,18 @@
 
 This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It complements automated unit tests and Steinberg's command-line validator; it does not replace either one.
 
-## Current limitation
+## Validation status
 
-TempoFlow does not yet expose a user-facing `.tempoflow` loader. The current protocol can validate plug-in discovery, default playback, transport behavior, Cubase-managed preset creation, and project lifecycle. Saving and reloading only the default state does not conclusively prove restoration of a changed state.
+Manual Cubase acceptance completed successfully on September 26, 2026. Cubase discovered all seven generated factory `.vstpreset` files, loaded the expected audible states, restored a Cubase-managed user preset, and restored the same non-default state after reopening a project.
 
-The non-default preset and project-state checks remain pending until an approved loading interaction exists.
+Automated generation additionally verifies the Steinberg container, processor class ID, component-state round trip, and byte reproducibility before accepting the files.
 
 ## Prerequisites
 
 - Use a clean checkout of the intended commit.
 - Run the Debug and Release CTest presets successfully.
 - Build, validate, and install the Release bundle by following [Building the TempoFlow VST3](building-vst3.md).
+- Build the `TempoFlowFactoryPresets` target and install the generated presets with `scripts/install-factory-presets.ps1`.
 - Confirm that `Invoke-VstValidator` reports 47 passed tests and no failures.
 - Close Cubase before replacing an installed VST3 bundle.
 
@@ -26,6 +27,12 @@ Expected user preset root:
 
 ```text
 %USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow
+```
+
+Expected per-user factory preset root:
+
+```text
+%APPDATA%\VST3 Presets\jfheinrich\TempoFlow
 ```
 
 ## Phase 1 — Host smoke test
@@ -45,10 +52,8 @@ Expected user preset root:
 
 ## Phase 2 — Non-default state restoration
 
-Run this phase only after TempoFlow has an approved user-facing `.tempoflow` loading mechanism.
-
-1. Load a reference preset whose click roles and volume differ audibly from the default.
-2. Record the preset file name and expected audible behavior.
+1. Load a factory `.vstpreset` through Cubase whose click roles and volume differ audibly from the default.
+2. Record the factory preset name, source `.tempoflow` reference, and expected audible behavior.
 3. Save the state as a Cubase-managed `.vstpreset`.
 4. Switch to a different TempoFlow preset, then reload the saved `.vstpreset`.
 5. Verify that click roles and master volume match the originally saved non-default preset.
@@ -58,6 +63,47 @@ Run this phase only after TempoFlow has an approved user-facing `.tempoflow` loa
 9. Confirm through diagnostic tooling or a focused test build that the complete `.tempoflow` JSON survived both restore paths.
 
 ## Result record
+
+### September 26, 2026
+
+```text
+Date: 2026-09-26
+Tester: Joerg Heinrich
+TempoFlow commit: 7ac5eda
+Cubase edition and version: Cubase Elements 15; maintenance version not recorded
+Windows version: Windows 10 x64; build not recorded
+Audio interface and driver: Not recorded
+Sample rate: Not recorded
+ASIO buffer size: Not recorded
+Installed VST3 path: %LOCALAPPDATA%\Programs\Common\VST3\TempoFlow.vst3
+Observed user preset path: %USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow
+Observed factory preset path: %APPDATA%\VST3 Presets\jfheinrich\TempoFlow
+Factory presets: All seven generated reference presets
+
+Debug CTest: PASS, 8/8
+Release CTest: PASS, 8/8
+Steinberg validator: PASS, 47/47
+Plug-in discovery: PASS
+Default playback: PASS
+Stop and restart: PASS
+Seek: PASS
+Loop: PASS
+Tempo change: PASS
+Meter change: PASS
+Factory preset discovery: PASS, 7/7
+Factory preset selection and audible state: PASS, 7/7
+Cubase-managed user preset restoration: PASS
+Cubase project reopen: PASS
+Non-default project-state restoration: PASS
+
+Notes:
+An initial playback-synchronous Cubase window flicker was observed when the
+window occupied approximately 90% of the monitor. Follow-up checks found no
+TempoFlow preset, state, or audio-processing failure. The visual behavior is
+therefore not a VST-012 or VST-013 acceptance blocker.
+```
+
+### Template
 
 Copy this section for each validation run.
 
@@ -72,7 +118,7 @@ Sample rate:
 ASIO buffer size:
 Installed VST3 path:
 Observed .vstpreset path:
-Reference .tempoflow preset, if applicable:
+Factory .vstpreset and source .tempoflow preset, if applicable:
 
 Release CTest: PASS / FAIL / NOT RUN
 Steinberg validator: PASS / FAIL / NOT RUN
