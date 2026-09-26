@@ -430,13 +430,13 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor. Steinberg's host-managed preset workflow does not require one.
 
-The initial scaffold and internal plug-in-state integration are present. User-facing preset selection, remaining playback semantics, and external host validation remain release-blocking for the MVP.
+The initial scaffold, internal plug-in-state integration, native factory-preset selection, and external Cubase state restoration are validated. Remaining playback semantics are still release-blocking for the MVP.
 
 ### VST-012 — Cubase preset and project-state validation
 
-Status: prepared
+Status: confirmed
 
-The initial smoke test covers host integration with the default state. A conclusive non-default state-restoration test follows after the native factory `.vstpreset` files defined by VST-013 are generated and installed.
+The completed validation covers host integration with the default state and conclusive non-default state restoration through the native factory `.vstpreset` files defined by VST-013.
 
 1. Build and install the Release VST3 bundle.
 2. Load TempoFlow in Cubase Elements 15 and complete the discovery, playback, transport, and project-lifecycle smoke tests.
@@ -447,7 +447,7 @@ The initial smoke test covers host integration with the default state. A conclus
 7. Repeat playback after stop, restart, seek, and a host meter change.
 8. Record the Cubase version, sample rate, buffer size, observed preset path, and result in the [Cubase validation protocol](docs/cubase-validation.md).
 
-After the VST-013 factory `.vstpreset` files exist:
+Non-default validation:
 
 1. Load a non-default factory `.vstpreset` with distinguishable click roles and master volume through Cubase.
 2. Save and reload it as a Cubase-managed `.vstpreset`.
@@ -459,11 +459,19 @@ Acceptance criteria:
 - Cubase loads the Release plug-in without a blocklist or scan error.
 - Cubase can save and accept the default `.vstpreset` and project state without an error.
 - TempoFlow writes no separate project-state file and does not write into its VST3 bundle.
-- The full acceptance test remains incomplete until Cubase can load a non-default VST-013 factory `.vstpreset`.
+- Cubase loads and restores a non-default VST-013 factory preset, a Cubase-managed user copy, and the corresponding `.cpr` project state.
+
+Validation completed on September 26, 2026:
+
+- Cubase Elements 15 discovered the Release VST3 and all seven installed factory presets.
+- The tested preset names, click roles, and volume produced the expected audible behavior.
+- A Cubase-managed user preset restored the selected non-default state.
+- Reopening a `.cpr` project restored the same non-default state.
+- Debug and Release CTest each passed 8 of 8 tests, and Steinberg's validator passed 47 of 47 tests.
 
 ### VST-013 — Native VST3 factory presets
 
-Status: implemented; Cubase acceptance pending
+Status: confirmed
 
 TempoFlow is a simple VST3 plug-in and follows Steinberg's host-managed preset model. Cubase provides the user interface for selecting and saving presets. TempoFlow does not add a custom editor or a VST3 program list for this purpose.
 
@@ -508,6 +516,8 @@ Acceptance criteria:
 - Cubase can save a user copy in the standard User location and reload it.
 - A Cubase `.cpr` project restores the selected non-default preset state.
 - Generated files use the correct processor class ID and pass automated structural and state-restoration checks.
+
+Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed.
 
 ## Open product decisions
 
@@ -581,7 +591,7 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 
 ### E — Presets
 
-- Load preset state. Internal `.tempoflow` validation, state application, and native VST-013 factory `.vstpreset` generation are implemented; Cubase acceptance remains pending.
+- Load preset state. Internal `.tempoflow` validation, state application, native VST-013 factory `.vstpreset` generation, and Cubase acceptance are confirmed.
 - Validate structure and semantics. Implemented.
 - Report errors without destabilizing active state. Implemented.
 - Use all seven presets as integration tests. Implemented.

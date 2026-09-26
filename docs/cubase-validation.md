@@ -2,9 +2,11 @@
 
 This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It complements automated unit tests and Steinberg's command-line validator; it does not replace either one.
 
-## Current limitation
+## Validation status
 
-TempoFlow generates native factory `.vstpreset` files, but Cubase discovery and audible non-default state restoration still require manual validation. Automated generation verifies the Steinberg container, processor class ID, and component-state round trip before writing each file.
+Manual Cubase acceptance completed successfully on September 26, 2026. Cubase discovered all seven generated factory `.vstpreset` files, loaded the expected audible states, restored a Cubase-managed user preset, and restored the same non-default state after reopening a project.
+
+Automated generation additionally verifies the Steinberg container, processor class ID, component-state round trip, and byte reproducibility before accepting the files.
 
 ## Prerequisites
 
@@ -61,6 +63,47 @@ Expected per-user factory preset root:
 9. Confirm through diagnostic tooling or a focused test build that the complete `.tempoflow` JSON survived both restore paths.
 
 ## Result record
+
+### September 26, 2026
+
+```text
+Date: 2026-09-26
+Tester: Joerg Heinrich
+TempoFlow commit: 7ac5eda
+Cubase edition and version: Cubase Elements 15; maintenance version not recorded
+Windows version: Windows 10 x64; build not recorded
+Audio interface and driver: Not recorded
+Sample rate: Not recorded
+ASIO buffer size: Not recorded
+Installed VST3 path: %LOCALAPPDATA%\Programs\Common\VST3\TempoFlow.vst3
+Observed user preset path: %USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow
+Observed factory preset path: %APPDATA%\VST3 Presets\jfheinrich\TempoFlow
+Factory presets: All seven generated reference presets
+
+Debug CTest: PASS, 8/8
+Release CTest: PASS, 8/8
+Steinberg validator: PASS, 47/47
+Plug-in discovery: PASS
+Default playback: PASS
+Stop and restart: PASS
+Seek: PASS
+Loop: PASS
+Tempo change: PASS
+Meter change: PASS
+Factory preset discovery: PASS, 7/7
+Factory preset selection and audible state: PASS, 7/7
+Cubase-managed user preset restoration: PASS
+Cubase project reopen: PASS
+Non-default project-state restoration: PASS
+
+Notes:
+An initial playback-synchronous Cubase window flicker was observed when the
+window occupied approximately 90% of the monitor. Follow-up checks found no
+TempoFlow preset, state, or audio-processing failure. The visual behavior is
+therefore not a VST-012 or VST-013 acceptance blocker.
+```
+
+### Template
 
 Copy this section for each validation run.
 
