@@ -164,9 +164,7 @@ cmake --build build/windows-x64-release `
   --target TempoFlowFactoryPresets
 ```
 
-The target validates every `.tempoflow` source, loads the actual built VST3 component, writes the native container with Steinberg's `PresetFile` helper, and verifies a round trip through a fresh component. It also writes a VST3 `Info` chunk so Cubase can associate the preset with the exact VST3 class and catalogue it by author, plug-in, vendor, plug-in category, musical category, musical instrument, musical character, and a supported musical style. Plug-in identity, category, and class ID come from the built VST3 class. The platform-neutral `metadata.category` value is translated only when it has a valid Steinberg musical-style equivalent.
-
-The seven generated files are written to:
+The target validates every `.tempoflow` source, loads the actual built VST3 component, writes the native container with Steinberg's `PresetFile` helper, and verifies a round trip through a fresh component. The seven generated files are written to:
 
 ```text
 build/windows-x64-release/factory-presets/Release
@@ -209,21 +207,3 @@ Verify that the complete bundle exists at one of the predefined VST3 locations a
 ### Cubase does not list the factory presets
 
 Verify that all seven `.vstpreset` files exist below `%APPDATA%\VST3 Presets\jfheinrich\TempoFlow`. Restart Cubase after installing them. Files with the `.tempoflow` suffix are interchange sources and are not discoverable native VST3 presets.
-
-### Cubase lists presets but leaves its search filters empty
-
-Rebuild and reinstall the factory presets. Current generated files contain a VST3 `Info` chunk with Cubase catalogue metadata; older generated files contain only component state. Rescan the preset location in MediaBay or restart Cubase after replacing the files.
-
-Cubase Elements 15 exposes the embedded attributes under these result-column groups:
-
-| VST3 metadata | Cubase result column |
-| --- | --- |
-| `MediaAuthor` | Staff > Author |
-| `MusicalCategory` | Musical > Category |
-| `MusicalInstrument` | Musical > Category and Sub Category |
-| `MusicalCharacter` | Musical > Character |
-| `PlugInName` | Plugin > Plugin Name |
-| `PlugInVendor` | Plugin > Plugin Vendor |
-| `PlugInCategory` | Plugin > Plugin Category |
-
-Open the full MediaBay window and use **Set up Result Columns** to expose attributes that are hidden by default. The compact preset browser does not display every available field.

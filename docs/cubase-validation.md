@@ -8,8 +8,6 @@ Manual Cubase acceptance completed successfully on September 26, 2026. Cubase di
 
 Automated generation additionally verifies the Steinberg container, processor class ID, component-state round trip, and byte reproducibility before accepting the files.
 
-The initial September 26 acceptance run predated generated VST3 catalogue metadata. Preset discovery, loading, and state restoration passed, but Cubase's preset search filters were empty. A follow-up run with metadata-enabled presets confirmed all expected catalogue fields in the full MediaBay result columns. Cubase Elements 15 displays `MediaAuthor` as **Staff > Author**; it does not use the technical VST3 attribute name in the user interface.
-
 ## Prerequisites
 
 - Use a clean checkout of the intended commit.
@@ -94,14 +92,6 @@ Tempo change: PASS
 Meter change: PASS
 Factory preset discovery: PASS, 7/7
 Factory preset selection and audible state: PASS, 7/7
-Factory preset PlugInName field: PASS
-Factory preset PlugInVendor field: PASS
-Factory preset PlugInCategory field: PASS
-Factory preset MediaAuthor field: PASS, displayed as Staff > Author
-Factory preset MusicalCategory field: PASS
-Factory preset MusicalInstrument field: PASS
-Factory preset MusicalCharacter field: PASS
-Factory preset MusicalStyle field: PASS where applicable
 Cubase-managed user preset restoration: PASS
 Cubase project reopen: PASS
 Non-default project-state restoration: PASS
@@ -140,14 +130,6 @@ Loop: PASS / FAIL
 Tempo change: PASS / FAIL
 Meter change: PASS / FAIL
 Default .vstpreset save and load: PASS / FAIL
-Factory preset PlugInName field: PASS / FAIL / NOT RUN
-Factory preset PlugInVendor field: PASS / FAIL / NOT RUN
-Factory preset PlugInCategory field: PASS / FAIL / NOT RUN
-Factory preset MediaAuthor field: PASS / FAIL / NOT RUN
-Factory preset MusicalCategory field: PASS / FAIL / NOT RUN
-Factory preset MusicalInstrument field: PASS / FAIL / NOT RUN
-Factory preset MusicalCharacter field: PASS / FAIL / NOT RUN
-Factory preset MusicalStyle field: PASS / FAIL / NOT RUN
 Cubase project reopen: PASS / FAIL
 Non-default .vstpreset restoration: PASS / FAIL / BLOCKED
 Non-default project-state restoration: PASS / FAIL / BLOCKED
