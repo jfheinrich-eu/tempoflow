@@ -505,13 +505,17 @@ Implementation:
 - `TempoFlowVst3PresetGenerator` loads the built TempoFlow VST3 module through Steinberg's hosting helper.
 - The generator obtains the processor class ID from the module factory rather than duplicating or hard-coding it.
 - Each validated `.tempoflow` document is applied through `IComponent::setState` and serialized through Steinberg's `PresetFile` helper.
+- Each generated preset contains a VST3 `Info` chunk. Plug-in name, vendor, category, and `VST3UniqueID` come from the built VST3 class; author and compatible musical style come from platform-neutral TempoFlow metadata.
+- TempoFlow presets are classified as `Drum&Perc|Beats` and `Percussive` using Steinberg's predefined vocabulary. Project-specific categories such as `practice` are not misrepresented as musical styles.
 - Each generated container is restored into a fresh component and its JSON state is compared with the source before the file is written.
+- Automated generation verifies the metadata chunk and its expected catalogue attributes in addition to state restoration and byte reproducibility.
 - The `TempoFlowFactoryPresets` build target writes all seven files below `build/<preset>/factory-presets/<configuration>`.
 - `scripts/install-factory-presets.ps1` installs the exact expected set into the per-user factory location and supports `-WhatIf`.
 
 Acceptance criteria:
 
 - Cubase discovers all seven installed factory `.vstpreset` files without a TempoFlow file chooser.
+- Cubase associates every preset with TempoFlow's VST3 class and exposes its author, plug-in name, vendor, plug-in category, musical category, instrument, character, and applicable style in its preset search filters.
 - Loading each preset restores the expected name, click roles, master volume, and complete validated JSON.
 - Cubase can save a user copy in the standard User location and reload it.
 - A Cubase `.cpr` project restores the selected non-default preset state.
