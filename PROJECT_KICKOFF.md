@@ -4,7 +4,7 @@ aliases:
   - TempoFlow Kickoff
 project: TempoFlow
 status: implementation
-updated: 2026-09-20
+updated: 2026-09-27
 tags:
   - tempoflow
   - metronome
@@ -28,6 +28,14 @@ TempoFlow is a cross-platform metronome system. Its initial product family consi
 The PWA and VST3 plug-in do not share application source code. They share the preset schema, musical semantics, validation rules, and preset files.
 
 The first engineering target is a lean VST3 MVP for Cubase Elements 15. It follows the host with sample accuracy, generates metronome audio, and exposes native factory `.vstpreset` files generated from the existing `.tempoflow` reference presets. Direct cloud or Base44 integration is explicitly outside the MVP.
+
+### Version terminology
+
+TempoFlow uses three independent version tracks:
+
+- **Preset Format 1.0** identifies the stable, platform-independent `.tempoflow` interchange contract. It is not a product version.
+- **VST3 MVP 0.1.0** identifies the current Windows x64 plug-in prototype target for Cubase Elements 15.
+- **TempoFlow 1.0** will identify a future product release. Its scope is not defined by the VST3 MVP, and no VST3 MVP completion claim includes completion of the PWA.
 
 ## Product concept
 
@@ -84,7 +92,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase discovery validation, grouping-driven playback, and triplet playback remain incomplete.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, and project-state restoration. Grouping-driven playback and triplet playback remain incomplete.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -188,7 +196,7 @@ Host tempo and time signature override preset values at runtime without modifyin
 
 The MVP uses synthetic clicks so unresolved sample licenses cannot block the prototype.
 
-## VST3 MVP
+## VST3 MVP 0.1.0
 
 The first viable prototype must:
 
@@ -309,7 +317,7 @@ Status: confirmed
 - JUCE manufacturer code: `Jfhe`
 - JUCE plug-in code: `Tflo`
 - Bundle identifier: `eu.jfheinrich.tempoflow`
-- Initial version: `0.1.0`
+- VST3 MVP plug-in version: `0.1.0`
 
 JUCE derives the VST3 class ID from the manufacturer and plug-in codes. Do not define a separate ID for this new JUCE plug-in. Product and manufacturer identifiers become immutable after first release.
 
@@ -521,7 +529,7 @@ Acceptance criteria:
 - A Cubase `.cpr` project restores the selected non-default preset state.
 - Generated files use the correct processor class ID and pass automated structural and state-restoration checks.
 
-Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed.
+Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed the expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**.
 
 ## Open product decisions
 
