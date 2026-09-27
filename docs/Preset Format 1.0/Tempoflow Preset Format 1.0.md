@@ -16,7 +16,10 @@ updated:
   - by: Codex
     at: 2026-09-11T00:00:00+02:00
     comment: Synchronized, translated, and consolidated the approved specification
-version: 1.1.2
+  - by: Codex
+    at: 2026-09-27T00:00:00+02:00
+    comment: Defined grouping playback semantics and click-role precedence
+version: 1.1.3
 status: approved
 tags:
   - tempoflow
@@ -399,8 +402,57 @@ Grouping is musically meaningful. In 7/8, `2+2+3`, `3+2+2`, and `2+3+2` are dist
 [2, 2]    -> invalid for 7/8
 ```
 
+### 40.1 Group starts
+
+Beat 1 begins the first group. Each following group begins after the cumulative size of all preceding groups. For example, grouping `[3, 2]` produces group starts on beats 1 and 4.
+
+An all-singleton grouping such as `[1, 1, 1, 1]` represents an ordinary simple meter. It makes only beat 1 eligible for an automatic grouping accent. This prevents a standard 4/4 pattern from accenting every beat.
+
+For every other valid grouping, each calculated group start is eligible for an automatic grouping accent.
+
+### 40.2 Click-role precedence
+
+`pattern.beats[].click` remains the primary musical instruction. Grouping promotes only the neutral `normal` role at an eligible group start.
+
+| Pattern role at group start | Effective role |
+|---|---|
+| `normal` | `accent` |
+| `accent` | `accent` |
+| `high` | `high` |
+| `low` | `low` |
+| `wood` | `wood` |
+| `mute` | `mute` |
+
+Outside an eligible group start, the effective role always equals the pattern role. In particular, grouping must never turn `mute` into an audible click or replace an explicitly selected `high`, `low`, or `wood` role.
+
+### 40.3 Required examples
+
+The following examples assume `accent` on beat 1 and `normal` on every other beat:
+
+| Meter | Grouping | Effective accent beats |
+|---|---|---|
+| 4/4 | `[1, 1, 1, 1]` | 1 |
+| 6/8 | `[3, 3]` | 1 and 4 |
+| 5/4 | `[3, 2]` | 1 and 4 |
+| 12/8 | `[3, 3, 3, 3]` | 1, 4, 7, and 10 |
+
+An explicit non-neutral role changes the corresponding result. For example, `wood` on beat 4 of the 6/8 example remains `wood`, and `mute` on beat 4 remains silent.
+
+### 40.4 Host Mode meter mismatch
+
+Grouping-based promotion applies in Host Mode only when the host numerator and denominator exactly match the preset meter. The host remains the timing authority.
+
+When the host meter differs from the preset meter:
+
+- do not derive grouping accents;
+- retain explicit pattern roles for host beat numbers that exist in the preset pattern;
+- treat host beat numbers outside the preset pattern as `mute`;
+- do not modify the stored preset.
+
+These rules are deterministic and must be covered by implementation tests before grouping playback is considered complete.
+
 ## 41. Status
 
-TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.2`.
+TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.3`.
 
-Completed decisions cover grouping, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing prototype, synthetic click engine, and typed runtime model are complete. The next phase is plugin-state integration and external VST3/Cubase validation.
+Completed decisions cover grouping playback, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing implementation, synthetic click engine, typed runtime model, plug-in state integration, and external VST3/Cubase preset validation are complete. Grouping-driven playback and audible triplet subdivisions remain implementation work for VST3 MVP 0.1.0.
