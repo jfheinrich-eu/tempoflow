@@ -4,6 +4,7 @@
     "metadata": {
         "name": "12-8 Blues",
         "description": "A 12/8 blues preset grouped as four groups of three eighth notes.",
+        "category": "blues",
         "author": "Jörg Heinrich",
         "createdAt": "2026-09-06T22:33:00+02:00",
         "updatedAt": "2026-09-06T22:33:00+02:00"

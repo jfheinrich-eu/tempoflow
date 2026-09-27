@@ -65,6 +65,66 @@ struct GeneratedPreset
     juce::MemoryBlock data;
 };
 
+struct PresetMetadata
+{
+    juce::String category;
+    juce::String author;
+};
+
+void addMetaInfoAttribute(juce::XmlElement &metaInfo, const juce::String &identifier, const juce::String &value,
+                          const juce::String &flags = {})
+{
+    if (value.isEmpty())
+        return;
+
+    auto *attribute = metaInfo.createNewChildElement("Attribute");
+    attribute->setAttribute("id", identifier);
+    attribute->setAttribute("value", value);
+    attribute->setAttribute("type", "string");
+    attribute->setAttribute("flags", flags);
+}
+
+[[nodiscard]] PresetMetadata readPresetMetadata(const juce::String &json)
+{
+    const auto root = juce::JSON::parse(json);
+    const auto *rootObject = root.getDynamicObject();
+    const auto *metadata = rootObject->getProperty("metadata").getDynamicObject();
+
+    return {metadata->getProperty("category").toString(), metadata->getProperty("author").toString()};
+}
+
+[[nodiscard]] juce::String toVst3MusicalStyle(const juce::String &category)
+{
+    if (category == "blues")
+        return "Blues";
+    if (category == "jazz")
+        return "Jazz";
+    if (category == "rock")
+        return "Rock/Metal";
+    if (category == "metal")
+        return "Rock/Metal|Heavy Metal";
+    if (category == "funk")
+        return "Urban (Hip-Hop / R&B)|Funk";
+
+    return {};
+}
+
+[[nodiscard]] juce::String createVst3MetaInfo(const VST3::Hosting::ClassInfo &classInfo, const PresetMetadata &metadata)
+{
+    juce::XmlElement metaInfo("MetaInfo");
+    addMetaInfoAttribute(metaInfo, "MediaAuthor", metadata.author);
+    addMetaInfoAttribute(metaInfo, "MediaType", "VstPreset", "writeProtected");
+    addMetaInfoAttribute(metaInfo, "MusicalCategory", "Drum&Perc");
+    addMetaInfoAttribute(metaInfo, "MusicalInstrument", "Drum&Perc|Beats");
+    addMetaInfoAttribute(metaInfo, "MusicalCharacter", "Percussive");
+    addMetaInfoAttribute(metaInfo, "MusicalStyle", toVst3MusicalStyle(metadata.category));
+    addMetaInfoAttribute(metaInfo, "PlugInCategory", classInfo.subCategoriesString(), "writeProtected");
+    addMetaInfoAttribute(metaInfo, "PlugInName", classInfo.name(), "writeProtected");
+    addMetaInfoAttribute(metaInfo, "PlugInVendor", classInfo.vendor(), "writeProtected");
+    addMetaInfoAttribute(metaInfo, "VST3UniqueID", classInfo.ID().toString(), "hidden|writeProtected");
+    return metaInfo.toString();
+}
+
 [[nodiscard]] juce::File resolvePath(const char *argument)
 {
     return juce::File::isAbsolutePath(argument) ? juce::File(argument)
@@ -160,7 +220,7 @@ struct GeneratedPreset
 [[nodiscard]] bool createAndVerifyPreset(const VST3::Hosting::PluginFactory &factory,
                                          const VST3::Hosting::ClassInfo &classInfo,
                                          Steinberg::Vst::HostApplication &host, const juce::String &json,
-                                         juce::MemoryBlock &result, std::string &error)
+                                         const juce::String &metaInfo, juce::MemoryBlock &result, std::string &error)
 {
     auto sourceComponent = createComponent(factory, classInfo, host, error);
     if (sourceComponent.component == nullptr || !setComponentState(*sourceComponent.component, json, error))
@@ -168,9 +228,30 @@ struct GeneratedPreset
 
     Steinberg::MemoryStream output;
     const Steinberg::FUID classId(classInfo.ID().data());
-    if (!Steinberg::Vst::PresetFile::savePreset(&output, classId, sourceComponent.component.get()))
+    const auto metaInfoUtf8 = metaInfo.toUTF8();
+    const auto metaInfoSize = static_cast<Steinberg::int32>(metaInfoUtf8.sizeInBytes() - 1);
+    if (!Steinberg::Vst::PresetFile::savePreset(&output, classId, sourceComponent.component.get(), nullptr,
+                                                metaInfoUtf8.getAddress(), metaInfoSize))
     {
         error = "Steinberg PresetFile could not serialize the TempoFlow component state";
+        return false;
+    }
+
+    Steinberg::MemoryStream metaInfoStream(output.getData(), output.getSize());
+    Steinberg::Vst::PresetFile presetFile(&metaInfoStream);
+    Steinberg::int32 storedMetaInfoSize = 0;
+    if (!presetFile.readChunkList() || !presetFile.readMetaInfo(nullptr, storedMetaInfoSize) ||
+        storedMetaInfoSize != metaInfoSize)
+    {
+        error = "The generated VST3 preset does not contain the expected metadata";
+        return false;
+    }
+
+    std::vector<char> storedMetaInfo(static_cast<std::size_t>(storedMetaInfoSize));
+    if (!presetFile.readMetaInfo(storedMetaInfo.data(), storedMetaInfoSize) ||
+        std::memcmp(storedMetaInfo.data(), metaInfoUtf8.getAddress(), storedMetaInfo.size()) != 0)
+    {
+        error = "The generated VST3 preset metadata does not match its source";
         return false;
     }
 
@@ -285,8 +366,10 @@ int main(int argc, char *argv[])
             return 1;
         }
 
+        const auto metadata = readPresetMetadata(readResult.content);
+        const auto metaInfo = createVst3MetaInfo(*componentClass, metadata);
         GeneratedPreset generated{outputDirectory.getChildFile(outputName), {}};
-        if (!createAndVerifyPreset(factory, *componentClass, host, readResult.content, generated.data, error))
+        if (!createAndVerifyPreset(factory, *componentClass, host, readResult.content, metaInfo, generated.data, error))
         {
             std::cerr << sourceFile.getFileName() << ": " << error << '\n';
             return 1;
