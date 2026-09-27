@@ -4,6 +4,7 @@
     "metadata": {
         "name": "Standard 4-4",
         "description": "A standard 4/4 time signature preset with a simple subdivision pattern.",
+        "category": "general",
         "author": "Jörg Heinrich",
         "createdAt": "2026-09-06T21:30:00+02:00",
         "updatedAt": "2026-09-06T21:30:00+02:00"

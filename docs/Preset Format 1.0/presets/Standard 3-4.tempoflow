@@ -4,6 +4,7 @@
     "metadata": {
         "name": "Standard 3-4",
         "description": "A standard 3/4 time signature preset with an accent on beat 1.",
+        "category": "general",
         "author": "Jörg Heinrich",
         "createdAt": "2026-09-06T22:33:00+02:00",
         "updatedAt": "2026-09-06T22:33:00+02:00"
