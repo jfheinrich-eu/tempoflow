@@ -23,11 +23,17 @@ TempoFlow is an open-source, cross-platform metronome system built around a shar
 - a native VST3 plug-in synchronized to a DAW host;
 - a platform-independent JSON preset format shared by both applications.
 
-The first engineering target is a lean Windows x64 VST3 MVP for Cubase Elements 15. It will follow host transport, tempo, time signature, PPQ position, and audio-buffer position to generate sample-accurate clicks.
+The first engineering target is the Windows x64 VST3 MVP `0.1.0` for Cubase Elements 15. It follows host transport, tempo, time signature, PPQ position, and audio-buffer position to generate sample-accurate clicks.
+
+TempoFlow uses three independent version tracks:
+
+- **Preset Format 1.0** identifies the stable `.tempoflow` interchange contract.
+- **VST3 MVP 0.1.0** identifies the current plug-in prototype target.
+- **TempoFlow 1.0** will identify a future product release. Its scope is not defined by the VST3 MVP and includes no claim that the PWA is complete.
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal preset-state loading, VST3 project-state restoration, and native factory `.vstpreset` generation are available. Grouping-driven playback and audible triplet subdivisions are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal preset-state loading, VST3 project-state restoration, and native factory `.vstpreset` generation are available. Cubase Elements 15 discovers all seven factory presets, exposes their catalogue metadata, restores Cubase-managed user presets, and restores non-default project state. Grouping-driven playback and audible triplet subdivisions are not implemented yet.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -174,7 +180,7 @@ Standard 6-8.tempoflow: valid
 
 ## Preset format
 
-TempoFlow presets are UTF-8 JSON files with the `.tempoflow` extension. Version 1 supports:
+TempoFlow presets are UTF-8 JSON files with the `.tempoflow` extension. Preset Format 1.0 supports:
 
 - tempos from 20 to 300 BPM;
 - simple, compound, and odd meters with explicit grouping;
@@ -196,8 +202,9 @@ Preset loading, transactional failure handling, real-time publication, and Cubas
 3. Add the synthetic click engine and initial click-role mapping. Complete.
 4. Add the typed preset runtime model. Complete.
 5. Integrate the semantic preset validator and runtime model with plug-in state loading. Complete.
-6. Validate the plug-in with Steinberg tools and Cubase Elements 15.
-7. Verify preset interoperability with the PWA.
+6. Validate the current plug-in, factory-preset, and project-state workflow with Steinberg tools and Cubase Elements 15. Complete.
+7. Complete grouping-driven playback and audible triplet subdivisions for VST3 MVP 0.1.0.
+8. Verify preset interoperability with the PWA as separate post-MVP product work.
 
 Detailed decisions and risks are tracked in [PROJECT_KICKOFF.md](PROJECT_KICKOFF.md).
 
