@@ -148,6 +148,9 @@ Core rules:
 - V1 meter denominators: `2`, `4`, `8`, and `16`.
 - `meter.grouping` is required.
 - The sum of `grouping` equals `meter.numerator`.
+- An all-singleton grouping automatically accents only beat 1.
+- Every other grouping makes each calculated group start eligible for automatic promotion from `normal` to `accent`.
+- Explicit `accent`, `high`, `low`, `wood`, and `mute` roles override grouping promotion.
 - The beat count equals `meter.numerator`.
 - Beat positions cover `1..numerator` without omissions or duplicates.
 - Volume range: `0.0` to `1.0`.
@@ -233,6 +236,7 @@ The “Edit with Base44” button is a low technical risk and a P3 branding issu
 - The preset model remains platform independent.
 - Pattern and sound set remain separate.
 - `meter.grouping` is mandatory.
+- Grouping promotes only `normal` at eligible group starts; explicit non-neutral click roles remain unchanged.
 - PWA and VST3 do not share application implementation.
 - VST3 uses C++ and JUCE.
 - VST3 uses host timing rather than an independent clock.
@@ -530,6 +534,38 @@ Acceptance criteria:
 - Generated files use the correct processor class ID and pass automated structural and state-restoration checks.
 
 Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed the expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**.
+
+### VST-014 — Grouping playback semantics
+
+Status: confirmed
+
+Group starts are derived from `meter.grouping`. Beat 1 begins the first group, and each following group begins after the cumulative size of the preceding groups. Grouping `[3, 2]` therefore starts groups on beats 1 and 4.
+
+An all-singleton grouping such as `[1, 1, 1, 1]` represents an ordinary simple meter and makes only beat 1 eligible for automatic grouping promotion. For every other valid grouping, each group start is eligible.
+
+Grouping changes only the neutral `normal` role at an eligible group start:
+
+| Pattern role at group start | Effective role |
+|---|---|
+| `normal` | `accent` |
+| `accent` | `accent` |
+| `high` | `high` |
+| `low` | `low` |
+| `wood` | `wood` |
+| `mute` | `mute` |
+
+Required reference behavior:
+
+| Meter | Grouping | Effective accent beats |
+|---|---|---|
+| 4/4 | `[1, 1, 1, 1]` | 1 |
+| 6/8 | `[3, 3]` | 1 and 4 |
+| 5/4 | `[3, 2]` | 1 and 4 |
+| 12/8 | `[3, 3, 3, 3]` | 1, 4, 7, and 10 |
+
+In Host Mode, grouping promotion applies only when the host numerator and denominator match the preset meter. If they differ, the host remains the timing authority, grouping promotion is disabled, explicit pattern roles remain active for defined beat numbers, and undefined host beats remain silent. The stored preset is not modified.
+
+Issue #20 must implement these rules without allocation or locking in the audio callback and must cover the examples, explicit-role precedence, mute behavior, and host-meter mismatch with automated tests.
 
 ## Open product decisions
 
