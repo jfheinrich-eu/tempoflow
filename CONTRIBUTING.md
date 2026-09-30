@@ -24,6 +24,24 @@ ctest --preset windows-x64-release
 
 See [Building the TempoFlow VST3](docs/building-vst3.md) for target-only builds, bundle locations, validation, installation, and in-source build safeguards.
 
+## Formatting
+
+Apply the deterministic repository formatting rules:
+
+```powershell
+.\scripts\format.ps1
+```
+
+Verify the same files without modifying them:
+
+```powershell
+.\scripts\verify-format.ps1
+```
+
+After `scripts/setup-dev.ps1` configures `.githooks`, the pre-commit hook runs the read-only verification automatically. C/C++ and JSON use the repository `.clang-format`; `.tempoflow` remains JSON with four-space indentation. TempoFlow semantic preset validation remains a separate build and test step.
+
+The Visual Studio CMake generator does not produce a reliable compilation database for a repository-wide `clang-tidy` run. Keep `.clang-tidy` authoritative and run focused analysis separately with a deliberately generated compilation database when required. The external Steinberg Validator remains part of full VST3 validation, not the pre-commit formatting gate.
+
 ## Contribution rules
 
 - Use English for code, comments, documentation, commits, issues, and pull requests.
