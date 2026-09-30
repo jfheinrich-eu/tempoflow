@@ -1,18 +1,45 @@
 #include "plugin/PluginPresetState.h"
 
+#include <cmath>
+
 namespace tempoflow::plugin
 {
+namespace
+{
+bool isSupportedDenominator(std::int64_t denominator) noexcept
+{
+    return denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16; // NOLINT
+}
+} // namespace
+
 RealtimePresetState::RealtimePresetState() noexcept
 {
     clicks.fill(audio::ClickType::mute);
+    groupStarts.fill(false);
 }
 
-audio::ClickType RealtimePresetState::clickForBeat(int beatNumber) const noexcept
+bool RealtimePresetState::isValid() const noexcept
 {
-    if (beatNumber < 1 || static_cast<std::size_t>(beatNumber) > beatCount)
+    return ready && beatCount > 0 && beatCount <= maximumBeatCount && meterNumerator > 0 &&
+           static_cast<std::uint64_t>(meterNumerator) == beatCount && isSupportedDenominator(meterDenominator) &&
+           std::isfinite(volume) && volume >= 0.0F && volume <= 1.0F && groupStarts[0];
+}
+
+audio::ClickType RealtimePresetState::clickForBeat(int beatNumber, int hostNumerator,
+                                                   int hostDenominator) const noexcept
+{
+    if (!isValid() || beatNumber < 1 || static_cast<std::size_t>(beatNumber) > beatCount)
         return audio::ClickType::mute;
 
-    return clicks[static_cast<std::size_t>(beatNumber - 1)];
+    const auto beatIndex = static_cast<std::size_t>(beatNumber - 1);
+    const auto click = clicks[beatIndex];
+    const auto meterMatches = static_cast<std::int64_t>(hostNumerator) == meterNumerator &&
+                              static_cast<std::int64_t>(hostDenominator) == meterDenominator;
+
+    if (meterMatches && groupStarts[beatIndex] && click == audio::ClickType::normal)
+        return audio::ClickType::accent;
+
+    return click;
 }
 
 void PluginPresetStateExchange::publish(const RealtimePresetState &state) noexcept

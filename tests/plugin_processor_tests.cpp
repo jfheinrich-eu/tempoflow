@@ -5,6 +5,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <initializer_list>
 #include <iostream>
 #include <limits>
 #include <string_view>
@@ -55,13 +56,13 @@ class TestPlayHead final : public juce::AudioPlayHead
 };
 
 void setPlayingPosition(TestPlayHead &playHead, double ppqPosition, std::int64_t samplePosition, int numerator = 4,
-                        int denominator = 4)
+                        int denominator = 4, double ppqPositionOfLastBarStart = 0.0)
 {
     playHead.position.setIsPlaying(true);
     playHead.position.setBpm(120.0);
     playHead.position.setTimeSignature(juce::AudioPlayHead::TimeSignature{numerator, denominator});
     playHead.position.setPpqPosition(ppqPosition);
-    playHead.position.setPpqPositionOfLastBarStart(0.0);
+    playHead.position.setPpqPositionOfLastBarStart(ppqPositionOfLastBarStart);
     playHead.position.setTimeInSamples(samplePosition);
 }
 
@@ -75,7 +76,48 @@ juce::String getSerializedState(tempoflow::plugin::TempoFlowAudioProcessor &proc
     return juce::String::fromUTF8(static_cast<const char *>(state.getData()), static_cast<int>(state.getSize()));
 }
 
-float renderPresetBeat(const juce::String &presetJson, int beatNumber)
+juce::String makeGroupingPreset(int numerator, int denominator, std::initializer_list<int> grouping,
+                                std::initializer_list<const char *> clicks)
+{
+    juce::String json;
+    json << R"json({
+  "schema": "tempoflow-preset",
+  "schemaVersion": "1.0.0",
+  "metadata": { "name": "Grouping Test" },
+  "tempo": { "bpm": 120 },
+  "meter": { "numerator": )json"
+         << numerator << R"json(, "denominator": )json" << denominator << R"json(, "grouping": [)json";
+
+    auto groupIndex = std::size_t{0};
+    for (const auto groupSize : grouping)
+    {
+        if (groupIndex++ > 0)
+            json << ", ";
+        json << groupSize;
+    }
+
+    json << R"json(] },
+  "subdivision": { "mode": "none", "partsPerBeat": 1 },
+  "pattern": { "beats": [)json";
+
+    auto beatNumber = 1;
+    for (const auto *click : clicks)
+    {
+        if (beatNumber > 1)
+            json << ", ";
+        json << R"json({ "beat": )json" << beatNumber << R"json(, "click": ")json" << click << R"json(" })json";
+        ++beatNumber;
+    }
+
+    json << R"json(] },
+  "sound": { "soundSet": "default", "volume": 1.0 },
+  "playback": { "mode": "host" }
+})json";
+    return json;
+}
+
+float renderPresetBeat(const juce::String &presetJson, int beatNumber, int hostNumerator = 4, int hostDenominator = 4,
+                       int barIndex = 0)
 {
     tempoflow::plugin::TempoFlowAudioProcessor processor;
     const auto result = processor.applyPresetJson(presetJson);
@@ -85,9 +127,13 @@ float renderPresetBeat(const juce::String &presetJson, int beatNumber)
     TestPlayHead playHead;
     constexpr auto sampleRate = 48'000.0;
     constexpr auto sampleCount = 64;
-    constexpr auto samplesPerBeat = 24'000;
-    setPlayingPosition(playHead, static_cast<double>(beatNumber - 1),
-                       static_cast<std::int64_t>(beatNumber - 1) * samplesPerBeat);
+    constexpr auto samplesPerPpq = 24'000.0;
+    const auto beatLengthPpq = 4.0 / static_cast<double>(hostDenominator);
+    const auto barLengthPpq = static_cast<double>(hostNumerator) * beatLengthPpq;
+    const auto barStartPpq = static_cast<double>(barIndex) * barLengthPpq;
+    const auto ppqPosition = barStartPpq + (static_cast<double>(beatNumber - 1) * beatLengthPpq);
+    setPlayingPosition(playHead, ppqPosition, static_cast<std::int64_t>(std::llround(ppqPosition * samplesPerPpq)),
+                       hostNumerator, hostDenominator, barStartPpq);
 
     processor.setPlayHead(&playHead);
     processor.setRateAndBufferSizeDetails(sampleRate, sampleCount);
@@ -253,6 +299,117 @@ bool testPresetPatternAndMasterVolumeAreApplied()
                   "Master volume must scale the rendered level linearly");
 }
 
+bool testSupportedGroupingPatternsPromoteNeutralGroupStarts()
+{
+    const auto simple = makeGroupingPreset(4, 4, {1, 1, 1, 1}, {"normal", "normal", "normal", "normal"});
+    const auto compound =
+        makeGroupingPreset(6, 8, {3, 3}, {"normal", "normal", "normal", "normal", "normal", "normal"});
+    const auto odd = makeGroupingPreset(5, 4, {3, 2}, {"normal", "normal", "normal", "normal", "normal"});
+    const auto compoundTwelve = makeGroupingPreset(12, 8, {3, 3, 3, 3},
+                                                   {"normal", "normal", "normal", "normal", "normal", "normal",
+                                                    "normal", "normal", "normal", "normal", "normal", "normal"});
+
+    const auto simpleNormal = renderPresetBeat(simple, 2, 4, 4);
+    const auto compoundNormal = renderPresetBeat(compound, 2, 6, 8);
+    const auto oddNormal = renderPresetBeat(odd, 2, 5, 4);
+    const auto compoundTwelveNormal = renderPresetBeat(compoundTwelve, 2, 12, 8);
+
+    bool passed = expect(renderPresetBeat(simple, 1, 4, 4) > simpleNormal,
+                         "An all-singleton 4/4 grouping must promote only beat 1") &&
+                  expect(renderPresetBeat(simple, 3, 4, 4) == simpleNormal,
+                         "An all-singleton 4/4 grouping must leave later beats normal") &&
+                  expect(renderPresetBeat(compound, 1, 6, 8) > compoundNormal &&
+                             renderPresetBeat(compound, 4, 6, 8) > compoundNormal,
+                         "A 3+3 grouping must promote beats 1 and 4") &&
+                  expect(renderPresetBeat(odd, 1, 5, 4) > oddNormal && renderPresetBeat(odd, 4, 5, 4) > oddNormal,
+                         "A 3+2 grouping must promote beats 1 and 4");
+
+    for (const auto accentBeat : {1, 4, 7, 10})
+    {
+        passed &= expect(renderPresetBeat(compoundTwelve, accentBeat, 12, 8) > compoundTwelveNormal,
+                         "A 3+3+3+3 grouping must promote every group start");
+    }
+
+    return passed;
+}
+
+bool testExplicitRolesOverrideGroupingPromotion()
+{
+    const auto explicitRoles = makeGroupingPreset(
+        12, 8, {3, 3, 3, 3},
+        {"accent", "high", "normal", "high", "low", "normal", "low", "wood", "normal", "wood", "normal", "normal"});
+    const auto mutedBoundary =
+        makeGroupingPreset(6, 8, {3, 3}, {"accent", "normal", "normal", "mute", "normal", "normal"});
+
+    return expect(renderPresetBeat(explicitRoles, 4, 12, 8) == renderPresetBeat(explicitRoles, 2, 12, 8),
+                  "Grouping must preserve an explicit high role") &&
+           expect(renderPresetBeat(explicitRoles, 7, 12, 8) == renderPresetBeat(explicitRoles, 5, 12, 8),
+                  "Grouping must preserve an explicit low role") &&
+           expect(renderPresetBeat(explicitRoles, 10, 12, 8) == renderPresetBeat(explicitRoles, 8, 12, 8),
+                  "Grouping must preserve an explicit wood role") &&
+           expect(renderPresetBeat(mutedBoundary, 4, 6, 8) == 0.0F,
+                  "Grouping must never turn a muted group start into an audible click");
+}
+
+bool testHostMeterMismatchDisablesGroupingPromotion()
+{
+    const auto preset = makeGroupingPreset(6, 8, {3, 3}, {"normal", "normal", "normal", "normal", "normal", "normal"});
+    const auto matchedBoundary = renderPresetBeat(preset, 4, 6, 8);
+    const auto mismatchedBoundary = renderPresetBeat(preset, 4, 4, 4);
+    const auto mismatchedNormal = renderPresetBeat(preset, 2, 4, 4);
+
+    return expect(matchedBoundary > mismatchedBoundary, "A matching host meter must apply grouping promotion") &&
+           expect(mismatchedBoundary == mismatchedNormal,
+                  "A mismatched host meter must retain the explicit normal role");
+}
+
+bool testGroupingResetsAtTheNextBarBoundary()
+{
+    const auto preset = makeGroupingPreset(4, 4, {1, 1, 1, 1}, {"normal", "mute", "mute", "mute"});
+    tempoflow::plugin::TempoFlowAudioProcessor processor;
+    if (!processor.applyPresetJson(preset).isValid())
+        return expect(false, "The bar-boundary grouping preset must be applied");
+
+    TestPlayHead playHead;
+    constexpr auto sampleRate = 480.0;
+    constexpr auto sampleCount = 240;
+    setPlayingPosition(playHead, 3.0, 720, 4, 4, 0.0);
+
+    processor.setPlayHead(&playHead);
+    processor.setRateAndBufferSizeDetails(sampleRate, sampleCount);
+    processor.prepareToPlay(sampleRate, sampleCount);
+
+    juce::AudioBuffer<float> finalBeatAudio(1, sampleCount);
+    juce::MidiBuffer midi;
+    processor.processBlock(finalBeatAudio, midi);
+
+    setPlayingPosition(playHead, 4.0, 960, 4, 4, 4.0);
+    juce::AudioBuffer<float> nextBarAudio(1, sampleCount);
+    processor.processBlock(nextBarAudio, midi);
+    processor.releaseResources();
+
+    return expect(finalBeatAudio.getMagnitude(0, sampleCount) == 0.0F,
+                  "The muted final beat of a bar must remain silent") &&
+           expect(nextBarAudio.getMagnitude(0, sampleCount) > 0.0F,
+                  "The neutral first beat of the next bar must receive the grouping accent");
+}
+
+bool testInconsistentRealtimeStateFailsSafelyToSilence()
+{
+    tempoflow::plugin::RealtimePresetState state;
+    state.ready = true;
+    state.beatCount = 1;
+    state.meterNumerator = 2;
+    state.meterDenominator = 4;
+    state.volume = 1.0F;
+    state.groupStarts[0] = true;
+    state.clicks[0] = tempoflow::audio::ClickType::accent;
+
+    return expect(!state.isValid(), "An inconsistent realtime state must be rejected") &&
+           expect(state.clickForBeat(1, 2, 4) == tempoflow::audio::ClickType::mute,
+                  "An inconsistent realtime state must resolve every beat to silence");
+}
+
 bool testRealtimePresetStateExchangePublishesCompleteGenerations()
 {
     tempoflow::plugin::PluginPresetStateExchange exchange;
@@ -263,9 +420,13 @@ bool testRealtimePresetStateExchangePublishesCompleteGenerations()
 
     tempoflow::plugin::RealtimePresetState firstState;
     firstState.beatCount = 2;
+    firstState.meterNumerator = 2;
+    firstState.meterDenominator = 4;
     firstState.clicks[0] = tempoflow::audio::ClickType::accent;
     firstState.clicks[1] = tempoflow::audio::ClickType::wood;
+    firstState.groupStarts[0] = true;
     firstState.volume = 0.25F;
+    firstState.ready = true;
     exchange.publish(firstState);
 
     const auto consumedFirstGeneration = exchange.consumeIfChanged(consumedState, generation);
@@ -274,8 +435,12 @@ bool testRealtimePresetStateExchangePublishesCompleteGenerations()
 
     tempoflow::plugin::RealtimePresetState secondState;
     secondState.beatCount = 1;
+    secondState.meterNumerator = 1;
+    secondState.meterDenominator = 4;
     secondState.clicks[0] = tempoflow::audio::ClickType::low;
+    secondState.groupStarts[0] = true;
     secondState.volume = 0.75F;
+    secondState.ready = true;
     exchange.publish(secondState);
     const auto consumedSecondGeneration = exchange.consumeIfChanged(consumedState, generation);
 
@@ -285,7 +450,7 @@ bool testRealtimePresetStateExchangePublishesCompleteGenerations()
            expect(unchangedAfterConsume, "A consumed generation must not be consumed twice") &&
            expect(consumedSecondGeneration && generation > firstGeneration,
                   "A later published state must advance the generation") &&
-           expect(consumedState.beatCount == secondState.beatCount &&
+           expect(consumedState.isValid() && consumedState.beatCount == secondState.beatCount &&
                       consumedState.clicks[0] == tempoflow::audio::ClickType::low &&
                       consumedState.volume == secondState.volume,
                   "The state exchange must publish one complete generation");
@@ -428,14 +593,17 @@ bool testAllReferencePresetsLoadIntoTheProcessor()
 
 int main()
 {
-    const bool passed = testIdentityAndCapabilities() && testBusLayout() && testSilentProcessing() &&
-                        testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail() &&
-                        testSchedulerOverflowProducesSilence() && testPresetPatternAndMasterVolumeAreApplied() &&
-                        testRealtimePresetStateExchangePublishesCompleteGenerations() &&
-                        testUndefinedHostBeatRemainsSilent() && testInvalidPresetLeavesActiveStateUnchanged() &&
-                        testProjectStateRoundTripPreservesPreset() && testInvalidStatePayloadsAreRejected() &&
-                        testFileErrorsIdentifyThePresetAndPreserveState() &&
-                        testAllReferencePresetsLoadIntoTheProcessor();
+    const bool passed =
+        testIdentityAndCapabilities() && testBusLayout() && testSilentProcessing() &&
+        testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail() &&
+        testSchedulerOverflowProducesSilence() && testPresetPatternAndMasterVolumeAreApplied() &&
+        testSupportedGroupingPatternsPromoteNeutralGroupStarts() && testExplicitRolesOverrideGroupingPromotion() &&
+        testHostMeterMismatchDisablesGroupingPromotion() && testGroupingResetsAtTheNextBarBoundary() &&
+        testInconsistentRealtimeStateFailsSafelyToSilence() &&
+        testRealtimePresetStateExchangePublishesCompleteGenerations() && testUndefinedHostBeatRemainsSilent() &&
+        testInvalidPresetLeavesActiveStateUnchanged() && testProjectStateRoundTripPreservesPreset() &&
+        testInvalidStatePayloadsAreRejected() && testFileErrorsIdentifyThePresetAndPreserveState() &&
+        testAllReferencePresetsLoadIntoTheProcessor();
 
     if (!passed)
         return 1;

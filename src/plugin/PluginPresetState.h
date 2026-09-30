@@ -18,11 +18,16 @@ struct RealtimePresetState final
     static constexpr std::size_t maximumBeatCount = preset::maximumJsonArrayElements;
 
     RealtimePresetState() noexcept;
-    [[nodiscard]] audio::ClickType clickForBeat(int beatNumber) const noexcept;
+    [[nodiscard]] bool isValid() const noexcept;
+    [[nodiscard]] audio::ClickType clickForBeat(int beatNumber, int hostNumerator, int hostDenominator) const noexcept;
 
     std::array<audio::ClickType, maximumBeatCount> clicks{};
+    std::array<bool, maximumBeatCount> groupStarts{};
     std::size_t beatCount = 0;
+    std::int64_t meterNumerator = 0;
+    std::int64_t meterDenominator = 0;
     float volume = 0.0F;
+    bool ready = false;
 };
 
 class PluginPresetStateExchange final

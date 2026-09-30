@@ -1,5 +1,7 @@
 #include "plugin/PluginProcessor.h"
 
+#include <algorithm>
+#include <cmath>
 #include <cstring>
 #include <optional>
 
@@ -73,15 +75,50 @@ audio::ClickType toAudioClickType(preset::ClickType type) noexcept
 RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset) noexcept
 {
     RealtimePresetState state;
-    state.beatCount = preset.pattern.beats.size();
-    state.volume = static_cast<float>(preset.sound.volume);
 
-    for (const auto &beat : preset.pattern.beats)
+    const auto beatCount = preset.pattern.beats.size();
+    if (beatCount == 0 || beatCount > RealtimePresetState::maximumBeatCount || preset.meter.numerator <= 0 ||
+        static_cast<std::uint64_t>(preset.meter.numerator) != beatCount ||
+        (preset.meter.denominator != 2 && preset.meter.denominator != 4 && preset.meter.denominator != 8 &&
+         preset.meter.denominator != 16) ||
+        !std::isfinite(preset.sound.volume) || preset.sound.volume < 0.0 || preset.sound.volume > 1.0 ||
+        preset.meter.grouping.empty())
     {
-        jassert(beat.beat >= 1 && static_cast<std::uint64_t>(beat.beat) <= state.beatCount);
-        state.clicks[static_cast<std::size_t>(beat.beat - 1)] = toAudioClickType(beat.click);
+        return state;
     }
 
+    state.beatCount = beatCount;
+    state.meterNumerator = preset.meter.numerator;
+    state.meterDenominator = preset.meter.denominator;
+    state.volume = static_cast<float>(preset.sound.volume);
+
+    for (std::size_t index = 0; index < beatCount; ++index)
+    {
+        const auto &beat = preset.pattern.beats[index];
+        if (beat.beat != static_cast<std::int64_t>(index + 1))
+            return {};
+
+        state.clicks[index] = toAudioClickType(beat.click);
+    }
+
+    state.groupStarts[0] = true;
+    const auto allSingleton = std::all_of(preset.meter.grouping.begin(), preset.meter.grouping.end(),
+                                          [](std::int64_t groupSize) { return groupSize == 1; });
+    std::size_t consumedBeats = 0;
+    for (const auto groupSize : preset.meter.grouping)
+    {
+        if (groupSize <= 0 || static_cast<std::uint64_t>(groupSize) > beatCount - consumedBeats)
+            return {};
+
+        consumedBeats += static_cast<std::size_t>(groupSize);
+        if (!allSingleton && consumedBeats < beatCount)
+            state.groupStarts[consumedBeats] = true;
+    }
+
+    if (consumedBeats != beatCount)
+        return {};
+
+    state.ready = true;
     return state;
 }
 
@@ -133,6 +170,13 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
         clickEngine.reset();
     }
 
+    if (!realtimePresetState.isValid())
+    {
+        beatScheduler.reset();
+        clickEngine.reset();
+        return;
+    }
+
     const auto *hostPlayHead = getPlayHead();
     const auto position = hostPlayHead != nullptr ? hostPlayHead->getPosition() : std::nullopt;
 
@@ -158,7 +202,8 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
             {
                 const auto &beat = schedule.beats[index];
                 clickEngine.render(output + renderedSamples, beat.sampleOffset - renderedSamples);
-                clickEngine.trigger(realtimePresetState.clickForBeat(beat.beatNumber));
+                clickEngine.trigger(realtimePresetState.clickForBeat(beat.beatNumber, timing->timeSignatureNumerator,
+                                                                     timing->timeSignatureDenominator));
                 renderedSamples = beat.sampleOffset;
             }
 
