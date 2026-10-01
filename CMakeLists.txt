@@ -222,6 +222,12 @@ if(WIN32 OR APPLE)
                 $<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>
         )
 
+        set_target_properties(
+            TempoFlowVst3PresetGenerator
+            PROPERTIES
+                XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
+        )
+
         find_library(TEMPOFLOW_COCOA_FRAMEWORK Cocoa REQUIRED)
         find_library(TEMPOFLOW_COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
         target_link_libraries(
