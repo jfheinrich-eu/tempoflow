@@ -10,7 +10,7 @@ Thank you for helping improve TempoFlow. Keep contributions focused, testable, a
 
 ## Development setup
 
-Use Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.25 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. JUCE 9.0.2 is fetched by CMake from its pinned commit.
+Windows development uses Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.25 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. macOS development uses Xcode with Apple Clang and CMake 3.25 or newer. JUCE 9.0.2 is fetched by CMake from its pinned commit.
 
 ```powershell
 .\scripts\setup-dev.ps1
@@ -20,6 +20,17 @@ ctest --preset windows-x64-debug
 cmake --fresh --preset windows-x64-release
 cmake --build --preset windows-x64-release
 ctest --preset windows-x64-release
+```
+
+On macOS, configure and test the unsigned Universal build with:
+
+```sh
+cmake --fresh --preset macos-universal-debug
+cmake --build --preset macos-universal-debug
+ctest --preset macos-universal-debug
+cmake --fresh --preset macos-universal-release
+cmake --build --preset macos-universal-release
+ctest --preset macos-universal-release
 ```
 
 See [Building the TempoFlow VST3](docs/building-vst3.md) for target-only builds, bundle locations, validation, installation, and in-source build safeguards.

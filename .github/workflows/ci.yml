@@ -27,3 +27,50 @@ jobs:
         run: ctest --test-dir build/ci -C Release --output-on-failure
       - name: Run toolchain check
         run: .\build\ci\TempoFlowToolchainCheck_artefacts\Release\TempoFlowToolchainCheck.exe
+
+  macos-universal-build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Configure
+        run: cmake --preset macos-universal-release
+      - name: Build
+        run: cmake --build --preset macos-universal-release
+      - name: Test
+        run: ctest --preset macos-universal-release
+      - name: Run toolchain check
+        shell: bash
+        run: |
+          toolchain_check=$(find \
+            build/macos-universal-release/TempoFlowToolchainCheck_artefacts/Release \
+            -type f -perm -111 -print -quit)
+          if [[ -z "$toolchain_check" ]]; then
+            echo "TempoFlow toolchain check executable was not found." >&2
+            exit 1
+          fi
+          "$toolchain_check"
+      - name: Verify universal Mach-O binaries
+        shell: bash
+        run: |
+          plugin_binary="build/macos-universal-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3/Contents/MacOS/TempoFlow"
+          if [[ ! -f "$plugin_binary" ]]; then
+            echo "TempoFlow VST3 executable was not found: $plugin_binary" >&2
+            exit 1
+          fi
+
+          verified=0
+          while IFS= read -r -d '' binary; do
+            if file "$binary" | grep -q 'Mach-O'; then
+              lipo -verify_arch arm64 x86_64 "$binary"
+              echo "$binary: $(lipo -archs "$binary")"
+              verified=$((verified + 1))
+            fi
+          done < <(find build/macos-universal-release \
+            -path '*_artefacts/Release/*' -type f -perm -111 -print0)
+
+          if [[ $verified -eq 0 ]]; then
+            echo "No project Mach-O executables were found for architecture verification." >&2
+            exit 1
+          fi

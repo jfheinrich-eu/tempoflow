@@ -23,7 +23,7 @@ TempoFlow is an open-source, cross-platform metronome system built around a shar
 - a native VST3 plug-in synchronized to a DAW host;
 - a platform-independent JSON preset format shared by both applications.
 
-The first engineering target is the Windows x64 VST3 MVP `0.1.0` for Cubase Elements 15. It follows host transport, tempo, time signature, PPQ position, and audio-buffer position to generate sample-accurate clicks.
+The primary host-validation target is the Windows x64 VST3 MVP `0.1.0` for Cubase Elements 15. The repository also produces an unsigned macOS Universal VST3 for `arm64` and `x86_64`. TempoFlow follows host transport, tempo, time signature, PPQ position, and audio-buffer position to generate sample-accurate clicks.
 
 TempoFlow uses three independent version tracks:
 
@@ -56,12 +56,11 @@ The PWA and VST3 plug-in do not share application source code. Their contract is
 
 ## Requirements
 
-- Windows 10 x64
-- Visual Studio Build Tools 2026 with the MSVC x64 toolchain
-- Windows SDK `10.0.26100.0`
+- Windows 10 x64 with Visual Studio Build Tools 2026, the MSVC x64 toolchain, and Windows SDK `10.0.26100.0`; or
+- macOS with Xcode and Apple Clang for unsigned Universal `arm64` and `x86_64` builds
 - CMake 3.25 or newer
 - Git
-- `clang-format` and `clang-tidy` from the Visual Studio LLVM tools
+- `clang-format` and `clang-tidy` from the Visual Studio LLVM tools on Windows or a compatible LLVM installation on macOS
 - Visual Studio Code 1.116 or newer with built-in Copilot Chat
 - Microsoft C/C++ and CMake Tools extensions
 
