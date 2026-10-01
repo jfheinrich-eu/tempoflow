@@ -216,16 +216,10 @@ if(WIN32 OR APPLE)
                 "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_mac.mm"
         )
 
-        target_compile_options(
-            TempoFlowVst3PresetGenerator
-            PRIVATE
-                $<$<COMPILE_LANGUAGE:OBJCXX>:-fobjc-arc>
-        )
-
-        set_target_properties(
-            TempoFlowVst3PresetGenerator
+        set_source_files_properties(
+            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_mac.mm"
             PROPERTIES
-                XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC YES
+                COMPILE_OPTIONS -fobjc-arc
         )
 
         find_library(TEMPOFLOW_COCOA_FRAMEWORK Cocoa REQUIRED)
