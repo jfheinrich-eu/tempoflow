@@ -274,6 +274,12 @@ if(WIN32 OR APPLE)
         "${CMAKE_CURRENT_BINARY_DIR}/factory-presets/$<CONFIG>"
     )
 
+    if(APPLE)
+        set(TEMPOFLOW_VST3_MODULE_PATH "$<TARGET_BUNDLE_DIR:TempoFlowPlugin_VST3>")
+    else()
+        set(TEMPOFLOW_VST3_MODULE_PATH "$<TARGET_FILE:TempoFlowPlugin_VST3>")
+    endif()
+
     set(TEMPOFLOW_FACTORY_PRESET_SOURCES)
     set(TEMPOFLOW_FACTORY_PRESET_OUTPUTS)
     foreach(preset_name IN LISTS TEMPOFLOW_FACTORY_PRESET_NAMES)
@@ -296,7 +302,7 @@ if(WIN32 OR APPLE)
             "${CMAKE_COMMAND}" -E make_directory "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
         COMMAND
             "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
-            "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+            "${TEMPOFLOW_VST3_MODULE_PATH}"
             "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
             "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
         DEPENDS
@@ -517,7 +523,7 @@ if(BUILD_TESTING)
                 -ExecutionPolicy Bypass
                 -File "${CMAKE_CURRENT_SOURCE_DIR}/tests/vst3-factory-presets.tests.ps1"
                 -GeneratorPath "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
-                -PluginPath "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+                -PluginPath "${TEMPOFLOW_VST3_MODULE_PATH}"
                 -SourceDirectory "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
                 -OutputRoot "${CMAKE_CURRENT_BINARY_DIR}/factory-presets-test/$<CONFIG>"
         )
