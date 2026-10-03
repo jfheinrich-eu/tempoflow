@@ -9,7 +9,7 @@
 ## Project boundaries
 
 - TempoFlow is an AGPL-3.0-only metronome system built with C++17, JUCE 9.0.2, CMake 3.25 or newer, and VST3.
-- The MVP targets Windows 10 x64 and Cubase Elements 15.
+- The primary MVP host-validation target is Windows 10 x64 with Cubase Elements 15. The repository also supports unsigned macOS Universal VST3 builds for `arm64` and `x86_64`; code signing and notarization require a separate approved release task.
 - Treat the `.tempoflow` format, JSON Schema, semantic rules, and reference presets as the shared contract.
 - Do not introduce Base44, browser, cloud, account, analytics, or network dependencies into core plug-in operation.
 - Do not add another plug-in format, standalone target, multi-output implementation, or elaborate GUI unless explicitly approved.

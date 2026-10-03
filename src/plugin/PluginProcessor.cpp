@@ -49,42 +49,6 @@ std::optional<timing::HostTiming> readHostTiming(const juce::AudioPlayHead::Posi
                               blockSize};
 }
 
-audio::ClickType toAudioClickType(preset::ClickType type) noexcept
-{
-    switch (type)
-    {
-    case preset::ClickType::accent:
-        return audio::ClickType::accent;
-    case preset::ClickType::normal:
-        return audio::ClickType::normal;
-    case preset::ClickType::high:
-        return audio::ClickType::high;
-    case preset::ClickType::low:
-        return audio::ClickType::low;
-    case preset::ClickType::wood:
-        return audio::ClickType::wood;
-    case preset::ClickType::mute:
-        return audio::ClickType::mute;
-    }
-
-    return audio::ClickType::mute;
-}
-
-RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset) noexcept
-{
-    RealtimePresetState state;
-    state.beatCount = preset.pattern.beats.size();
-    state.volume = static_cast<float>(preset.sound.volume);
-
-    for (const auto &beat : preset.pattern.beats)
-    {
-        jassert(beat.beat >= 1 && static_cast<std::uint64_t>(beat.beat) <= state.beatCount);
-        state.clicks[static_cast<std::size_t>(beat.beat - 1)] = toAudioClickType(beat.click);
-    }
-
-    return state;
-}
-
 std::vector<juce::String> prefixErrors(const juce::String &prefix, const std::vector<juce::String> &errors)
 {
     std::vector<juce::String> prefixedErrors;
@@ -133,6 +97,13 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
         clickEngine.reset();
     }
 
+    if (!realtimePresetState.isValid())
+    {
+        beatScheduler.reset();
+        clickEngine.reset();
+        return;
+    }
+
     const auto *hostPlayHead = getPlayHead();
     const auto position = hostPlayHead != nullptr ? hostPlayHead->getPosition() : std::nullopt;
 
@@ -158,7 +129,8 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
             {
                 const auto &beat = schedule.beats[index];
                 clickEngine.render(output + renderedSamples, beat.sampleOffset - renderedSamples);
-                clickEngine.trigger(realtimePresetState.clickForBeat(beat.beatNumber));
+                clickEngine.trigger(realtimePresetState.clickForBeat(beat.beatNumber, timing->timeSignatureNumerator,
+                                                                     timing->timeSignatureDenominator));
                 renderedSamples = beat.sampleOffset;
             }
 

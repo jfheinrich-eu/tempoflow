@@ -13,6 +13,10 @@ project(
     LANGUAGES C CXX
 )
 
+if(APPLE)
+    enable_language(OBJCXX)
+endif()
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -175,7 +179,7 @@ target_link_libraries(
         TempoFlowPresetValidation
 )
 
-if(WIN32)
+if(WIN32 OR APPLE)
     set(
         TEMPOFLOW_VST3_SDK_DIR
         "${juce_SOURCE_DIR}/modules/juce_audio_processors_headless/format_types/VST3_SDK"
@@ -191,14 +195,42 @@ if(WIN32)
         PRIVATE
             tools/vst3_preset_generator.cpp
             "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module.cpp"
-            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_win32.cpp"
     )
 
-    set_source_files_properties(
-        "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module.cpp"
-        PROPERTIES
-            COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS
-    )
+    if(WIN32)
+        target_sources(
+            TempoFlowVst3PresetGenerator
+            PRIVATE
+                "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_win32.cpp"
+        )
+
+        set_source_files_properties(
+            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module.cpp"
+            PROPERTIES
+                COMPILE_DEFINITIONS _CRT_SECURE_NO_WARNINGS
+        )
+    elseif(APPLE)
+        target_sources(
+            TempoFlowVst3PresetGenerator
+            PRIVATE
+                "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_mac.mm"
+        )
+
+        set_source_files_properties(
+            "${TEMPOFLOW_VST3_SDK_DIR}/public.sdk/source/vst/hosting/module_mac.mm"
+            PROPERTIES
+                COMPILE_OPTIONS -fobjc-arc
+        )
+
+        find_library(TEMPOFLOW_COCOA_FRAMEWORK Cocoa REQUIRED)
+        find_library(TEMPOFLOW_COREFOUNDATION_FRAMEWORK CoreFoundation REQUIRED)
+        target_link_libraries(
+            TempoFlowVst3PresetGenerator
+            PRIVATE
+                "${TEMPOFLOW_COCOA_FRAMEWORK}"
+                "${TEMPOFLOW_COREFOUNDATION_FRAMEWORK}"
+        )
+    endif()
 
     target_compile_features(
         TempoFlowVst3PresetGenerator
@@ -242,6 +274,12 @@ if(WIN32)
         "${CMAKE_CURRENT_BINARY_DIR}/factory-presets/$<CONFIG>"
     )
 
+    if(APPLE)
+        set(TEMPOFLOW_VST3_MODULE_PATH "$<TARGET_BUNDLE_DIR:TempoFlowPlugin_VST3>")
+    else()
+        set(TEMPOFLOW_VST3_MODULE_PATH "$<TARGET_FILE:TempoFlowPlugin_VST3>")
+    endif()
+
     set(TEMPOFLOW_FACTORY_PRESET_SOURCES)
     set(TEMPOFLOW_FACTORY_PRESET_OUTPUTS)
     foreach(preset_name IN LISTS TEMPOFLOW_FACTORY_PRESET_NAMES)
@@ -264,7 +302,7 @@ if(WIN32)
             "${CMAKE_COMMAND}" -E make_directory "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
         COMMAND
             "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
-            "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+            "${TEMPOFLOW_VST3_MODULE_PATH}"
             "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
             "${TEMPOFLOW_FACTORY_PRESET_OUTPUT_DIR}"
         DEPENDS
@@ -474,7 +512,7 @@ if(BUILD_TESTING)
         COMMAND TempoFlowPresetRuntimeModelTests
     )
 
-    if(WIN32)
+    if(WIN32 OR APPLE)
         find_program(TEMPOFLOW_POWERSHELL_EXECUTABLE NAMES pwsh powershell REQUIRED)
         add_test(
             NAME vst3-factory-preset-generation
@@ -485,10 +523,13 @@ if(BUILD_TESTING)
                 -ExecutionPolicy Bypass
                 -File "${CMAKE_CURRENT_SOURCE_DIR}/tests/vst3-factory-presets.tests.ps1"
                 -GeneratorPath "$<TARGET_FILE:TempoFlowVst3PresetGenerator>"
-                -PluginPath "$<TARGET_FILE:TempoFlowPlugin_VST3>"
+                -PluginPath "${TEMPOFLOW_VST3_MODULE_PATH}"
                 -SourceDirectory "${TEMPOFLOW_FACTORY_PRESET_SOURCE_DIR}"
                 -OutputRoot "${CMAKE_CURRENT_BINARY_DIR}/factory-presets-test/$<CONFIG>"
         )
+    endif()
+
+    if(WIN32)
         add_test(
             NAME preset-reparse-point
             COMMAND

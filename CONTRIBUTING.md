@@ -10,7 +10,7 @@ Thank you for helping improve TempoFlow. Keep contributions focused, testable, a
 
 ## Development setup
 
-Use Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.25 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. JUCE 9.0.2 is fetched by CMake from its pinned commit.
+Windows development uses Windows 10 x64, Visual Studio Build Tools 2026, Windows SDK `10.0.26100.0`, CMake 3.25 or newer, VS Code 1.116 or newer, and Developer PowerShell for VS 18. macOS development uses Xcode with Apple Clang and CMake 3.25 or newer. JUCE 9.0.2 is fetched by CMake from its pinned commit.
 
 ```powershell
 .\scripts\setup-dev.ps1
@@ -22,7 +22,36 @@ cmake --build --preset windows-x64-release
 ctest --preset windows-x64-release
 ```
 
+On macOS, configure and test the unsigned Universal build with:
+
+```sh
+cmake --fresh --preset macos-universal-debug
+cmake --build --preset macos-universal-debug
+ctest --preset macos-universal-debug
+cmake --fresh --preset macos-universal-release
+cmake --build --preset macos-universal-release
+ctest --preset macos-universal-release
+```
+
 See [Building the TempoFlow VST3](docs/building-vst3.md) for target-only builds, bundle locations, validation, installation, and in-source build safeguards.
+
+## Formatting
+
+Apply the deterministic repository formatting rules:
+
+```powershell
+.\scripts\format.ps1
+```
+
+Verify the same files without modifying them:
+
+```powershell
+.\scripts\verify-format.ps1
+```
+
+After `scripts/setup-dev.ps1` configures `.githooks`, the pre-commit hook runs the read-only verification automatically. C/C++ and JSON use the repository `.clang-format`; `.tempoflow` remains JSON with four-space indentation. TempoFlow semantic preset validation remains a separate build and test step.
+
+The Visual Studio CMake generator does not produce a reliable compilation database for a repository-wide `clang-tidy` run. Keep `.clang-tidy` authoritative and run focused analysis separately with a deliberately generated compilation database when required. The external Steinberg Validator remains part of full VST3 validation, not the pre-commit formatting gate.
 
 ## Contribution rules
 

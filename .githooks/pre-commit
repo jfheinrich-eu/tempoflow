@@ -1,0 +1,17 @@
+#!/bin/sh
+
+repo_root=$(git rev-parse --show-toplevel) || exit 1
+
+if command -v pwsh.exe >/dev/null 2>&1; then
+    powershell_command=pwsh.exe
+elif command -v pwsh >/dev/null 2>&1; then
+    powershell_command=pwsh
+elif command -v powershell.exe >/dev/null 2>&1; then
+    powershell_command=powershell.exe
+else
+    echo "Formatting verification failed: PowerShell was not found." >&2
+    exit 1
+fi
+
+exec "$powershell_command" -NoLogo -NoProfile -ExecutionPolicy Bypass \
+    -File "$repo_root/scripts/verify-format.ps1"

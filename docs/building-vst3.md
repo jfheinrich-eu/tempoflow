@@ -1,10 +1,10 @@
 # Building the TempoFlow VST3
 
-This guide builds the native Windows x64 VST3 bundle from a clean TempoFlow checkout. Run all commands from the repository root in **Developer PowerShell for VS 18**.
+This guide builds the native Windows x64 and unsigned macOS Universal VST3 bundles from a clean TempoFlow checkout. Run all commands from the repository root.
 
 ## Prerequisites
 
-Install the tools listed in the [README requirements](../README.md#requirements), then verify the local development environment:
+For Windows, install the tools listed in the [README requirements](../README.md#requirements), then verify the local development environment from **Developer PowerShell for VS 18**:
 
 ```powershell
 .\scripts\setup-dev.ps1
@@ -13,6 +13,8 @@ cl
 ```
 
 JUCE is downloaded automatically from the commit pinned in `CMakeLists.txt`. A separate JUCE installation is not required. The first configuration therefore requires network access.
+
+For macOS, install Xcode, select its command-line tools, and install CMake 3.25 or newer and PowerShell 7. The Xcode generator uses Apple Clang. No signing identity is required because the current macOS build is intentionally unsigned.
 
 ## Keep generated files out of the source tree
 
@@ -32,6 +34,8 @@ Use the checked-in presets instead. Their build directories are:
 | ------------- | --------------------------- |
 | Debug         | `build/windows-x64-debug`   |
 | Release       | `build/windows-x64-release` |
+| macOS Debug   | `build/macos-universal-debug`   |
+| macOS Release | `build/macos-universal-release` |
 
 The top-level `CMakeLists.txt` also rejects in-source builds with a fatal configuration error.
 
@@ -88,6 +92,31 @@ The Debug bundle is:
 ```text
 build/windows-x64-debug/TempoFlowPlugin_artefacts/Debug/VST3/TempoFlow.vst3
 ```
+
+## Build the macOS Universal VST3
+
+Configure and build the unsigned Release bundle with Xcode and Apple Clang:
+
+```sh
+cmake --fresh --preset macos-universal-release
+cmake --build --preset macos-universal-release
+ctest --preset macos-universal-release
+```
+
+The resulting bundle is:
+
+```text
+build/macos-universal-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
+```
+
+Verify that its executable contains both supported architectures:
+
+```sh
+lipo -verify_arch arm64 x86_64 \
+  build/macos-universal-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3/Contents/MacOS/TempoFlow
+```
+
+Use `macos-universal-debug` for the corresponding Debug build. Both presets set `CMAKE_OSX_ARCHITECTURES` to `arm64;x86_64` and target macOS 11 or newer. They disable Xcode code signing; notarization and distribution signing are outside this build task.
 
 ## Perform a clean reconfiguration
 

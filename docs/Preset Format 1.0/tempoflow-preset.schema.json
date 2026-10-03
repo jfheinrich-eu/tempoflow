@@ -2,8 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:tempoflow:schema:preset:1.0",
   "title": "TempoFlow Preset Format 1.0",
-  "description": "JSON Schema for TempoFlow .tempoflow preset files, based on the approved TempoFlow Preset Format 1.0 specification.",
-  "$comment": "The approved specification requires meter.grouping. Applications must also enforce the semantic grouping and beat rules documented in the schema definitions below.",
+  "description":
+      "JSON Schema for TempoFlow .tempoflow preset files, based on the approved TempoFlow Preset Format 1.0 specification.",
+  "$comment":
+      "The approved specification requires meter.grouping. Applications must also enforce the semantic grouping and beat rules documented in the schema definitions below.",
   "type": "object",
   "required": [
     "schema",
@@ -23,8 +25,10 @@
     },
     "schemaVersion": {
       "type": "string",
-      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
-      "description": "Semantic Versioning version of the preset schema. This 1.0 validator accepts compatible major version 1.x schema versions."
+      "pattern":
+          "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$",
+      "description":
+          "Semantic Versioning version of the preset schema. This 1.0 validator accepts compatible major version 1.x schema versions."
     },
     "metadata": {
       "$ref": "#/$defs/metadata"
@@ -66,7 +70,8 @@
         },
         "category": {
           "type": "string",
-          "description": "Preset category. Recommended values include general, practice, blues, rock, jazz, funk, metal and custom; the vocabulary is intentionally extensible."
+          "description":
+              "Preset category. Recommended values include general, practice, blues, rock, jazz, funk, metal and custom; the vocabulary is intentionally extensible."
         },
         "tags": {
           "type": "array",
@@ -78,7 +83,8 @@
           "type": "string"
         },
         "createdAt": {
-          "description": "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "description":
+              "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
           "anyOf": [
             {
               "type": "string",
@@ -90,7 +96,8 @@
           ]
         },
         "updatedAt": {
-          "description": "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
+          "description":
+              "RFC 3339 date-time when populated; empty string remains accepted for compatibility with the approved metadata example.",
           "anyOf": [
             {
               "type": "string",
@@ -151,10 +158,12 @@
         }
       },
       "additionalProperties": true,
-      "$comment": "Semantic rule required by TempoFlow Preset Format 1.0: sum(meter.grouping) MUST equal meter.numerator. Draft 2020-12 JSON Schema has no portable arithmetic comparison to a sibling property, so applications MUST enforce this as an additional semantic validation step."
+      "$comment":
+          "Semantic rule required by TempoFlow Preset Format 1.0: sum(meter.grouping) MUST equal meter.numerator. Draft 2020-12 JSON Schema has no portable arithmetic comparison to a sibling property, so applications MUST enforce this as an additional semantic validation step."
     },
     "subdivision": {
-      "description": "V1 supports only no subdivision and triplets. Future modes are intentionally not accepted by this V1 schema until a compatible schema revision defines them.",
+      "description":
+          "V1 supports only no subdivision and triplets. Future modes are intentionally not accepted by this V1 schema until a compatible schema revision defines them.",
       "oneOf": [
         {
           "type": "object",
@@ -234,7 +243,8 @@
         }
       },
       "additionalProperties": true,
-      "$comment": "Semantic rules required by TempoFlow Preset Format 1.0: pattern.beats length MUST equal meter.numerator; beat positions MUST correspond to the bar positions 1..meter.numerator without omissions or duplicates. Draft 2020-12 cannot portably compare these values with sibling meter.numerator, so applications MUST enforce them as an additional semantic validation step."
+      "$comment":
+          "Semantic rules required by TempoFlow Preset Format 1.0: pattern.beats length MUST equal meter.numerator; beat positions MUST correspond to the bar positions 1..meter.numerator without omissions or duplicates. Draft 2020-12 cannot portably compare these values with sibling meter.numerator, so applications MUST enforce them as an additional semantic validation step."
     },
     "sound": {
       "type": "object",
@@ -246,7 +256,8 @@
         "soundSet": {
           "type": "string",
           "minLength": 1,
-          "description": "Identifier of the active sound set. Concrete sample/synthesis mapping is intentionally outside the preset."
+          "description":
+              "Identifier of the active sound set. Concrete sample/synthesis mapping is intentionally outside the preset."
         },
         "volume": {
           "type": "number",
