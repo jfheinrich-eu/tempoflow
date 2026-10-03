@@ -1,5 +1,6 @@
 #include "plugin/PluginPresetState.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace tempoflow::plugin
@@ -9,6 +10,27 @@ namespace
 bool isSupportedDenominator(std::int64_t denominator) noexcept
 {
     return denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16; // NOLINT
+}
+
+audio::ClickType toAudioClickType(preset::ClickType type) noexcept
+{
+    switch (type)
+    {
+    case preset::ClickType::accent:
+        return audio::ClickType::accent;
+    case preset::ClickType::normal:
+        return audio::ClickType::normal;
+    case preset::ClickType::high:
+        return audio::ClickType::high;
+    case preset::ClickType::low:
+        return audio::ClickType::low;
+    case preset::ClickType::wood:
+        return audio::ClickType::wood;
+    case preset::ClickType::mute:
+        return audio::ClickType::mute;
+    }
+
+    return audio::ClickType::mute;
 }
 } // namespace
 
@@ -40,6 +62,54 @@ audio::ClickType RealtimePresetState::clickForBeat(int beatNumber, int hostNumer
         return audio::ClickType::accent;
 
     return click;
+}
+
+RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset) noexcept
+{
+    RealtimePresetState state;
+
+    const auto beatCount = preset.pattern.beats.size();
+    if (beatCount == 0 || beatCount > RealtimePresetState::maximumBeatCount || preset.meter.numerator <= 0 ||
+        static_cast<std::uint64_t>(preset.meter.numerator) != beatCount ||
+        !isSupportedDenominator(preset.meter.denominator) || !std::isfinite(preset.sound.volume) ||
+        preset.sound.volume < 0.0 || preset.sound.volume > 1.0 || preset.meter.grouping.empty())
+    {
+        return state;
+    }
+
+    state.beatCount = beatCount;
+    state.meterNumerator = preset.meter.numerator;
+    state.meterDenominator = preset.meter.denominator;
+    state.volume = static_cast<float>(preset.sound.volume);
+
+    for (std::size_t index = 0; index < beatCount; ++index)
+    {
+        const auto &beat = preset.pattern.beats[index];
+        if (beat.beat != static_cast<std::int64_t>(index + 1))
+            return {};
+
+        state.clicks[index] = toAudioClickType(beat.click);
+    }
+
+    state.groupStarts[0] = true;
+    const auto allSingleton = std::all_of(preset.meter.grouping.begin(), preset.meter.grouping.end(),
+                                          [](std::int64_t groupSize) { return groupSize == 1; });
+    std::size_t consumedBeats = 0;
+    for (const auto groupSize : preset.meter.grouping)
+    {
+        if (groupSize <= 0 || static_cast<std::uint64_t>(groupSize) > beatCount - consumedBeats)
+            return {};
+
+        consumedBeats += static_cast<std::size_t>(groupSize);
+        if (!allSingleton && consumedBeats < beatCount)
+            state.groupStarts[consumedBeats] = true;
+    }
+
+    if (consumedBeats != beatCount)
+        return {};
+
+    state.ready = true;
+    return state;
 }
 
 void PluginPresetStateExchange::publish(const RealtimePresetState &state) noexcept

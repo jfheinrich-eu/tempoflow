@@ -1,6 +1,7 @@
 #pragma once
 
 #include "audio/ClickEngine.h"
+#include "preset/PresetRuntimeModel.h"
 #include "preset/PresetValidator.h"
 
 #include <array>
@@ -29,6 +30,8 @@ struct RealtimePresetState final
     float volume = 0.0F;
     bool ready = false;
 };
+
+[[nodiscard]] RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset) noexcept;
 
 class PluginPresetStateExchange final
 {

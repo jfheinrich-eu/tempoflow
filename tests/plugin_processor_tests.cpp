@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 namespace
@@ -410,6 +411,74 @@ bool testInconsistentRealtimeStateFailsSafelyToSilence()
                   "An inconsistent realtime state must resolve every beat to silence");
 }
 
+bool testRealtimePresetConversionRejectsInvalidRuntimeModels()
+{
+    const auto parsed = tempoflow::preset::parsePresetJson(statePreset);
+    if (!parsed.isValid())
+        return expect(false, "The realtime conversion fixture must be valid");
+
+    const auto validPreset = parsed.preset;
+    auto emptyPattern = validPreset;
+    emptyPattern.pattern.beats.clear();
+
+    auto oversizedPattern = validPreset;
+    oversizedPattern.pattern.beats.assign(tempoflow::plugin::RealtimePresetState::maximumBeatCount + 1,
+                                          tempoflow::preset::RuntimeBeat{1, tempoflow::preset::ClickType::normal});
+
+    auto mismatchedNumerator = validPreset;
+    mismatchedNumerator.meter.numerator = 3;
+
+    auto unsupportedDenominator = validPreset;
+    unsupportedDenominator.meter.denominator = 3;
+
+    auto nonFiniteVolume = validPreset;
+    nonFiniteVolume.sound.volume = std::numeric_limits<double>::quiet_NaN();
+
+    auto outOfRangeVolume = validPreset;
+    outOfRangeVolume.sound.volume = 1.01;
+
+    auto emptyGrouping = validPreset;
+    emptyGrouping.meter.grouping.clear();
+
+    auto nonContiguousBeats = validPreset;
+    nonContiguousBeats.pattern.beats[1].beat = 3;
+
+    auto oversizedGroup = validPreset;
+    oversizedGroup.meter.grouping = {5};
+
+    auto incompleteGrouping = validPreset;
+    incompleteGrouping.meter.grouping = {2};
+
+    auto unknownClick = validPreset;
+    unknownClick.pattern.beats[0].click = static_cast<tempoflow::preset::ClickType>(
+        std::numeric_limits<std::underlying_type_t<tempoflow::preset::ClickType>>::max());
+    const auto stateWithUnknownClick = tempoflow::plugin::makeRealtimePresetState(unknownClick);
+
+    return expect(!tempoflow::plugin::makeRealtimePresetState(emptyPattern).isValid(),
+                  "An empty runtime pattern must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(oversizedPattern).isValid(),
+                  "A runtime pattern above the realtime capacity must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(mismatchedNumerator).isValid(),
+                  "A runtime meter that disagrees with its pattern must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(unsupportedDenominator).isValid(),
+                  "An unsupported runtime denominator must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(nonFiniteVolume).isValid(),
+                  "A non-finite runtime volume must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(outOfRangeVolume).isValid(),
+                  "An out-of-range runtime volume must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(emptyGrouping).isValid(),
+                  "An empty runtime grouping must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(nonContiguousBeats).isValid(),
+                  "Non-contiguous runtime beats must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(oversizedGroup).isValid(),
+                  "A runtime group larger than the remaining measure must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(incompleteGrouping).isValid(),
+                  "A runtime grouping that does not fill the measure must be rejected") &&
+           expect(stateWithUnknownClick.isValid() &&
+                      stateWithUnknownClick.clicks[0] == tempoflow::audio::ClickType::mute,
+                  "An unknown runtime click type must fail safely to silence");
+}
+
 bool testRealtimePresetStateExchangePublishesCompleteGenerations()
 {
     tempoflow::plugin::PluginPresetStateExchange exchange;
@@ -600,6 +669,7 @@ int main()
         testSupportedGroupingPatternsPromoteNeutralGroupStarts() && testExplicitRolesOverrideGroupingPromotion() &&
         testHostMeterMismatchDisablesGroupingPromotion() && testGroupingResetsAtTheNextBarBoundary() &&
         testInconsistentRealtimeStateFailsSafelyToSilence() &&
+        testRealtimePresetConversionRejectsInvalidRuntimeModels() &&
         testRealtimePresetStateExchangePublishesCompleteGenerations() && testUndefinedHostBeatRemainsSilent() &&
         testInvalidPresetLeavesActiveStateUnchanged() && testProjectStateRoundTripPreservesPreset() &&
         testInvalidStatePayloadsAreRejected() && testFileErrorsIdentifyThePresetAndPreserveState() &&
