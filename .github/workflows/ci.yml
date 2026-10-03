@@ -63,8 +63,8 @@ jobs:
           verified=0
           while IFS= read -r -d '' binary; do
             if file "$binary" | grep -q 'Mach-O'; then
-              lipo -verify_arch arm64 x86_64 "$binary"
-              echo "$binary: $(lipo -archs "$binary")"
+              lipo "$binary" -verify_arch arm64 x86_64
+              echo "$binary: $(lipo "$binary" -archs)"
               verified=$((verified + 1))
             fi
           done < <(find build/macos-universal-release \
