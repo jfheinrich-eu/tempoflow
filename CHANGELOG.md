@@ -24,4 +24,5 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 - Public repository governance, contribution, security, automation, and Copilot configuration.
 - Reusable semantic preset validator with positive, negative, and reference-preset tests.
 - Reproducible Visual Studio 2026 CI configuration and development setup helper.
+- PowerShell `Invoke-VstValidator` helper and usage documentation for validating the VST3 bundle.
 - Native C++ line-coverage reporting through Microsoft Code Coverage and Codecov.
