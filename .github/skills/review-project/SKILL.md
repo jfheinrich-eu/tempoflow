@@ -1,3 +1,8 @@
+---
+name: review-project
+description: Run a complete TempoFlow engineering and security review, then synchronize project documentation after explicit approval.
+disable-model-invocation: true
+---
 Perform a complete engineering review, security review, and documentation synchronization for TempoFlow.
 
 ## Scope and repository state

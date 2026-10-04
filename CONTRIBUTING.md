@@ -74,10 +74,14 @@ JUCE updates are manual because Dependabot does not manage general CMake `FetchC
 
 Native C++ test coverage is reported through Codecov. See [Code Coverage](docs/code-coverage.md) for the scope, local command, and pull-request behavior. Do not introduce a blocking threshold without an approved baseline.
 
-## Copilot prompt files
+## Copilot skills
+
+Repository-specific Copilot skills live under `.github/skills`. They are deliberately manual-only and appear as slash commands in supported Copilot chat clients.
 
 - `/review` performs an engineering review of current changes or the complete clean repository.
 - `/sec-review` performs the corresponding security review.
+- `/review-project` combines engineering and security reviews, then synchronizes project documentation after explicit approval.
+- `/create-pr` creates a pull request using the required repository template and verified change evidence.
 - `/commit` interactively selects untracked files, proposes atomic Conventional Commit groups, and commits only individually approved groups.
 
 ## Pull requests

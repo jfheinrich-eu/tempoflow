@@ -1,3 +1,8 @@
+---
+name: commit
+description: Prepare reviewed atomic Conventional Commit groups and create only commits explicitly approved by the user.
+disable-model-invocation: true
+---
 Prepare and create reviewed atomic commits for the current repository. Follow all repository instructions. Do not modify project files while running this command.
 
 ## Safety rules

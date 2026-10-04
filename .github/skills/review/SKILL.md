@@ -1,3 +1,8 @@
+---
+name: review
+description: Review current changes or the complete clean TempoFlow repository for engineering defects without modifying files.
+disable-model-invocation: true
+---
 Perform a complete engineering review of TempoFlow without modifying files.
 
 Determine the scope first:
