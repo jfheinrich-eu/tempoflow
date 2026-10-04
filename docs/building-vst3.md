@@ -141,9 +141,11 @@ Use the corresponding `windows-x64-debug` presets for a Debug verification.
 
 ## Validate the bundle
 
-Run Steinberg's validator through the local PowerShell helper:
+Load the repository's PowerShell helper in the current session, then run Steinberg's validator:
 
 ```powershell
+. .\scripts\invoke-vstvalidator.ps1
+
 Invoke-VstValidator `
   '.\build\windows-x64-release\TempoFlowPlugin_artefacts\Release\VST3\TempoFlow.vst3'
 ```
@@ -154,7 +156,7 @@ The expected result is:
 Result: 47 tests passed, 0 tests failed
 ```
 
-See the [Steinberg VST3 Validator guide](steinberg-validator.md) for SDK download and validator build instructions.
+See the [TempoFlow PowerShell scripts](project-helper.md) for function behavior and validator discovery options, and the [Steinberg VST3 Validator guide](steinberg-validator.md) for SDK download and validator build instructions.
 
 ## Install for the current user
 

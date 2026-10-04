@@ -89,7 +89,7 @@ The bundle to validate is:
 build\windows-x64-release\TempoFlowPlugin_artefacts\Release\VST3\TempoFlow.vst3
 ```
 
-## Run the validator
+## Run the validator directly
 
 Assign the actual validator path found or built above:
 
@@ -102,6 +102,14 @@ $plugin = (Resolve-Path `
 if ($LASTEXITCODE -ne 0) {
   throw "VST 3 validation failed with exit code $LASTEXITCODE."
 }
+```
+
+From the TempoFlow repository, you can instead dot-source the [PowerShell scripts guide](project-helper.md), which documents validator discovery and explicit executable selection:
+
+```powershell
+. .\scripts\invoke-vstvalidator.ps1
+Invoke-VstValidator `
+  '.\build\windows-x64-release\TempoFlowPlugin_artefacts\Release\VST3\TempoFlow.vst3'
 ```
 
 To display the output and save it for investigation:
