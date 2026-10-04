@@ -37,7 +37,7 @@ Signed-off-by: Your Name <your.email@example.com>
 
 Each commit must represent one coherent purpose. Assign each changed file to exactly one commit group. Do not combine unrelated source, build, policy, or documentation work in a catch-all commit.
 
-Use the repository `/commit` prompt when Copilot should prepare the groups interactively. A commit created directly from an editor or review interface does not run that prompt automatically and remains subject to the same validation rules.
+Use the repository `/commit` skill when Copilot should prepare the groups interactively. The skill is deliberately manual-only. A commit created directly from an editor or review interface does not run the skill automatically and remains subject to the same validation rules.
 
 ## Enforcement
 

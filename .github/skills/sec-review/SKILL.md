@@ -1,3 +1,8 @@
+---
+name: sec-review
+description: Review current changes or the complete clean TempoFlow repository for security risks without modifying files.
+disable-model-invocation: true
+---
 Perform a security-focused review of TempoFlow without modifying files.
 
 Determine the scope first:
