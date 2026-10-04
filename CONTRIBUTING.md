@@ -81,6 +81,7 @@ Repository-specific Copilot skills live under `.github/skills`. They are deliber
 - `/review` performs an engineering review of current changes or the complete clean repository.
 - `/sec-review` performs the corresponding security review.
 - `/review-project` combines engineering and security reviews, then synchronizes project documentation after explicit approval.
+- `/create-pr` creates a pull request using the required repository template and verified change evidence.
 - `/commit` interactively selects untracked files, proposes atomic Conventional Commit groups, and commits only individually approved groups.
 
 ## Pull requests
