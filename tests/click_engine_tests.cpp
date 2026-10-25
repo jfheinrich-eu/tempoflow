@@ -32,6 +32,16 @@ std::array<float, sampleCount> renderClick(ClickType type)
     return output;
 }
 
+std::array<float, sampleCount> renderTripletSubdivision()
+{
+    SyntheticClickEngine engine;
+    std::array<float, sampleCount> output{};
+    engine.prepare(48'000.0);
+    engine.triggerTripletSubdivision();
+    engine.render(output.data(), static_cast<int>(output.size()));
+    return output;
+}
+
 template <std::size_t size> float magnitude(const std::array<float, size> &samples)
 {
     float result = 0.0F;
@@ -71,6 +81,21 @@ bool testRolesAreAudibleAndDistinct()
 bool testMuteProducesSilence()
 {
     return expect(magnitude(renderClick(ClickType::mute)) == 0.0F, "Mute must produce silence");
+}
+
+bool testTripletSubdivisionHasDistinctQuieterShorterSound()
+{
+    const auto normal = renderClick(ClickType::normal);
+    const auto subdivision = renderTripletSubdivision();
+    constexpr auto tailSample = 512;
+
+    return expect(magnitude(subdivision) > 0.1F, "Triplet subdivisions must remain clearly audible") &&
+           expect(magnitude(subdivision) < magnitude(normal) * 0.5F,
+                  "Triplet subdivisions must be substantially quieter than normal beats") &&
+           expect(std::abs(subdivision[0] - normal[0]) > 0.1F,
+                  "Triplet subdivisions must have a distinct attack from normal beats") &&
+           expect(std::abs(subdivision[tailSample]) < std::abs(normal[tailSample]) * 0.1F,
+                  "Triplet subdivisions must have a shorter decay than normal beats");
 }
 
 bool testUnsupportedRoleProducesSilence()
@@ -144,6 +169,7 @@ bool testInvalidPreparationStaysSilent()
 int main()
 {
     const bool passed = testRolesAreAudibleAndDistinct() && testMuteProducesSilence() &&
+                        testTripletSubdivisionHasDistinctQuieterShorterSound() &&
                         testUnsupportedRoleProducesSilence() && testTriggerStartsAtTheCurrentSample() &&
                         testTailContinuesAcrossBlocksAndResetStopsIt() && testOutputIsFiniteAndBounded() &&
                         testInvalidPreparationStaysSilent();

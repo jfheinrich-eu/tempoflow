@@ -92,7 +92,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, and project-state restoration. Grouping-driven playback and triplet playback remain incomplete.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, grouping-aware playback, triplet subdivisions, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, and project-state restoration. Grouping and triplet behavior are unit-tested; their Cubase acceptance remains pending.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -442,7 +442,7 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor. Steinberg's host-managed preset workflow does not require one.
 
-The initial scaffold, internal plug-in-state integration, native factory-preset selection, and external Cubase state restoration are validated. Remaining playback semantics are still release-blocking for the MVP.
+The initial scaffold, internal plug-in-state integration, native factory-preset selection, and external Cubase state restoration are validated. Grouping-aware accents and triplet subdivisions are implemented and unit-tested; Cubase validation of those playback behaviors remains release-blocking for the MVP.
 
 ### VST-012 — Cubase preset and project-state validation
 
@@ -635,7 +635,7 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 - Implement the click engine.
 - Map all six click roles.
 - Apply master volume.
-- Process grouping and triplet subdivision.
+- Process grouping-aware accents and triplet subdivisions. Implemented and unit-tested; Cubase validation remains.
 
 ### E — Presets
 

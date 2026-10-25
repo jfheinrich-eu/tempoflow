@@ -24,6 +24,7 @@ struct ScheduledBeat
     int sampleOffset = 0;
     int beatNumber = 0;
     bool isBarStart = false;
+    int subdivisionIndex = 0;
 };
 
 class ScheduledBeatBuffer final
@@ -57,7 +58,7 @@ struct BeatSchedule final
 class BeatScheduler final
 {
   public:
-    [[nodiscard]] BeatSchedule schedule(const HostTiming &timing) noexcept;
+    [[nodiscard]] BeatSchedule schedule(const HostTiming &timing, int subdivisionsPerBeat = 1) noexcept;
     void reset() noexcept;
 
   private:

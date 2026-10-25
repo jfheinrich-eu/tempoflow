@@ -112,6 +112,71 @@ bool testCompoundMeterUsesDenominatorBeatLength()
                   "6/8 beat three must use an eighth-note interval");
 }
 
+bool testThreeQuarterMeterWrapsToTheNextBarStart()
+{
+    BeatScheduler scheduler;
+    const auto result = scheduler.schedule(makeTiming(0.0, 0.0, 0, 80'000, 48'000.0, 120.0, 3, 4));
+
+    return expect(result.beats.size() == 4, "A 3/4 block that spans a bar boundary must include the next bar start") &&
+           expect(result.beats[0].sampleOffset == 0 && result.beats[0].beatNumber == 1,
+                  "The first beat of a 3/4 bar must start at sample zero") &&
+           expect(result.beats[1].sampleOffset == 24'000 && result.beats[1].beatNumber == 2,
+                  "The second beat of a 3/4 bar must fall on the second quarter-note") &&
+           expect(result.beats[2].sampleOffset == 48'000 && result.beats[2].beatNumber == 3,
+                  "The third beat of a 3/4 bar must be audible") &&
+           expect(result.beats[3].sampleOffset == 72'000 && result.beats[3].beatNumber == 1,
+                  "A 3/4 bar must wrap to the next bar start as beat one, never as a silent beat four");
+}
+
+bool testTripletSubdivisionsAreScheduledAtEvenSampleOffsets()
+{
+    BeatScheduler scheduler;
+    const auto result = scheduler.schedule(makeTiming(0.0, 0.0, 0, 25'000), 3);
+
+    constexpr std::array expectedOffsets{0, 8'000, 16'000, 24'000};
+    constexpr std::array expectedBeats{1, 1, 1, 2};
+    constexpr std::array expectedSubdivisionIndices{0, 1, 2, 0};
+    bool passed = expect(result.beats.size() == expectedOffsets.size(),
+                         "A triplet schedule must contain all events in the half-open block");
+
+    for (std::size_t index = 0; index < result.beats.size(); ++index)
+    {
+        passed &= expect(result.beats[index].sampleOffset == expectedOffsets[index],
+                         "A triplet event has the wrong sample offset");
+        passed &= expect(result.beats[index].beatNumber == expectedBeats[index],
+                         "A triplet event has the wrong host beat number");
+        passed &= expect(result.beats[index].subdivisionIndex == expectedSubdivisionIndices[index],
+                         "A triplet event has the wrong subdivision index");
+    }
+
+    return passed && expect(result.beats[0].isBarStart && !result.beats[1].isBarStart,
+                            "Only the main pulse at the start of a bar may mark the bar start");
+}
+
+bool testTripletPulsesAtBlockBoundariesAreScheduledOnce()
+{
+    BeatScheduler scheduler;
+    constexpr auto sampleRate = 48'000.0;
+    constexpr auto bpm = 120.0;
+    constexpr auto blockSize = 8'000;
+    constexpr auto ppqPerSample = bpm / (60.0 * sampleRate);
+
+    const auto first = scheduler.schedule(makeTiming(0.0, 0.0, 0, blockSize, sampleRate, bpm), 3);
+    const auto second =
+        scheduler.schedule(makeTiming(blockSize * ppqPerSample, 0.0, blockSize, blockSize, sampleRate, bpm), 3);
+    const auto third =
+        scheduler.schedule(makeTiming(2 * blockSize * ppqPerSample, 0.0, 2 * blockSize, blockSize, sampleRate, bpm), 3);
+
+    return expect(first.beats.size() == 1 && first.beats[0].sampleOffset == 0,
+                  "The first triplet block must not include its exclusive end pulse") &&
+           expect(!second.transportDiscontinuity && second.beats.size() == 1 && second.beats[0].sampleOffset == 0 &&
+                      second.beats[0].subdivisionIndex == 1,
+                  "A triplet pulse at a block start must be scheduled exactly once") &&
+           expect(!third.transportDiscontinuity && third.beats.size() == 1 && third.beats[0].sampleOffset == 0 &&
+                      third.beats[0].subdivisionIndex == 2,
+                  "The next triplet pulse must remain continuous across blocks");
+}
+
 bool testMidBarStartAndSeek()
 {
     BeatScheduler scheduler;
@@ -210,15 +275,38 @@ bool testFixedCapacityReportsOverflow()
                   "The fixed beat buffer must stop at its capacity") &&
            expect(result.beats.overflowed(), "Capacity exhaustion must be reported");
 }
+
+bool testTripletScheduleReportsCapacityOverflow()
+{
+    BeatScheduler scheduler;
+    const auto result = scheduler.schedule(makeTiming(0.0, 0.0, 0, 1'000, 1.0, 300.0, 4, 16), 3);
+
+    return expect(result.beats.size() == tempoflow::timing::ScheduledBeatBuffer::capacity,
+                  "A triplet schedule must stop at the fixed event capacity") &&
+           expect(result.beats.overflowed(), "A triplet schedule capacity exhaustion must be reported");
+}
+
+bool testUnsupportedSubdivisionCountProducesNoEvents()
+{
+    BeatScheduler scheduler;
+    const auto result = scheduler.schedule(makeTiming(0.0, 0.0, 0, 512), 2);
+
+    return expect(result.beats.empty(), "An unsupported subdivision count must produce no events") &&
+           expect(!result.hostTimingValid, "An unsupported subdivision count must not be accepted");
+}
 } // namespace
 
 int main()
 {
-    const bool passed =
-        testStoppedAndInvalidTimingProduceNoEvents() && testBeatAtBlockStart() && testHalfOpenBlockBoundary() &&
-        testMultipleBeatsAndBarWrap() && testCompoundMeterUsesDenominatorBeatLength() && testMidBarStartAndSeek() &&
-        testPpqJumpIsADiscontinuity() && testSampleRatesAndBlockSizes() && testTempoAndMeterChangesApplyImmediately() &&
-        testStopResetsContinuity() && testFixedCapacityReportsOverflow();
+    const bool passed = testStoppedAndInvalidTimingProduceNoEvents() && testBeatAtBlockStart() &&
+                        testHalfOpenBlockBoundary() && testMultipleBeatsAndBarWrap() &&
+                        testCompoundMeterUsesDenominatorBeatLength() && testThreeQuarterMeterWrapsToTheNextBarStart() &&
+                        testMidBarStartAndSeek() && testTripletSubdivisionsAreScheduledAtEvenSampleOffsets() &&
+                        testTripletPulsesAtBlockBoundariesAreScheduledOnce() && testPpqJumpIsADiscontinuity() &&
+                        testSampleRatesAndBlockSizes() && testTempoAndMeterChangesApplyImmediately() &&
+                        testStopResetsContinuity() && testFixedCapacityReportsOverflow() &&
+                        testTripletScheduleReportsCapacityOverflow() &&
+                        testUnsupportedSubdivisionCountProducesNoEvents();
 
     if (!passed)
         return 1;

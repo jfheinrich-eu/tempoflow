@@ -22,9 +22,11 @@ bool isValid(const HostTiming &timing) noexcept
 {
     return timing.isPlaying && std::isfinite(timing.bpm) && timing.bpm > 0.0 && timing.timeSignatureNumerator > 0 &&
            isSupportedDenominator(timing.timeSignatureDenominator) && std::isfinite(timing.ppqPosition) &&
-           std::isfinite(timing.ppqPositionOfLastBarStart) &&
+           timing.ppqPosition >= 0.0 && std::isfinite(timing.ppqPositionOfLastBarStart) &&
+           timing.ppqPositionOfLastBarStart >= 0.0 &&
            timing.ppqPositionOfLastBarStart <= timing.ppqPosition + positionTolerance &&
-           std::isfinite(timing.sampleRate) && timing.sampleRate > 0.0 && timing.blockSize > 0;
+           std::isfinite(timing.samplePosition) && timing.samplePosition >= 0 && std::isfinite(timing.sampleRate) &&
+           timing.sampleRate > 0.0 && timing.blockSize > 0;
 }
 
 bool tryCeilToInt64(double value, std::int64_t &result) noexcept
@@ -73,6 +75,11 @@ int positiveModulo(std::int64_t value, int divisor) noexcept
     const auto remainder = value % divisor;
     return static_cast<int>(remainder < 0 ? remainder + divisor : remainder);
 }
+
+bool isSupportedSubdivisionCount(int subdivisionsPerBeat) noexcept
+{
+    return subdivisionsPerBeat == 1 || subdivisionsPerBeat == 3;
+}
 } // namespace
 
 std::size_t ScheduledBeatBuffer::size() const noexcept
@@ -111,11 +118,11 @@ void ScheduledBeatBuffer::markOverflow() noexcept
     didOverflow = true;
 }
 
-BeatSchedule BeatScheduler::schedule(const HostTiming &timing) noexcept
+BeatSchedule BeatScheduler::schedule(const HostTiming &timing, int subdivisionsPerBeat) noexcept
 {
     BeatSchedule result;
 
-    if (!isValid(timing))
+    if (!isValid(timing) || !isSupportedSubdivisionCount(subdivisionsPerBeat))
     {
         reset();
         return result;
@@ -145,10 +152,11 @@ BeatSchedule BeatScheduler::schedule(const HostTiming &timing) noexcept
     result.hostTimingValid = true;
 
     const auto beatLengthPpq = 4.0 / static_cast<double>(timing.timeSignatureDenominator);
+    const auto subdivisionLengthPpq = beatLengthPpq / static_cast<double>(subdivisionsPerBeat);
     const auto relativePpq = timing.ppqPosition - timing.ppqPositionOfLastBarStart;
 
-    std::int64_t beatOrdinal = 0;
-    if (!tryCeilToInt64(relativePpq / beatLengthPpq, beatOrdinal))
+    std::int64_t subdivisionOrdinal = 0;
+    if (!tryCeilToInt64(relativePpq / subdivisionLengthPpq, subdivisionOrdinal))
     {
         reset();
         return {};
@@ -158,7 +166,10 @@ BeatSchedule BeatScheduler::schedule(const HostTiming &timing) noexcept
 
     while (true)
     {
-        const auto beatPpq = timing.ppqPositionOfLastBarStart + (static_cast<double>(beatOrdinal) * beatLengthPpq);
+        const auto beatOrdinal = subdivisionOrdinal / subdivisionsPerBeat;
+        const auto subdivisionIndex = static_cast<int>(subdivisionOrdinal % subdivisionsPerBeat);
+        const auto beatPpq = timing.ppqPositionOfLastBarStart + (static_cast<double>(beatOrdinal) * beatLengthPpq) +
+                             (static_cast<double>(subdivisionIndex) * subdivisionLengthPpq);
         const auto samplePositionInBlock = (beatPpq - timing.ppqPosition) * samplesPerPpq;
 
         int sampleOffset = 0;
@@ -176,20 +187,21 @@ BeatSchedule BeatScheduler::schedule(const HostTiming &timing) noexcept
         if (sampleOffset >= 0)
         {
             const auto beatIndex = positiveModulo(beatOrdinal, timing.timeSignatureNumerator);
-            if (!result.beats.add({sampleOffset, beatIndex + 1, beatIndex == 0}))
+            if (!result.beats.add(
+                    {sampleOffset, beatIndex + 1, subdivisionIndex == 0 && beatIndex == 0, subdivisionIndex}))
             {
                 result.beats.markOverflow();
                 break;
             }
         }
 
-        if (beatOrdinal == std::numeric_limits<std::int64_t>::max())
+        if (subdivisionOrdinal == std::numeric_limits<std::int64_t>::max())
         {
             result.beats.markOverflow();
             break;
         }
 
-        ++beatOrdinal;
+        ++subdivisionOrdinal;
     }
 
     return result;

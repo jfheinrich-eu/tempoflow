@@ -33,7 +33,7 @@ TempoFlow uses three independent version tracks:
 
 ## Project status
 
-TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, internal preset-state loading, VST3 project-state restoration, and native factory `.vstpreset` generation are available. Cubase Elements 15 discovers all seven factory presets, exposes their catalogue metadata, restores Cubase-managed user presets, and restores non-default project state. Grouping-driven playback and audible triplet subdivisions are not implemented yet.
+TempoFlow is in pre-alpha development. The preset specification, JSON Schema, semantic validator, typed preset runtime model, seven reference presets, Windows build environment, sample-accurate host synchronization, synthetic VST3 click engine, grouping-driven accents, triplet subdivisions, internal preset-state loading, VST3 project-state restoration, and native factory `.vstpreset` generation are available. Triplet mode divides each denominator-defined host beat into three equal pulses with a distinct, quieter and shorter sound on the intermediate pulses. Cubase Elements 15 discovers all seven factory presets, exposes their catalogue metadata, restores Cubase-managed user presets, and restores non-default project state. The grouping and triplet playback changes are covered by automated tests; Cubase acceptance for these playback behaviors is still pending.
 
 Do not use the current repository as a production plug-in or depend on API stability.
 
@@ -202,7 +202,7 @@ Preset loading, transactional failure handling, real-time publication, and Cubas
 4. Add the typed preset runtime model. Complete.
 5. Integrate the semantic preset validator and runtime model with plug-in state loading. Complete.
 6. Validate the current plug-in, factory-preset, and project-state workflow with Steinberg tools and Cubase Elements 15. Complete.
-7. Complete grouping-driven playback and audible triplet subdivisions for VST3 MVP 0.1.0.
+7. Validate grouping-driven accents and audible triplet subdivisions in Cubase Elements 15 for VST3 MVP 0.1.0.
 8. Verify preset interoperability with the PWA as separate post-MVP product work.
 
 Detailed decisions and risks are tracked in [PROJECT_KICKOFF.md](PROJECT_KICKOFF.md).

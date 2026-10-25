@@ -24,6 +24,7 @@ class SyntheticClickEngine final
     void prepare(double sampleRate) noexcept;
     void reset() noexcept;
     void trigger(ClickType type) noexcept;
+    void triggerTripletSubdivision() noexcept;
     void render(float *output, int sampleCount) noexcept;
 
   private:
@@ -40,6 +41,7 @@ class SyntheticClickEngine final
 
     static constexpr std::size_t voiceCount = 64;
 
+    void trigger(ClickType type, double frequency, float amplitude, double decaySeconds) noexcept;
     [[nodiscard]] Voice &voiceForTrigger() noexcept;
     [[nodiscard]] float renderVoice(Voice &voice) noexcept;
 

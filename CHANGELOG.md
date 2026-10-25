@@ -15,6 +15,7 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 
 ### Added
 
+- Sample-accurate triplet subdivisions with pattern-role precedence, mute handling, and a distinct quieter, shorter subdivision sound.
 - Transactional plug-in preset loading, lock-free real-time state publication, preset-driven click roles and volume, and VST3 project-state restoration.
 - Typed preset runtime model with bounded file loading and focused tests.
 - Informational native C++ coverage reporting through Codecov.
