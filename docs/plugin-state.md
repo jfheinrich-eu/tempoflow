@@ -42,7 +42,7 @@ flowchart LR
 
 ## Real-time publication
 
-Parsing, file access, diagnostics, strings, and dynamic containers remain outside `processBlock`. A validated preset is converted to a fixed-size real-time representation containing only the beat-role table and master volume.
+Parsing, file access, diagnostics, strings, and dynamic containers remain outside `processBlock`. A validated preset is converted to a fixed-size real-time representation containing beat roles, grouping starts, subdivision count, and master volume.
 
 The processor publishes this representation through three preallocated slots. The audio callback copies a stable slot only when its generation changes. It does not allocate, free, lock, wait, access files, parse JSON, or report diagnostics.
 
@@ -52,6 +52,7 @@ Applying a new generation resets the scheduler and click tails at the next audio
 
 - Host tempo, transport, position, and time signature remain authoritative.
 - The preset selects the click role for each defined beat and supplies the master volume.
+- Triplet mode divides each denominator-defined host beat into three evenly spaced pulses. The main pulse uses the effective pattern role; intermediate pulses use a distinct, shorter and quieter triplet sound. A `mute` beat suppresses all three pulses.
 - `mute` produces silence.
 - A host beat outside the loaded preset's pattern range produces silence. TempoFlow does not invent pattern expansion when the host meter differs from the preset meter.
-- Grouping-driven accents and audible triplet subdivisions remain separate playback work. Their musical behavior must be approved before implementation.
+- Grouping promotes only a `normal` role at eligible group starts when the host meter matches the preset meter. Explicit roles and muted beats are preserved.

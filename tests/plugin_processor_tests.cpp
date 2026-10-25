@@ -264,6 +264,27 @@ bool testStoppedTransportClearsClickTail()
            expect(stoppedAudio.getMagnitude(0, sampleCount) == 0.0F, "Stopped transport must clear click tails");
 }
 
+bool testNegativeHostTimingIsRejected()
+{
+    tempoflow::plugin::TempoFlowAudioProcessor processor;
+    TestPlayHead playHead;
+    constexpr auto sampleRate = 48'000.0;
+    constexpr auto sampleCount = 64;
+    setPlayingPosition(playHead, -1.0, -32, 4, 4, -1.0);
+
+    processor.setPlayHead(&playHead);
+    processor.setRateAndBufferSizeDetails(sampleRate, sampleCount);
+    processor.prepareToPlay(sampleRate, sampleCount);
+
+    juce::AudioBuffer<float> audio(1, sampleCount);
+    juce::MidiBuffer midi;
+    processor.processBlock(audio, midi);
+    processor.releaseResources();
+
+    return expect(audio.getMagnitude(0, sampleCount) == 0.0F,
+                  "Negative host timing must reject scheduling and remain silent");
+}
+
 bool testSchedulerOverflowProducesSilence()
 {
     tempoflow::plugin::TempoFlowAudioProcessor processor;
@@ -298,6 +319,45 @@ bool testPresetPatternAndMasterVolumeAreApplied()
            expect(fullVolumeMagnitude > quarterVolumeMagnitude, "Master volume must change the rendered level") &&
            expect(std::abs(quarterVolumeMagnitude - (fullVolumeMagnitude * 0.25F)) < 0.0001F,
                   "Master volume must scale the rendered level linearly");
+}
+
+bool testTripletsUseNormalClicksAndMutedBeatsStaySilent()
+{
+    const auto tripletPreset =
+        makeGroupingPreset(4, 4, {1, 1, 1, 1}, {"normal", "mute", "normal", "normal"})
+            .replace("\"mode\": \"none\", \"partsPerBeat\": 1", "\"mode\": \"triplet\", \"partsPerBeat\": 3");
+    tempoflow::plugin::TempoFlowAudioProcessor processor;
+    if (!processor.applyPresetJson(tripletPreset).isValid())
+        return expect(false, "The triplet test preset must be valid");
+
+    TestPlayHead playHead;
+    constexpr auto sampleRate = 48'000.0;
+    constexpr auto sampleCount = 48'000;
+    setPlayingPosition(playHead, 0.0, 0);
+
+    processor.setPlayHead(&playHead);
+    processor.setRateAndBufferSizeDetails(sampleRate, sampleCount);
+    processor.prepareToPlay(sampleRate, sampleCount);
+
+    juce::AudioBuffer<float> audio(1, sampleCount);
+    juce::MidiBuffer midi;
+    processor.processBlock(audio, midi);
+    processor.releaseResources();
+
+    const auto *samples = audio.getReadPointer(0);
+    constexpr auto beatStart = 0;
+    constexpr auto firstTriplet = 8'000;
+    constexpr auto secondTriplet = 16'000;
+    constexpr auto mutedBeat = 24'000;
+    constexpr auto mutedFirstTriplet = 32'000;
+    constexpr auto mutedSecondTriplet = 40'000;
+
+    return expect(samples[beatStart] > 0.7F, "Grouping must retain the main beat's automatic accent") &&
+           expect(std::abs(samples[firstTriplet] - 0.22F) < 0.001F && std::abs(samples[secondTriplet] - 0.22F) < 0.001F,
+                  "Triplet subdivisions must use the dedicated quieter click") &&
+           expect(samples[mutedBeat] == 0.0F && samples[mutedFirstTriplet] == 0.0F &&
+                      samples[mutedSecondTriplet] == 0.0F,
+                  "A muted beat must suppress its main pulse and both triplet subdivisions");
 }
 
 bool testSupportedGroupingPatternsPromoteNeutralGroupStarts()
@@ -395,6 +455,27 @@ bool testGroupingResetsAtTheNextBarBoundary()
                   "The neutral first beat of the next bar must receive the grouping accent");
 }
 
+bool testThreeQuarterMeterWrapsToTheNextBarWithoutSilencing()
+{
+    tempoflow::plugin::RealtimePresetState state;
+    state.ready = true;
+    state.beatCount = 3;
+    state.meterNumerator = 3;
+    state.meterDenominator = 4;
+    state.volume = 1.0F;
+    state.groupStarts[0] = true;
+    state.clicks[0] = tempoflow::audio::ClickType::accent;
+    state.clicks[1] = tempoflow::audio::ClickType::normal;
+    state.clicks[2] = tempoflow::audio::ClickType::normal;
+
+    return expect(state.clickForBeat(1, 3, 4) == tempoflow::audio::ClickType::accent,
+                  "The first beat of a 3/4 pattern must remain accented") &&
+           expect(state.clickForBeat(3, 3, 4) == tempoflow::audio::ClickType::normal,
+                  "The final beat of a 3/4 pattern must remain audible") &&
+           expect(state.clickForBeat(4, 3, 4) == tempoflow::audio::ClickType::accent,
+                  "A bar-boundary beat beyond the pattern must wrap to the next bar without silencing");
+}
+
 bool testInconsistentRealtimeStateFailsSafelyToSilence()
 {
     tempoflow::plugin::RealtimePresetState state;
@@ -437,6 +518,9 @@ bool testRealtimePresetConversionRejectsInvalidRuntimeModels()
     auto outOfRangeVolume = validPreset;
     outOfRangeVolume.sound.volume = 1.01;
 
+    auto unsupportedSubdivision = validPreset;
+    unsupportedSubdivision.subdivision.partsPerBeat = 2;
+
     auto emptyGrouping = validPreset;
     emptyGrouping.meter.grouping.clear();
 
@@ -466,6 +550,8 @@ bool testRealtimePresetConversionRejectsInvalidRuntimeModels()
                   "A non-finite runtime volume must be rejected") &&
            expect(!tempoflow::plugin::makeRealtimePresetState(outOfRangeVolume).isValid(),
                   "An out-of-range runtime volume must be rejected") &&
+           expect(!tempoflow::plugin::makeRealtimePresetState(unsupportedSubdivision).isValid(),
+                  "An inconsistent runtime subdivision must be rejected") &&
            expect(!tempoflow::plugin::makeRealtimePresetState(emptyGrouping).isValid(),
                   "An empty runtime grouping must be rejected") &&
            expect(!tempoflow::plugin::makeRealtimePresetState(nonContiguousBeats).isValid(),
@@ -665,9 +751,11 @@ int main()
     const bool passed =
         testIdentityAndCapabilities() && testBusLayout() && testSilentProcessing() &&
         testScheduledClickStartsAtTheExactSample() && testStoppedTransportClearsClickTail() &&
-        testSchedulerOverflowProducesSilence() && testPresetPatternAndMasterVolumeAreApplied() &&
+        testNegativeHostTimingIsRejected() && testSchedulerOverflowProducesSilence() &&
+        testPresetPatternAndMasterVolumeAreApplied() && testTripletsUseNormalClicksAndMutedBeatsStaySilent() &&
         testSupportedGroupingPatternsPromoteNeutralGroupStarts() && testExplicitRolesOverrideGroupingPromotion() &&
         testHostMeterMismatchDisablesGroupingPromotion() && testGroupingResetsAtTheNextBarBoundary() &&
+        testThreeQuarterMeterWrapsToTheNextBarWithoutSilencing() &&
         testInconsistentRealtimeStateFailsSafelyToSilence() &&
         testRealtimePresetConversionRejectsInvalidRuntimeModels() &&
         testRealtimePresetStateExchangePublishesCompleteGenerations() && testUndefinedHostBeatRemainsSilent() &&

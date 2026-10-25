@@ -38,13 +38,28 @@ std::optional<timing::HostTiming> readHostTiming(const juce::AudioPlayHead::Posi
     if (!bpm || !timeSignature || !ppqPosition || !lastBarStart || !samplePosition)
         return std::nullopt;
 
+    const auto bpmValue = *bpm;
+    const auto numerator = timeSignature->numerator;
+    const auto denominator = timeSignature->denominator;
+    const auto ppqValue = *ppqPosition;
+    const auto lastBarStartValue = *lastBarStart;
+    const auto samplePositionValue = *samplePosition;
+
+    if (!std::isfinite(bpmValue) || bpmValue <= 0.0 || !std::isfinite(ppqValue) || ppqValue < 0.0 ||
+        !std::isfinite(lastBarStartValue) || lastBarStartValue < 0.0 || !std::isfinite(samplePositionValue) ||
+        samplePositionValue < 0.0 || numerator <= 0 || denominator <= 0 || !std::isfinite(sampleRate) ||
+        sampleRate <= 0.0 || blockSize <= 0)
+    {
+        return std::nullopt;
+    }
+
     return timing::HostTiming{position.getIsPlaying(),
-                              *bpm,
-                              timeSignature->numerator,
-                              timeSignature->denominator,
-                              *ppqPosition,
-                              *lastBarStart,
-                              *samplePosition,
+                              bpmValue,
+                              numerator,
+                              denominator,
+                              ppqValue,
+                              lastBarStartValue,
+                              static_cast<std::int64_t>(samplePositionValue),
                               sampleRate,
                               blockSize};
 }
@@ -111,7 +126,7 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
     {
         if (const auto timing = readHostTiming(*position, getSampleRate(), audio.getNumSamples()))
         {
-            const auto schedule = beatScheduler.schedule(*timing);
+            const auto schedule = beatScheduler.schedule(*timing, realtimePresetState.subdivisionsPerBeat);
             if (!schedule.hostTimingValid || schedule.beats.overflowed())
             {
                 beatScheduler.reset();
@@ -129,8 +144,17 @@ void TempoFlowAudioProcessor::processBlock(juce::AudioBuffer<float> &audio, juce
             {
                 const auto &beat = schedule.beats[index];
                 clickEngine.render(output + renderedSamples, beat.sampleOffset - renderedSamples);
-                clickEngine.trigger(realtimePresetState.clickForBeat(beat.beatNumber, timing->timeSignatureNumerator,
-                                                                     timing->timeSignatureDenominator));
+                const auto click = realtimePresetState.clickForBeat(beat.beatNumber, timing->timeSignatureNumerator,
+                                                                    timing->timeSignatureDenominator);
+                if (beat.subdivisionIndex > 0)
+                {
+                    if (click != audio::ClickType::mute)
+                        clickEngine.triggerTripletSubdivision();
+                }
+                else
+                {
+                    clickEngine.trigger(click);
+                }
                 renderedSamples = beat.sampleOffset;
             }
 

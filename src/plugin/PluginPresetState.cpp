@@ -12,6 +12,11 @@ bool isSupportedDenominator(std::int64_t denominator) noexcept
     return denominator == 2 || denominator == 4 || denominator == 8 || denominator == 16; // NOLINT
 }
 
+bool isSupportedSubdivisionCount(int subdivisionsPerBeat) noexcept
+{
+    return subdivisionsPerBeat == 1 || subdivisionsPerBeat == 3;
+}
+
 audio::ClickType toAudioClickType(preset::ClickType type) noexcept
 {
     switch (type)
@@ -44,19 +49,21 @@ bool RealtimePresetState::isValid() const noexcept
 {
     return ready && beatCount > 0 && beatCount <= maximumBeatCount && meterNumerator > 0 &&
            static_cast<std::uint64_t>(meterNumerator) == beatCount && isSupportedDenominator(meterDenominator) &&
-           std::isfinite(volume) && volume >= 0.0F && volume <= 1.0F && groupStarts[0];
+           isSupportedSubdivisionCount(subdivisionsPerBeat) && std::isfinite(volume) && volume >= 0.0F &&
+           volume <= 1.0F && groupStarts[0];
 }
 
 audio::ClickType RealtimePresetState::clickForBeat(int beatNumber, int hostNumerator,
                                                    int hostDenominator) const noexcept
 {
-    if (!isValid() || beatNumber < 1 || static_cast<std::size_t>(beatNumber) > beatCount)
+    if (!isValid() || beatNumber < 1)
         return audio::ClickType::mute;
 
-    const auto beatIndex = static_cast<std::size_t>(beatNumber - 1);
-    const auto click = clicks[beatIndex];
     const auto meterMatches = static_cast<std::int64_t>(hostNumerator) == meterNumerator &&
                               static_cast<std::int64_t>(hostDenominator) == meterDenominator;
+    const auto resolvedBeatNumber = ((beatNumber - 1) % static_cast<int>(beatCount)) + 1;
+    const auto beatIndex = static_cast<std::size_t>(resolvedBeatNumber - 1);
+    const auto click = clicks[beatIndex];
 
     if (meterMatches && groupStarts[beatIndex] && click == audio::ClickType::normal)
         return audio::ClickType::accent;
@@ -81,6 +88,22 @@ RealtimePresetState makeRealtimePresetState(const preset::RuntimePreset &preset)
     state.meterNumerator = preset.meter.numerator;
     state.meterDenominator = preset.meter.denominator;
     state.volume = static_cast<float>(preset.sound.volume);
+
+    switch (preset.subdivision.mode)
+    {
+    case preset::SubdivisionMode::none:
+        if (preset.subdivision.partsPerBeat != 1)
+            return {};
+        state.subdivisionsPerBeat = 1;
+        break;
+    case preset::SubdivisionMode::triplet:
+        if (preset.subdivision.partsPerBeat != 3)
+            return {};
+        state.subdivisionsPerBeat = 3;
+        break;
+    default:
+        return {};
+    }
 
     for (std::size_t index = 0; index < beatCount; ++index)
     {

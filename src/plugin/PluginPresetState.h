@@ -27,6 +27,7 @@ struct RealtimePresetState final
     std::size_t beatCount = 0;
     std::int64_t meterNumerator = 0;
     std::int64_t meterDenominator = 0;
+    int subdivisionsPerBeat = 1;
     float volume = 0.0F;
     bool ready = false;
 };

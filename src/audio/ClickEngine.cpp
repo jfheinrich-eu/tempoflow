@@ -64,21 +64,28 @@ void SyntheticClickEngine::reset() noexcept
 
 void SyntheticClickEngine::trigger(ClickType type) noexcept
 {
-    if (currentSampleRate <= 0.0)
-        return;
-
     const auto parameters = parametersFor(type);
-    if (parameters.amplitude <= 0.0F || parameters.frequency <= 0.0 || parameters.decaySeconds <= 0.0)
+    trigger(type, parameters.frequency, parameters.amplitude, parameters.decaySeconds);
+}
+
+void SyntheticClickEngine::triggerTripletSubdivision() noexcept
+{
+    trigger(ClickType::normal, 1'600.0, 0.22F, 0.008);
+}
+
+void SyntheticClickEngine::trigger(ClickType type, double frequency, float amplitude, double decaySeconds) noexcept
+{
+    if (currentSampleRate <= 0.0 || amplitude <= 0.0F || frequency <= 0.0 || decaySeconds <= 0.0)
         return;
 
     auto &voice = voiceForTrigger();
-    const auto frequency = std::min(parameters.frequency, currentSampleRate * 0.45);
-    const auto decaySamples = parameters.decaySeconds * currentSampleRate;
+    const auto limitedFrequency = std::min(frequency, currentSampleRate * 0.45);
+    const auto decaySamples = decaySeconds * currentSampleRate;
 
     voice.type = type;
     voice.phase = twoPi * 0.25;
-    voice.phaseIncrement = twoPi * frequency / currentSampleRate;
-    voice.amplitude = parameters.amplitude;
+    voice.phaseIncrement = twoPi * limitedFrequency / currentSampleRate;
+    voice.amplitude = amplitude;
     voice.decay = decaySamples > 0.0 ? static_cast<float>(std::exp(std::log(0.001) / decaySamples)) : 0.0F;
     voice.noiseState = nextNoiseSeed;
     voice.active = true;

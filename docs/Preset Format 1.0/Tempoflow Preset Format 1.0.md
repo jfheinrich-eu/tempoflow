@@ -19,7 +19,7 @@ updated:
   - by: Codex
     at: 2026-09-27T00:00:00+02:00
     comment: Defined grouping playback semantics and click-role precedence
-version: 1.1.3
+version: 1.1.4
 status: approved
 tags:
   - tempoflow
@@ -162,6 +162,8 @@ and:
 ```json
 { "mode": "triplet", "partsPerBeat": 3 }
 ```
+
+In triplet mode, each host beat has three evenly spaced pulses. A host beat is the note value defined by the time-signature denominator: for example, a quarter-note beat in 4/4 is divided into three equal pulses, while an eighth-note beat in 6/8 is divided into three equal pulses. The first pulse uses the effective pattern role for that beat, including any eligible grouping accent. The two intermediate pulses use the dedicated triplet-subdivision sound, which is shorter and quieter than the main beat. If the effective role for the beat is `mute`, all three pulses are silent.
 
 ## 11. Reserved subdivisions
 
@@ -346,7 +348,7 @@ The PWA uses JavaScript or TypeScript. VST3 uses C++ and JUCE. They share schema
 - Phase 3B — formal [JSON Schema](tempoflow-preset.schema.json): complete.
 - Phase 3C — seven [reference presets](presets): complete.
 - Phase 4A — Headless VST3 scaffold, host timing, synthetic click engine, and typed preset runtime model: implemented and unit-tested.
-- Phase 4B — Plugin state loading, preset-driven beat roles and volume, and project-state restoration: implemented and unit-tested. User-facing preset selection, grouping-driven playback, and audible triplet subdivisions remain open.
+- Phase 4B — Plugin state loading, preset-driven beat roles and volume, grouping-aware accents, triplet subdivisions, and project-state restoration: implemented and unit-tested. User-facing preset selection remains open.
 
 ## 36. VST3 MVP definition
 
@@ -453,6 +455,6 @@ These rules are deterministic and must be covered by implementation tests before
 
 ## 41. Status
 
-TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.3`.
+TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.4`.
 
-Completed decisions cover grouping playback, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing implementation, synthetic click engine, typed runtime model, plug-in state integration, and external VST3/Cubase preset validation are complete. Grouping-driven playback and audible triplet subdivisions remain implementation work for VST3 MVP 0.1.0.
+Completed decisions cover grouping playback, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing implementation, synthetic click engine, typed runtime model, plug-in state integration, and external VST3/Cubase preset validation are complete. Grouping-driven accents and audible triplet subdivisions are implemented and unit-tested; Cubase acceptance of these playback behaviors remains for VST3 MVP 0.1.0.

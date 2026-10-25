@@ -67,10 +67,12 @@ Use this message structure:
 
 [optional body explaining why, behavior, risk, or verification]
 
-[optional footers]
+[optional footers, such as Co-authored-by]
 ```
 
 Use `feat` for user-visible capabilities and `fix` for defects. Other allowed lowercase types include `docs`, `test`, `build`, `ci`, `refactor`, `perf`, `style`, `chore`, and `revert`. Keep the subject concise and omit a trailing period.
+
+Do not include a `Signed-off-by` trailer in a proposed message when the commit will use `git commit -s`; Git adds the configured committer's sign-off automatically. Make clear in the approval prompt that `git commit -s` will add this trailer.
 
 For an incompatible change, use both forms so GitHub and SemVer tooling can recognize it:
 
@@ -89,9 +91,10 @@ Process one group at a time. Show the group name, rationale, exact files, comple
 - If the user changes the file list, recompute group uniqueness and show the revised group again.
 - Before committing, compare the staged paths with the approved list and show `git diff --cached --stat` plus the staged diff summary.
 - Run `git diff --cached --check` and the relevant focused tests. Run broader tests when risk or project instructions require them.
+- Before invoking `git commit -s`, inspect the exact message input for `Signed-off-by` trailers and compare them with `git config user.name` and `git config user.email`. If the input already contains a trailer matching that configured identity, do not pass the duplicate to Git: remove it and obtain approval for the normalized message first. Preserve distinct sign-off identities only when they are intentional and approved.
 - If a check or hook fails, do not commit by default. Keep the current state, report the failure, and ask the user how to proceed.
 - Create the approved commit with `git commit -s`. Pass the message without unsafe shell interpolation.
-- After each commit, record its hash and subject. Verify that its changed paths exactly match the approved group before continuing.
+- After each commit, record its hash and subject. Verify that its changed paths exactly match the approved group and that the commit message contains exactly one `Signed-off-by` trailer matching the configured identity before continuing.
 
 Refresh repository status after every commit because hooks may change files. Newly created or modified files require a new interactive review and must not be silently added to a previously approved group.
 
