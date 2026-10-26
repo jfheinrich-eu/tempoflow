@@ -129,10 +129,10 @@
           </p>
           <p>
             Grouping-aware accents and audible triplet subdivisions are covered
-            by automated tests; Cubase acceptance for these behaviors, the
-            complete validation matrix, a Windows installer, and final release
-            verification remain open. There is no production release or
-            supported binary download yet.
+            by automated tests and passed focused Cubase acceptance. The complete
+            validation matrix, a Windows installer, and final release verification
+            remain open. There is no production release or supported binary
+            download yet.
           </p>
         </div>
         <dl class="facts">
@@ -171,37 +171,35 @@
         <div class="roadmap-grid">
           <article class="roadmap-step">
             <p class="roadmap-state">Now</p>
-            <h3>Triplet playback</h3>
+            <h3>Cubase validation matrix</h3>
             <p>
-              Define the audible triplet rules, then schedule three sample-accurate
-              pulses per beat without weakening real-time guarantees.
+              Verify the Release plug-in across the required sample rates, buffer
+              sizes, transport operations, tempo automation, and meter changes.
             </p>
             <div class="issue-links">
-              <a href="https://github.com/jfheinrich-eu/tempoflow/issues/21">Issue 21</a>
-              <a href="https://github.com/jfheinrich-eu/tempoflow/issues/22">Issue 22</a>
-            </div>
-          </article>
-          <article class="roadmap-step">
-            <p class="roadmap-state">Then</p>
-            <h3>Regression and host validation</h3>
-            <p>
-              Cover grouping and triplet boundaries, then complete the Cubase
-              matrix across sample rates, buffers, transport, and meter changes.
-            </p>
-            <div class="issue-links">
-              <a href="https://github.com/jfheinrich-eu/tempoflow/issues/23">Issue 23</a>
               <a href="https://github.com/jfheinrich-eu/tempoflow/issues/27">Issue 27</a>
             </div>
           </article>
           <article class="roadmap-step">
-            <p class="roadmap-state">Release gate</p>
-            <h3>Package and verify</h3>
+            <p class="roadmap-state">Then</p>
+            <h3>Windows release package</h3>
             <p>
-              Build and test the Windows installer, complete legal notices, and
-              run the final automated, Steinberg, and Cubase verification suite.
+              Install the VST3 bundle and shared factory presets reproducibly,
+              preserve user presets, and test clean installation and removal.
             </p>
             <div class="issue-links">
               <a href="https://github.com/jfheinrich-eu/tempoflow/issues/28">Issue 28</a>
+            </div>
+          </article>
+          <article class="roadmap-step">
+            <p class="roadmap-state">Release gate</p>
+            <h3>Prepare and verify</h3>
+            <p>
+              Complete release documentation and legal notices, then run the final
+              automated, Steinberg, installer, and Cubase verification suite.
+            </p>
+            <div class="issue-links">
+              <a href="https://github.com/jfheinrich-eu/tempoflow/issues/24">Issue 24</a>
               <a href="https://github.com/jfheinrich-eu/tempoflow/issues/29">Issue 29</a>
             </div>
           </article>

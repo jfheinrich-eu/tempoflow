@@ -348,7 +348,7 @@ The PWA uses JavaScript or TypeScript. VST3 uses C++ and JUCE. They share schema
 - Phase 3B — formal [JSON Schema](tempoflow-preset.schema.json): complete.
 - Phase 3C — seven [reference presets](presets): complete.
 - Phase 4A — Headless VST3 scaffold, host timing, synthetic click engine, and typed preset runtime model: implemented and unit-tested.
-- Phase 4B — Plugin state loading, preset-driven beat roles and volume, grouping-aware accents, triplet subdivisions, and project-state restoration: implemented and unit-tested. User-facing preset selection remains open.
+- Phase 4B — Plugin state loading, preset-driven beat roles and volume, grouping-aware accents, triplet subdivisions, project-state restoration, and user-facing factory-preset selection: implemented, unit-tested, and accepted in focused Cubase runs.
 
 ## 36. VST3 MVP definition
 
@@ -457,4 +457,4 @@ These rules are deterministic and must be covered by implementation tests before
 
 TempoFlow Preset Format 1.0 is approved. The specification document version is `1.1.4`.
 
-Completed decisions cover grouping playback, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing implementation, synthetic click engine, typed runtime model, plug-in state integration, and external VST3/Cubase preset validation are complete. Grouping-driven accents and audible triplet subdivisions are implemented and unit-tested; Cubase acceptance of these playback behaviors remains for VST3 MVP 0.1.0.
+Completed decisions cover grouping playback, subdivision, sound generation, host/internal behavior, mono processing, future output extensibility, and parallel Cubase-metronome operation. The preset schema, formal JSON Schema, seven reference presets, host-timing implementation, synthetic click engine, typed runtime model, plug-in state integration, and external VST3/Cubase preset validation are complete. Grouping-driven accents and audible triplet subdivisions are implemented, unit-tested, and accepted in a focused Cubase Elements 15 Release run. The complete VST-010 matrix remains open for VST3 MVP 0.1.0.

@@ -6,6 +6,8 @@ This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It com
 
 Manual Cubase acceptance completed successfully on September 26, 2026. Cubase discovered all seven generated factory `.vstpreset` files, loaded the expected audible states, restored a Cubase-managed user preset, and restored the same non-default state after reopening a project.
 
+A focused playback acceptance run completed successfully on October 26, 2026. The Release plug-in reproduced the expected audible behavior for all seven factory presets at 48 kHz with a 192-sample ASIO process buffer. This run confirms grouping-aware accents and audible triplet subdivisions in Cubase; it does not replace the complete VST-010 matrix across all required sample rates, buffer sizes, transport operations, and meter changes.
+
 Automated generation additionally verifies the Steinberg container, processor class ID, component-state round trip, and byte reproducibility before accepting the files.
 
 The initial September 26 acceptance run predated generated VST3 catalogue metadata. Preset discovery, loading, and state restoration passed, but Cubase's preset search filters were empty. A follow-up run with metadata-enabled presets confirmed all expected catalogue fields in the full MediaBay result columns. Cubase Elements 15 displays `MediaAuthor` as **Staff > Author**; it does not use the technical VST3 attribute name in the user interface.
@@ -111,6 +113,35 @@ An initial playback-synchronous Cubase window flicker was observed when the
 window occupied approximately 90% of the monitor. Follow-up checks found no
 TempoFlow preset, state, or audio-processing failure. The visual behavior is
 therefore not a VST-012 or VST-013 acceptance blocker.
+```
+
+### October 26, 2026 — Grouping and triplet playback
+
+```text
+Date: 2026-10-26
+Tester: Joerg Heinrich
+TempoFlow commit: Not recorded; Release build included the merged PR #42 playback behavior
+Cubase edition and version: Cubase Elements 15.0.30 Build 287 (x64)
+Windows version: Windows 10 x64; build not recorded
+Audio interface and driver: Native Instruments Komplete Audio 6; driver version not recorded
+Sample rate: 48 kHz
+ASIO process buffer size: 192 samples
+Driver output latency: 8.4 ms
+Build configuration: Release
+Factory presets: All seven generated reference presets
+
+Factory preset selection and audible state: PASS, 7/7
+Grouping-aware playback: PASS
+Standard 6-8 grouping 3+3: PASS
+12-8 Blues grouping 3+3+3+3: PASS
+Slow Blues Shuffle triplet subdivisions: PASS
+Unexpected playback behavior: NONE OBSERVED
+
+Notes:
+This focused run closes the manual Cubase acceptance gap for grouping and
+triplet playback. The complete VST-010 matrix remains open in issue #27.
+The 1 ms USB buffer shown by the interface driver is separate from the
+192-sample ASIO process buffer recorded above.
 ```
 
 ### Template

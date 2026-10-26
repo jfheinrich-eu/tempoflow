@@ -92,7 +92,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, grouping-aware playback, triplet subdivisions, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, and project-state restoration. Grouping and triplet behavior are unit-tested; their Cubase acceptance remains pending.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, grouping-aware playback, triplet subdivisions, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, project-state restoration, grouping-aware accents, and audible triplet subdivisions. The complete VST-010 Cubase matrix remains open.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -442,7 +442,7 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor. Steinberg's host-managed preset workflow does not require one.
 
-The initial scaffold, internal plug-in-state integration, native factory-preset selection, and external Cubase state restoration are validated. Grouping-aware accents and triplet subdivisions are implemented and unit-tested; Cubase validation of those playback behaviors remains release-blocking for the MVP.
+The initial scaffold, internal plug-in-state integration, native factory-preset selection, external Cubase state restoration, grouping-aware accents, and triplet subdivisions are validated. The complete VST-010 Cubase matrix remains release-blocking for the MVP.
 
 ### VST-012 — Cubase preset and project-state validation
 
@@ -533,7 +533,7 @@ Acceptance criteria:
 - A Cubase `.cpr` project restores the selected non-default preset state.
 - Generated files use the correct processor class ID and pass automated structural and state-restoration checks.
 
-Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed the expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**.
+Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed all expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**. On October 26, 2026, a focused Release run in Cubase Elements 15.0.30 Build 287 at 48 kHz and a 192-sample ASIO process buffer passed all seven factory presets, including grouping-aware accents and audible triplet subdivisions. The full VST-010 matrix remains open.
 
 ### VST-014 — Grouping playback semantics
 
@@ -565,7 +565,7 @@ Required reference behavior:
 
 In Host Mode, grouping promotion applies only when the host numerator and denominator match the preset meter. If they differ, the host remains the timing authority, grouping promotion is disabled, explicit pattern roles remain active for defined beat numbers, and undefined host beats remain silent. The stored preset is not modified.
 
-Issue #20 must implement these rules without allocation or locking in the audio callback and must cover the examples, explicit-role precedence, mute behavior, and host-meter mismatch with automated tests.
+These rules are implemented without allocation or locking in the audio callback and are covered by automated tests for the examples, explicit-role precedence, mute behavior, and host-meter mismatch. Focused Cubase acceptance passed on October 26, 2026.
 
 ## Open product decisions
 
@@ -635,7 +635,7 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 - Implement the click engine.
 - Map all six click roles.
 - Apply master volume.
-- Process grouping-aware accents and triplet subdivisions. Implemented and unit-tested; Cubase validation remains.
+- Process grouping-aware accents and triplet subdivisions. Implemented, unit-tested, and accepted in a focused Cubase Release run; the complete VST-010 matrix remains open.
 
 ### E — Presets
 
