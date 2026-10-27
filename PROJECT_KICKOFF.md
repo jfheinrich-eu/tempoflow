@@ -4,7 +4,7 @@ aliases:
   - TempoFlow Kickoff
 project: TempoFlow
 status: implementation
-updated: 2026-09-27
+updated: 2026-10-27
 tags:
   - tempoflow
   - metronome
@@ -92,7 +92,7 @@ All seven reference files are valid JSON and satisfy the documented semantic cor
 
 ### VST3
 
-The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, grouping-aware playback, triplet subdivisions, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, project-state restoration, grouping-aware accents, and audible triplet subdivisions. The complete VST-010 Cubase matrix remains open.
+The repository contains a headless VST3 scaffold with a mono output, host-timing scheduler, synthetic click engine, semantic preset validator, typed preset runtime model, transactional preset loading, preset-driven beat roles and volume, grouping-aware playback, triplet subdivisions, VST3 project-state restoration, and reproducible native factory-preset generation. Cubase Elements 15 acceptance passed for plug-in discovery, all seven factory presets, catalogue metadata, user-preset restoration, project-state restoration, grouping-aware accents, and audible triplet subdivisions. The complete VST-010 Cubase matrix was executed on October 27, 2026, without a release-blocking finding.
 
 - Technology: C++17 and JUCE 9.0.2
 - Plug-in format: VST3 only
@@ -416,21 +416,23 @@ Test Cubase behavior for multiple host changes within one audio block during pro
 
 ### VST-010 — Test matrix
 
-Status: prepared
+Status: confirmed
 
-- Debug and Release
-- 44.1, 48, and 96 kHz
-- buffer sizes 32, 64, 128, 256, 512, and 1024
-- fixed and automated tempo
-- simple, compound, and odd meters
-- start at a bar boundary and within a bar
-- stop, restart, loop, and seek
-- time-signature changes
-- all seven reference presets
-- invalid JSON, invalid schema, and invalid semantics
-- Cubase project save and reopen
+- [x] Debug and Release
+- [x] 44.1, 48, and 96 kHz
+- [x] buffer sizes 32, 64, 128, 256, 512, and 1024
+- [x] fixed and automated tempo
+- [x] simple, compound, and odd meters
+- [x] start at a bar boundary and within a bar
+- [x] stop, restart, loop, and seek
+- [x] time-signature changes
+- [x] all seven reference presets
+- [x] invalid JSON, invalid schema, and invalid semantics
+- [x] Cubase project save and reopen
 
-Run unit tests, builds, validator checks, and Cubase integration tests on Windows 10.
+The matrix was completed on October 27, 2026, with Cubase Elements 15.0.30 Build 287 (x64) on Windows 10 Pro 22H2, system build 19045.7807. Both Debug and Release builds were covered. The complete result record is maintained in the [Cubase validation protocol](docs/cubase-validation.md).
+
+No release-blocking failure was reported. The intermittent missing click observed during extended playback is tracked separately in [issue #45](https://github.com/jfheinrich-eu/tempoflow/issues/45) as a non-blocking defect.
 
 ### VST-011 — Scaffold readiness
 
@@ -442,7 +444,7 @@ Status: confirmed
 - The MVP uses synthesized click sounds.
 - The initial VST3 scaffold has no custom graphical editor. Steinberg's host-managed preset workflow does not require one.
 
-The initial scaffold, internal plug-in-state integration, native factory-preset selection, external Cubase state restoration, grouping-aware accents, and triplet subdivisions are validated. The complete VST-010 Cubase matrix remains release-blocking for the MVP.
+The initial scaffold, internal plug-in-state integration, native factory-preset selection, external Cubase state restoration, grouping-aware accents, triplet subdivisions, and complete VST-010 Cubase matrix are validated.
 
 ### VST-012 — Cubase preset and project-state validation
 
@@ -533,7 +535,7 @@ Acceptance criteria:
 - A Cubase `.cpr` project restores the selected non-default preset state.
 - Generated files use the correct processor class ID and pass automated structural and state-restoration checks.
 
-Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed all expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**. On October 26, 2026, a focused Release run in Cubase Elements 15.0.30 Build 287 at 48 kHz and a 192-sample ASIO process buffer passed all seven factory presets, including grouping-aware accents and audible triplet subdivisions. The full VST-010 matrix remains open.
+Cubase acceptance completed on September 26, 2026. Cubase discovered all seven files in the per-user factory location, loaded them through its native preset browser, and reproduced the expected audible states. Saving and reloading a user copy and reopening a project with a non-default state also passed. A follow-up run with metadata-enabled presets confirmed all expected Cubase catalogue fields, including the `MediaAuthor` mapping displayed as **Staff > Author**. On October 26, 2026, a focused Release run in Cubase Elements 15.0.30 Build 287 at 48 kHz and a 192-sample ASIO process buffer passed all seven factory presets, including grouping-aware accents and audible triplet subdivisions. The complete VST-010 matrix was executed on October 27, 2026, across the required Debug and Release configurations, sample rates, buffer sizes, timing modes, meters, transport operations, invalid-input cases, and project restoration.
 
 ### VST-014 — Grouping playback semantics
 
@@ -595,6 +597,8 @@ These rules are implemented without allocation or locking in the audio callback 
 
 Transport, meter changes, tempo automation, seeks, loops, and buffer boundaries must not drift or double-trigger.
 
+An intermittent missing click during extended Cubase playback remains tracked in [issue #45](https://github.com/jfheinrich-eu/tempoflow/issues/45). It is reproducible but infrequent and is not currently classified as a VST3 MVP release blocker.
+
 ### P1 — Semantic preset validation
 
 JSON Schema cannot express all arithmetic relationships between sibling fields. Applications must separately validate grouping sums, beat counts, and beat positions.
@@ -635,7 +639,7 @@ The visible “Edit with Base44” button looks unprofessional but is not an urg
 - Implement the click engine.
 - Map all six click roles.
 - Apply master volume.
-- Process grouping-aware accents and triplet subdivisions. Implemented, unit-tested, and accepted in a focused Cubase Release run; the complete VST-010 matrix remains open.
+- Process grouping-aware accents and triplet subdivisions. Implemented, unit-tested, accepted in a focused Cubase Release run, and covered by the completed VST-010 matrix.
 
 ### E — Presets
 
