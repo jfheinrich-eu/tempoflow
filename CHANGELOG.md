@@ -6,6 +6,7 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 
 ### Changed
 
+- Recorded completion of the full VST-010 Cubase validation matrix across the required build configurations, sample rates, buffer sizes, timing modes, meters, transport operations, presets, invalid inputs, and project restoration.
 - Raised the minimum CMake version to 3.25 for CMake Presets schema version 6.
 - Pinned JUCE and GitHub Actions to immutable commit SHAs.
 - Enforced defined metadata types, RFC 3339 timestamps, and safe integer conversion in preset validation.

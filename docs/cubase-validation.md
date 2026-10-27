@@ -6,7 +6,9 @@ This protocol records manual TempoFlow VST3 checks in Cubase Elements 15. It com
 
 Manual Cubase acceptance completed successfully on September 26, 2026. Cubase discovered all seven generated factory `.vstpreset` files, loaded the expected audible states, restored a Cubase-managed user preset, and restored the same non-default state after reopening a project.
 
-A focused playback acceptance run completed successfully on October 26, 2026. The Release plug-in reproduced the expected audible behavior for all seven factory presets at 48 kHz with a 192-sample ASIO process buffer. This run confirms grouping-aware accents and audible triplet subdivisions in Cubase; it does not replace the complete VST-010 matrix across all required sample rates, buffer sizes, transport operations, and meter changes.
+A focused playback acceptance run completed successfully on October 26, 2026. The Release plug-in reproduced the expected audible behavior for all seven factory presets at 48 kHz with a 192-sample ASIO process buffer. This run confirmed grouping-aware accents and audible triplet subdivisions in Cubase.
+
+The complete VST-010 matrix was executed on October 27, 2026, with Cubase Elements 15.0.30 Build 287 (x64) on Windows 10 Pro 22H2, system build 19045.7807. It covered Debug and Release, all required sample rates and buffer sizes, fixed and automated tempo, simple through odd meters, transport operations, time-signature changes, all seven reference presets, invalid preset inputs, and Cubase project restoration. No release-blocking failure was reported. The intermittent non-blocking missing click observed during extended playback is tracked separately in [issue #45](https://github.com/jfheinrich-eu/tempoflow/issues/45).
 
 Automated generation additionally verifies the Steinberg container, processor class ID, component-state round trip, and byte reproducibility before accepting the files.
 
@@ -139,9 +141,39 @@ Unexpected playback behavior: NONE OBSERVED
 
 Notes:
 This focused run closes the manual Cubase acceptance gap for grouping and
-triplet playback. The complete VST-010 matrix remains open in issue #27.
+triplet playback. The complete VST-010 matrix was executed on October 27, 2026.
 The 1 ms USB buffer shown by the interface driver is separate from the
 192-sample ASIO process buffer recorded above.
+```
+
+### October 27, 2026 — Complete VST-010 matrix
+
+```text
+Date: 2026-10-27
+Tester: Joerg Heinrich
+TempoFlow commit: Not recorded
+Cubase edition and version: Cubase Elements 15.0.30 Build 287 (x64)
+Windows version: Windows 10 Pro 22H2; system build 19045.7807
+Audio interface and driver: Not recorded for the complete matrix
+Build configurations: Debug and Release
+Sample rates: 44.1, 48, and 96 kHz
+ASIO buffer sizes: 32, 64, 128, 256, 512, and 1024 samples
+
+Debug and Release: COMPLETED
+Fixed and automated tempo: COMPLETED
+Simple, compound, and odd meters: COMPLETED
+Start at a bar boundary and within a bar: COMPLETED
+Stop, restart, loop, and seek: COMPLETED
+Time-signature changes: COMPLETED
+All seven reference presets: COMPLETED
+Invalid JSON, invalid schema, and invalid semantics: COMPLETED
+Cubase project save and reopen: COMPLETED
+Release-blocking failures: NONE REPORTED
+
+Notes:
+The test matrix records completed coverage, not a claim that no residual defect
+exists. An intermittent missing click during extended playback is tracked in
+issue #45 and is not currently classified as a VST3 MVP release blocker.
 ```
 
 ### Template
