@@ -542,3 +542,5 @@ if(BUILD_TESTING)
         )
     endif()
 endif()
+
+include(cmake/Packaging.cmake)

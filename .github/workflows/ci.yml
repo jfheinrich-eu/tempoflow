@@ -27,6 +27,35 @@ jobs:
         run: ctest --test-dir build/ci -C Release --output-on-failure
       - name: Run toolchain check
         run: .\build\ci\TempoFlowToolchainCheck_artefacts\Release\TempoFlowToolchainCheck.exe
+      - name: Download NSIS 3.13
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'nsis-3.13.zip'
+          $destination = Join-Path $env:RUNNER_TEMP 'nsis-3.13'
+          curl.exe --fail --location --output $archive 'https://downloads.sourceforge.net/project/nsis/NSIS%203/3.13/nsis-3.13.zip'
+          if ($LASTEXITCODE -ne 0) {
+            throw "NSIS download failed with exit code $LASTEXITCODE."
+          }
+          $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          $expectedHash = 'ba63dffc4410ee89193e1cb5a41989991bd77c61068da17e3156d136b7b0b3d8'
+          if ($actualHash -ne $expectedHash) {
+            throw "NSIS archive SHA-256 mismatch: $actualHash"
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $destination
+          $executable = Join-Path $destination 'nsis-3.13\makensis.exe'
+          "TEMPOFLOW_NSIS_EXECUTABLE=$executable" >> $env:GITHUB_ENV
+      - name: Build and verify Windows installer
+        shell: pwsh
+        run: .\scripts\build-windows-installer.ps1 -BuildDirectory build/ci
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: TempoFlow-windows-x64-installer
+          path: |
+            build/ci/package/TempoFlow-*-windows-x64.exe
+            build/ci/package/TempoFlow-*-windows-x64.exe.sha256
+          if-no-files-found: error
+          retention-days: 14
 
   macos-universal-build-and-test:
     runs-on: macos-15

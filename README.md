@@ -128,6 +128,14 @@ build/windows-x64-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
 
 Building does not copy the plug-in into a system or user VST3 directory. Installation remains an explicit step.
 
+Build the Windows x64 release installer from **Developer PowerShell for VS 18** after installing NSIS 3.13:
+
+```powershell
+.\scripts\build-windows-installer.ps1
+```
+
+The verified installer is written to `build/windows-x64-release/package/TempoFlow-0.1.0-windows-x64.exe`. It installs the VST3 and native factory presets into Steinberg's system-wide locations. See [Windows release installer](docs/windows-installer.md) for build, installation, and clean uninstall validation.
+
 Generate the seven native factory presets from the validated `.tempoflow` sources:
 
 ```powershell
