@@ -55,7 +55,6 @@ cpack_add_component(
     DISPLAY_NAME "TempoFlow VST3"
     DESCRIPTION "TempoFlow 64-bit VST3 plug-in"
     REQUIRED
-    HIDDEN
 )
 
 cpack_add_component(
@@ -63,7 +62,6 @@ cpack_add_component(
     DISPLAY_NAME "TempoFlow factory presets"
     DESCRIPTION "Seven native TempoFlow VST3 factory presets"
     REQUIRED
-    HIDDEN
 )
 
 cpack_add_component(
@@ -71,7 +69,6 @@ cpack_add_component(
     DISPLAY_NAME "Licenses and notices"
     DESCRIPTION "TempoFlow and third-party license information"
     REQUIRED
-    HIDDEN
 )
 
 set(CPACK_GENERATOR "NSIS64")
@@ -86,6 +83,20 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY "TempoFlow")
 set(CPACK_PACKAGE_CHECKSUM "SHA256")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_COMPONENTS_ALL VST3 FactoryPresets Documentation)
+
+set(CPACK_NSIS_BRANDING_TEXT "TempoFlow by ${CPACK_PACKAGE_VENDOR}")
+set(CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION RIGHT)
+set(
+    CPACK_NSIS_INSTALLER_MUI_ICON_CODE
+    "VIProductVersion ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.0
+VIFileVersion ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}.0
+VIAddVersionKey /LANG=0 \\\"ProductName\\\" \\\"${CPACK_PACKAGE_NAME}\\\"
+VIAddVersionKey /LANG=0 \\\"ProductVersion\\\" \\\"${PROJECT_VERSION}\\\"
+VIAddVersionKey /LANG=0 \\\"CompanyName\\\" \\\"${CPACK_PACKAGE_VENDOR}\\\"
+VIAddVersionKey /LANG=0 \\\"FileDescription\\\" \\\"${CPACK_PACKAGE_NAME} Windows Installer\\\"
+VIAddVersionKey /LANG=0 \\\"FileVersion\\\" \\\"${PROJECT_VERSION}\\\"
+VIAddVersionKey /LANG=0 \\\"OriginalFilename\\\" \\\"${CPACK_PACKAGE_FILE_NAME}.exe\\\""
+)
 
 set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
 set(CPACK_NSIS_DISPLAY_NAME "TempoFlow ${PROJECT_VERSION}")
