@@ -4,7 +4,7 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$requiredCommands = @('git', 'cmake', 'cl', 'code', 'clang-format', 'clang-tidy')
+$requiredCommands = @('git', 'cmake', 'cl', 'code', 'clang-format', 'clang-tidy', 'node', 'npm')
 $missingCommands = @(
     $requiredCommands | Where-Object { -not (Get-Command $_ -ErrorAction SilentlyContinue) }
 )
@@ -38,6 +38,16 @@ if ($cmakeVersion -lt [version]'3.25.0') {
     throw "CMake 3.25 or newer is required by CMakePresets.json. Detected: $cmakeVersion"
 }
 
+$nodeVersionText = (& node --version).Trim().TrimStart('v')
+if ($LASTEXITCODE -ne 0) {
+    throw 'Failed to determine the installed Node.js version.'
+}
+
+$nodeVersion = [version] $nodeVersionText
+if ($nodeVersion.Major -ne 24) {
+    throw "Node.js 24 LTS is required for the pinned CLI dependencies. Detected: $nodeVersion"
+}
+
 $cmakeHelp = & cmake --help
 $cmakeHelpText = $cmakeHelp -join "`n"
 if ($LASTEXITCODE -ne 0 -or $cmakeHelpText -notmatch 'Visual Studio 18 2026') {
@@ -45,6 +55,20 @@ if ($LASTEXITCODE -ne 0 -or $cmakeHelpText -notmatch 'Visual Studio 18 2026') {
 }
 
 $repositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+
+if ($PSCmdlet.ShouldProcess($repositoryRoot, 'Install pinned CLI development dependencies')) {
+    Push-Location $repositoryRoot
+    try {
+        & npm.cmd ci --ignore-scripts
+        if ($LASTEXITCODE -ne 0) {
+            throw "npm ci failed with exit code $LASTEXITCODE."
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 $expectedHooksPath = '.githooks'
 $configuredHooksPath = & git -C $repositoryRoot config --local --get core.hooksPath
 
@@ -95,7 +119,7 @@ if ($WhatIfPreference) {
     Write-Output 'Validation complete. Missing setup actions were reported without changing the environment.'
 }
 else {
-    Write-Output 'Development prerequisites, Git hooks, and VS Code extensions are installed.'
+    Write-Output 'Development prerequisites, CLI tools, Git hooks, and VS Code extensions are installed.'
 }
 
 Write-Output 'VS Code activates extensions when their language and workspace conditions apply.'

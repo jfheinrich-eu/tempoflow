@@ -60,13 +60,14 @@ The PWA and VST3 plug-in do not share application source code. Their contract is
 - macOS with Xcode and Apple Clang for unsigned Universal `arm64` and `x86_64` builds
 - CMake 3.25 or newer
 - Git
+- Node.js 24 LTS with npm for the pinned command-line development tools
 - `clang-format` and `clang-tidy` from the Visual Studio LLVM tools on Windows or a compatible LLVM installation on macOS
 - Visual Studio Code 1.116 or newer with built-in Copilot Chat
 - Microsoft C/C++ and CMake Tools extensions
 
 JUCE `9.0.2` is fetched automatically by CMake from its pinned commit. A global JUCE installation is not required.
 
-Run the idempotent setup helper from Developer PowerShell to verify the required commands and install missing recommended VS Code extensions:
+Run the idempotent setup helper from Developer PowerShell to verify the required commands, install lockfile-pinned CLI dependencies, and install missing recommended VS Code extensions:
 
 ```powershell
 .\scripts\setup-dev.ps1
