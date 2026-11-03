@@ -19,6 +19,7 @@ The initial September 26 acceptance run predated generated VST3 catalogue metada
 - Use a clean checkout of the intended commit.
 - Run the Debug and Release CTest presets successfully.
 - Build, validate, and install the Release bundle by following [Building the TempoFlow VST3](building-vst3.md).
+- Use the [Release validation VM](release-validation-vm.md) when accepting a Windows release installer. Keep ASIO timing and physical audio-interface checks on the physical validation system.
 - Build the `TempoFlowFactoryPresets` target and install the generated presets with `scripts/install-factory-presets.ps1`.
 - Confirm that `Invoke-VstValidator` reports 47 passed tests and no failures.
 - Close Cubase before replacing an installed VST3 bundle.

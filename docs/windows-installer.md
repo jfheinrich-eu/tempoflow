@@ -58,7 +58,7 @@ The build fails if the plug-in bundle, one of the seven factory presets, legal f
 
 ## Clean installation test
 
-Use a clean Windows Sandbox or disposable virtual machine. This avoids confusing the release package with a per-user development copy.
+Use the reproducible Hyper-V environment described in [Release validation VM](release-validation-vm.md). Restore its clean Cubase checkpoint before every release-package test. Windows Sandbox is acceptable for a quick installer-footprint check, but it is not the release-acceptance environment because it does not retain the required Cubase installation.
 
 1. Confirm that these paths do not contain an older TempoFlow installation:
    - `%LOCALAPPDATA%\Programs\Common\VST3\TempoFlow.vst3`
@@ -81,4 +81,4 @@ The per-user VST3 and factory-preset locations have higher discovery priority th
 4. Verify that the Cubase-managed user preset still exists.
 5. Verify that unrelated VST3 plug-ins and presets were not changed.
 
-Do not mark the release-package issue complete until this clean installation and uninstall procedure has passed on a disposable Windows environment.
+Do not mark the release-package issue complete until this clean installation and uninstall procedure has passed in the documented release-validation VM.
