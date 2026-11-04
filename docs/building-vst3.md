@@ -183,6 +183,8 @@ Copy-Item -LiteralPath $source -Destination $destination -Recurse
 
 The system-wide 64-bit location is `C:\Program Files\Common Files\VST3` and normally requires administrator privileges. The predefined locations are documented in the [Steinberg VST3 Developer Portal](https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical%2BDocumentation/Locations%2BFormat/Plugin%2BLocations.html).
 
+For a distributable system-wide installation, build and test the [Windows release installer](windows-installer.md). Do not distribute a development copy from `%LOCALAPPDATA%` as the release package.
+
 After installation, start Cubase and allow it to rescan VST3 plug-ins. TempoFlow appears as a mono-output instrument.
 
 ## Generate and install factory presets

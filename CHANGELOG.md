@@ -16,6 +16,7 @@ All notable changes to TempoFlow will be documented here. The format follows [Ke
 
 ### Added
 
+- Reproducible system-wide Windows x64 installer packaging for the VST3 bundle, seven native factory presets, and required license notices.
 - Sample-accurate triplet subdivisions with pattern-role precedence, mute handling, and a distinct quieter, shorter subdivision sound.
 - Transactional plug-in preset loading, lock-free real-time state publication, preset-driven click roles and volume, and VST3 project-state restoration.
 - Typed preset runtime model with bounded file loading and focused tests.

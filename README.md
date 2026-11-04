@@ -60,13 +60,14 @@ The PWA and VST3 plug-in do not share application source code. Their contract is
 - macOS with Xcode and Apple Clang for unsigned Universal `arm64` and `x86_64` builds
 - CMake 3.25 or newer
 - Git
+- Node.js 24 LTS with npm for the pinned command-line development tools
 - `clang-format` and `clang-tidy` from the Visual Studio LLVM tools on Windows or a compatible LLVM installation on macOS
 - Visual Studio Code 1.116 or newer with built-in Copilot Chat
 - Microsoft C/C++ and CMake Tools extensions
 
 JUCE `9.0.2` is fetched automatically by CMake from its pinned commit. A global JUCE installation is not required.
 
-Run the idempotent setup helper from Developer PowerShell to verify the required commands and install missing recommended VS Code extensions:
+Run the idempotent setup helper from Developer PowerShell to verify the required commands, install lockfile-pinned CLI dependencies, and install missing recommended VS Code extensions:
 
 ```powershell
 .\scripts\setup-dev.ps1
@@ -127,6 +128,14 @@ build/windows-x64-release/TempoFlowPlugin_artefacts/Release/VST3/TempoFlow.vst3
 ```
 
 Building does not copy the plug-in into a system or user VST3 directory. Installation remains an explicit step.
+
+Build the Windows x64 release installer from **Developer PowerShell for VS 18** after installing NSIS 3.13:
+
+```powershell
+.\scripts\build-windows-installer.ps1
+```
+
+The verified installer is written to `build/windows-x64-release/package/TempoFlow-0.1.0-windows-x64.exe`. It installs the VST3 and native factory presets into Steinberg's system-wide locations. See [Windows release installer](docs/windows-installer.md) for build, installation, and clean uninstall validation.
 
 Generate the seven native factory presets from the validated `.tempoflow` sources:
 

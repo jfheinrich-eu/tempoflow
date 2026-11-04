@@ -117,7 +117,7 @@ function Assert-TempoFlowJsonSyntax {
 
     $relativePath = Get-TempoFlowRelativePath -RepositoryRoot $RepositoryRoot -Path $Path
     try {
-        Get-Content -Raw -LiteralPath $Path -Encoding UTF8 | ConvertFrom-Json | Out-Null
+        Get-Content -Raw -LiteralPath $Path -Encoding UTF8 | ConvertFrom-Json -AsHashtable | Out-Null
     }
     catch {
         throw "$Kind syntax validation failed for '$relativePath': $($_.Exception.Message)"

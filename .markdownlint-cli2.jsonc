@@ -1,0 +1,13 @@
+{
+  "gitignore": true,
+  "config": {
+    "default": true,
+    // Preserve established project conventions instead of rewriting existing
+    // documentation, GitHub templates, and generated skill front matter.
+    "MD013": false,
+    "MD025": false,
+    "MD033": false,
+    "MD041": false,
+    "MD060": false
+  }
+}

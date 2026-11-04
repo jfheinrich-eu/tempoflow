@@ -569,6 +569,21 @@ In Host Mode, grouping promotion applies only when the host numerator and denomi
 
 These rules are implemented without allocation or locking in the audio callback and are covered by automated tests for the examples, explicit-role precedence, mute behavior, and host-meter mismatch. Focused Cubase acceptance passed on October 26, 2026.
 
+### VST-015 — Windows release installer
+
+Status: implemented; clean-machine acceptance pending
+
+- Build an unsigned Windows x64 installer with CPack and NSIS 3.13.
+- Install the complete `TempoFlow.vst3` bundle to `%ProgramFiles%\Common Files\VST3`.
+- Install exactly seven native factory `.vstpreset` files to `%ProgramData%\VST3 Presets\jfheinrich\TempoFlow`.
+- Install the TempoFlow license, third-party notices, JUCE license and dependency inventory, and VST3 SDK license to `%ProgramFiles%\TempoFlow`.
+- Never package raw `.tempoflow` sources.
+- Never write to or remove Cubase-managed user presets under `%USERPROFILE%\Documents\VST3 Presets`.
+- Keep per-user development plug-ins and factory presets outside the installer's ownership.
+- Verify package inputs, system destinations, preset count, raw-source exclusion, and the generated executable in CI.
+
+The implementation is not release-accepted until the clean installation and uninstall procedure in [Windows release installer](docs/windows-installer.md) passes in a disposable Windows environment.
+
 ## Open product decisions
 
 - Confirm the primary audience.
