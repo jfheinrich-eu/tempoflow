@@ -39,7 +39,7 @@ See the [Steinberg VST 3 Validator guide](steinberg-validator.md) for SDK setup 
 
 ## `setup-dev.ps1`
 
-Checks the Windows development prerequisites, configures the repository's local Git hooks path as `.githooks`, and installs missing required VS Code extensions through the `code` command.
+Checks the Windows development prerequisites, installs lockfile-pinned CLI dependencies, configures the repository's local Git hooks path as `.githooks`, and installs missing required VS Code extensions through the `code` command.
 
 Run it from **Developer PowerShell for VS 18**:
 
@@ -47,7 +47,7 @@ Run it from **Developer PowerShell for VS 18**:
 .\scripts\setup-dev.ps1
 ```
 
-The script checks for Git, CMake 3.25 or newer, the Visual Studio 18 2026 CMake generator, MSVC, VS Code 1.116 or newer, `clang-format`, and `clang-tidy`. It also checks and may configure the local hooks path, and installs these VS Code extensions if missing:
+The script checks for Git, CMake 3.25 or newer, the Visual Studio 18 2026 CMake generator, MSVC, Node.js 24 LTS, npm, VS Code 1.116 or newer, `clang-format`, and `clang-tidy`. It runs `npm ci --ignore-scripts` for the pinned project CLI dependencies, checks and may configure the local hooks path, and installs these VS Code extensions if missing:
 
 - `ms-vscode.cpptools`
 - `ms-vscode.cmake-tools`

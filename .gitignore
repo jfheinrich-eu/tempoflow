@@ -2,6 +2,7 @@
 /build/
 /out/
 /cmake-build-*/
+/node_modules/
 
 # Visual Studio and local caches
 /.vs/
