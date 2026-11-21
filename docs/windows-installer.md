@@ -75,10 +75,14 @@ The per-user VST3 and factory-preset locations have higher discovery priority th
 
 ## Clean uninstall test
 
-1. Save a Cubase-managed user preset under `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
+TempoFlow 0.1.0 cannot create or edit custom preset content. This procedure uses
+Cubase to save an unchanged, host-managed copy of a loaded factory state only
+to verify that uninstall preserves user-owned data.
+
+1. Load a factory preset and use Cubase's VST preset command to save an unchanged copy under `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
 2. Uninstall **TempoFlow 0.1.0** through Windows **Installed apps**.
 3. Verify that the system-wide `TempoFlow.vst3` bundle, seven factory presets, and `%ProgramFiles%\TempoFlow` legal files were removed.
-4. Verify that the Cubase-managed user preset still exists.
+4. Verify that the Cubase-managed preset copy still exists.
 5. Verify that unrelated VST3 plug-ins and presets were not changed.
 
 Do not mark the release-package issue complete until this clean installation and uninstall procedure has passed in the documented release-validation VM.
