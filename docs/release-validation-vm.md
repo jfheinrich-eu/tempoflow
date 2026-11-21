@@ -237,6 +237,12 @@ if ($actualHash -ne $recordedHash) {
 
 ## Validate Cubase integration
 
+TempoFlow 0.1.0 cannot create or edit custom preset content. The
+user-preset step below uses Cubase only to save an unchanged, host-managed copy
+of the currently loaded factory state. It verifies standard VST3 state storage
+and installer ownership; it does not verify a TempoFlow preset editor or import
+workflow.
+
 1. Start Cubase and wait for VST3 scanning to finish.
 2. Confirm that TempoFlow is not blocklisted and appears as an instrument.
 3. Create an empty project and add one TempoFlow instrument track.
@@ -244,8 +250,8 @@ if ($actualHash -ne $recordedHash) {
 5. Confirm that all seven factory presets are visible.
 6. Load at least one non-default preset and verify its expected audible state.
 7. Verify the documented preset catalogue fields in MediaBay.
-8. Save a Cubase-managed user preset.
-9. Confirm that the user preset is stored below `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
+8. Use Cubase's VST preset command to save an unchanged copy of the loaded factory state under a unique test name.
+9. Confirm that the host-managed preset copy is stored below `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
 10. Save, close, and reopen the Cubase project. Confirm that the non-default state is restored.
 11. Close Cubase before uninstalling TempoFlow.
 
@@ -257,7 +263,7 @@ Do not use this VM run as evidence for ASIO buffer-size, latency, dropout, or sa
 2. Verify that `%ProgramFiles%\Common Files\VST3\TempoFlow.vst3` was removed.
 3. Verify that the seven TempoFlow factory presets were removed from `%ProgramData%`.
 4. Verify that the TempoFlow license directory under `%ProgramFiles%` was removed.
-5. Verify that the Cubase-managed user preset still exists below `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
+5. Verify that the Cubase-managed preset copy still exists below `%USERPROFILE%\Documents\VST3 Presets\jfheinrich\TempoFlow`.
 6. Verify that unrelated VST3 plug-ins and preset directories were not modified.
 7. Start Cubase and confirm that TempoFlow is no longer available after rescanning.
 
@@ -296,13 +302,13 @@ Windows Installed apps entry: PASS / FAIL
 Cubase plug-in discovery: PASS / FAIL
 Cubase factory preset discovery: PASS / FAIL
 Non-default preset load: PASS / FAIL
-Cubase user preset save: PASS / FAIL
+Cubase host-managed preset copy save: PASS / FAIL
 Cubase project-state restoration: PASS / FAIL
 Uninstall completed: PASS / FAIL
 System VST3 removed: PASS / FAIL
 Factory presets removed: PASS / FAIL
 License files removed: PASS / FAIL
-User preset preserved: PASS / FAIL
+Host-managed preset copy preserved: PASS / FAIL
 Unrelated VST3 content unchanged: PASS / FAIL
 
 Result: PASS / FAIL
